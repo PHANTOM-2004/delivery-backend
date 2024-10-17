@@ -1,3 +1,6 @@
+# local CA
+*.pem
+
 # configuration for vscode
 .vscode/
 
