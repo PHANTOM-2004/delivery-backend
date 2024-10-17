@@ -4,6 +4,7 @@ go 1.23.2
 
 require (
 	github.com/gin-gonic/gin v1.10.0
+	github.com/go-ini/ini v1.67.0
 	github.com/sirupsen/logrus v1.9.3
 )
 
