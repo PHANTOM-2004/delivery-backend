@@ -1,0 +1,93 @@
+package setting
+
+import (
+	"delivery-backend/pkg/common"
+	"time"
+
+	log "github.com/sirupsen/logrus"
+
+	"github.com/go-ini/ini"
+)
+
+type Server struct {
+	RunMode      string
+	HTTPPort     int
+	ReadTimeout  time.Duration
+	WriteTimeout time.Duration
+}
+
+type Test struct {
+	CATest    bool
+	HTTPSPort int
+}
+
+type Log struct {
+	Level string
+}
+
+var cfg *ini.File
+
+const conf_path = "conf/app.ini"
+
+var (
+	ServerSetting = &Server{}
+	TestSetting   = &Test{}
+	LogSetting    = &Log{}
+)
+
+func Setup() {
+	var err error
+	cfg, err = ini.Load(conf_path)
+	if err != nil {
+		log.Println(err)
+		log.Fatalf("Failed to parse [%s]", conf_path)
+	}
+
+	parseLogSetting()
+	parseServerSetting()
+	parseTestSetting()
+}
+
+func logCurrentConf(s any, section string) {
+	kv, err := common.StructToStr(s)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(section + "Setting:\n" + kv)
+}
+
+// NOTE: loglevel会在setup时设置
+func parseLogSetting() {
+	err := cfg.Section("log").StrictMapTo(LogSetting)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	level, err := log.ParseLevel(LogSetting.Level)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.SetLevel(level)
+
+	logCurrentConf(LogSetting, "Log")
+}
+
+func parseTestSetting() {
+	err := cfg.Section("test").StrictMapTo(TestSetting)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	logCurrentConf(TestSetting, "Test")
+}
+
+func parseServerSetting() {
+	err := cfg.Section("server").StrictMapTo(ServerSetting)
+	if err != nil {
+		log.Fatal(err)
+	}
+	ServerSetting.ReadTimeout = ServerSetting.ReadTimeout * time.Second
+	ServerSetting.WriteTimeout = ServerSetting.WriteTimeout * time.Second
+
+	logCurrentConf(ServerSetting, "Server")
+}
