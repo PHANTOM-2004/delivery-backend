@@ -26,12 +26,14 @@ type Log struct {
 }
 
 type Database struct {
-	Type        string
-	User        string
-	Password    string
-	Host        string
-	Name        string
-	TablePrefix string
+	Type         string
+	User         string
+	Password     string
+	Host         string
+	Name         string
+	TablePrefix  string
+	MaxIdleConns int
+	MaxOpenConns int
 }
 
 var cfg *ini.File
@@ -55,7 +57,7 @@ func Setup() {
 
 	parseLogSetting()
 	parseServerSetting()
-  parseDatabaseSetting()
+	parseDatabaseSetting()
 	parseTestSetting()
 }
 

@@ -3,10 +3,12 @@ package main
 import (
 	"delivery-backend/internal/setting"
 	"delivery-backend/test/CA"
+  "delivery-backend/models"
 )
 
 func main() {
 	setting.Setup()
+  models.SetUp()
 
 	if setting.TestSetting.CATest {
     //NOTE: 请使用该模块测试本地开发环境是否可以正确访问
