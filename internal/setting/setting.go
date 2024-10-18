@@ -25,14 +25,24 @@ type Log struct {
 	Level string
 }
 
+type Database struct {
+	Type        string
+	User        string
+	Password    string
+	Host        string
+	Name        string
+	TablePrefix string
+}
+
 var cfg *ini.File
 
 const conf_path = "conf/app.ini"
 
 var (
-	ServerSetting = &Server{}
-	TestSetting   = &Test{}
-	LogSetting    = &Log{}
+	DatabaseSetting = &Database{}
+	ServerSetting   = &Server{}
+	TestSetting     = &Test{}
+	LogSetting      = &Log{}
 )
 
 func Setup() {
@@ -45,6 +55,7 @@ func Setup() {
 
 	parseLogSetting()
 	parseServerSetting()
+  parseDatabaseSetting()
 	parseTestSetting()
 }
 
@@ -79,6 +90,15 @@ func parseTestSetting() {
 	}
 
 	logCurrentConf(TestSetting, "Test")
+}
+
+func parseDatabaseSetting() {
+	err := cfg.Section("database").StrictMapTo(DatabaseSetting)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	logCurrentConf(DatabaseSetting, "Database")
 }
 
 func parseServerSetting() {
