@@ -22,7 +22,7 @@ func SetUp() {
 		setting.DatabaseSetting.Host,
 		setting.DatabaseSetting.Name,
 	)
-  log.Info("initializing Database with Setting:")
+	log.Info("initializing Database with Setting:")
 	log.Info(dsn, setting.DatabaseSetting.Type)
 
 	var err error

@@ -8,5 +8,3 @@ type Admin struct {
 	Account   string
 	Password  string
 }
-
-
