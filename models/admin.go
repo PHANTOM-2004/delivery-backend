@@ -27,7 +27,7 @@ func ExistAdmin(account string) (bool, error) {
 
 func GetAdmin(account string) (*Admin, error) {
 	a := &Admin{}
-	err := db.Model(&Admin{}).Where("account = ?", account).First(&a).Error
+	err := db.Model(&Admin{}).Where("account = ?", account).First(a).Error
 	return a, err
 }
 
