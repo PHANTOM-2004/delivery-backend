@@ -1,7 +1,7 @@
 package setting
 
 import (
-	"delivery-backend/pkg/common"
+	"delivery-backend/pkg/utils"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -70,7 +70,7 @@ func Setup() {
 }
 
 func logCurrentConf(s any, section string) {
-	kv, err := common.StructToStr(s)
+	kv, err := utils.StructToStr(s)
 	if err != nil {
 		log.Fatal(err)
 	}

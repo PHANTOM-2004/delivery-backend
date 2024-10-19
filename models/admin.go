@@ -16,6 +16,7 @@ type Admin struct {
 }
 
 // TODO: 添加单元测试(cyt on 2024-10-19)
+// 建议在service层添加单元测试
 func ExistAdmin(account string) (bool, error) {
 	var a Admin
 	err := db.Model(&Admin{}).Where("account = ?", account).First(&a).Error
