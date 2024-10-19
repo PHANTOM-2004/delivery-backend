@@ -25,6 +25,10 @@ type Log struct {
 	Level string
 }
 
+type App struct {
+	Salt string
+}
+
 type Database struct {
 	Type         string
 	User         string
@@ -44,6 +48,7 @@ var (
 	DatabaseSetting = &Database{}
 	ServerSetting   = &Server{}
 	TestSetting     = &Test{}
+	AppSetting      = &App{}
 	LogSetting      = &Log{}
 )
 
@@ -59,6 +64,7 @@ func Setup() {
 	parseServerSetting()
 	parseDatabaseSetting()
 	parseTestSetting()
+	parseAppSetting()
 }
 
 func logCurrentConf(s any, section string) {
@@ -67,6 +73,14 @@ func logCurrentConf(s any, section string) {
 		log.Fatal(err)
 	}
 	log.Println(section + "Setting:\n" + kv)
+}
+
+func parseAppSetting() {
+	err := cfg.Section("app").StrictMapTo(AppSetting)
+	if err != nil {
+		log.Fatal(err)
+	}
+	logCurrentConf(AppSetting, "App")
 }
 
 // NOTE: loglevel会在setup时设置

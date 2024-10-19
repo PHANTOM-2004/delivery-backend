@@ -17,6 +17,9 @@ func InitRouter() *gin.Engine {
 
 	gin.SetMode(setting.ServerSetting.RunMode)
 
+  // admin := r.Group("/admin")
+
+
 	// apiv1 := r.Group("/api/v1")
 	// TODO: JWT 鉴权
 
