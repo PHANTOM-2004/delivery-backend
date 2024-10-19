@@ -17,8 +17,10 @@ type Server struct {
 }
 
 type Test struct {
-	CATest    bool
-	HTTPSPort int
+	CATest            bool
+	HTTPSPort         int
+	LocalhostKeyPath  string
+	LocalhostCertPath string
 }
 
 type Log struct {
