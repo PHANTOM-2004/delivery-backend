@@ -14,11 +14,13 @@ type Server struct {
 	HTTPPort     int
 	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
+	SSLKeyPath        string
+	SSLCertPath       string
 }
 
 type Test struct {
 	CATest            bool
-	HTTPSPort         int
+	HTTPPort          int
 	LocalhostKeyPath  string
 	LocalhostCertPath string
 }

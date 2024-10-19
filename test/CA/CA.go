@@ -11,6 +11,7 @@ import (
 )
 
 func InitRouter() *gin.Engine {
+	defer log.Info("testing router initialized")
 	r := gin.New()
 	r.GET("/", func(c *gin.Context) {
 		log.Println("got [/]")
@@ -32,7 +33,7 @@ func InitRouter() *gin.Engine {
 func LaunchServer() {
 	router := InitRouter()
 	s := &http.Server{
-		Addr:           fmt.Sprintf(":%d", setting.TestSetting.HTTPSPort),
+		Addr:           fmt.Sprintf(":%d", setting.TestSetting.HTTPPort),
 		Handler:        router,
 		MaxHeaderBytes: 1 << 20,
 	}
@@ -40,7 +41,7 @@ func LaunchServer() {
 	certFile := setting.TestSetting.LocalhostCertPath
 	keyFile := setting.TestSetting.LocalhostKeyPath
 	log.Infof("test server for HTTPS test launching")
-	log.Infof("listening port[%d]", setting.TestSetting.HTTPSPort)
+	log.Infof("listening port[%d]", setting.TestSetting.HTTPPort)
 
 	err := s.ListenAndServeTLS(certFile, keyFile)
 	if err != nil {

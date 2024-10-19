@@ -2,6 +2,7 @@ package routers
 
 import (
 	"delivery-backend/internal/setting"
+	"delivery-backend/routers/api"
 
 	"github.com/gin-gonic/gin"
 
@@ -9,7 +10,7 @@ import (
 )
 
 func InitRouter() *gin.Engine {
-	defer log.Info("router initialized")
+	defer log.Info("app router initialized")
 
 	r := gin.New()
 	r.Use(gin.Logger())
@@ -17,8 +18,9 @@ func InitRouter() *gin.Engine {
 
 	gin.SetMode(setting.ServerSetting.RunMode)
 
-  // admin := r.Group("/admin")
+	r.GET("/login/admin/auth", api.ValidateAccount)
 
+	// admin := r.Group("/admin")
 
 	// apiv1 := r.Group("/api/v1")
 	// TODO: JWT 鉴权

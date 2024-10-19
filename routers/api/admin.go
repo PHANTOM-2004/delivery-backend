@@ -29,8 +29,8 @@ func Encrypt(s string) string {
 }
 
 type Login struct {
-	Account  string
-	Password string
+	Account  string `json:"admin_account"`
+	Password string `json:"admin_password"`
 }
 
 func init() {
@@ -41,16 +41,23 @@ func init() {
 		// 约定密码最大长度为32, 最小长度为12
 		rules := map[string]string{
 			"Account":  "min=10,max=30",
-			"Password": "min=12,max=32",
+			"Password": "min=12,max=50",
 		}
 		app.RegisterValidation(Login{}, rules)
 	}
 }
 
+func ExistAccount(c *gin.Context){
+  data := c.Query("account")
+
+
+
+}
+
 func ValidateAccount(c *gin.Context) {
 	data := Login{
-		Account:  c.Query("account"),
-    //密码经过加密
+		Account: c.Query("account"),
+		// 密码经过加密
 		Password: Encrypt(c.Query("password")),
 	}
 
@@ -59,6 +66,7 @@ func ValidateAccount(c *gin.Context) {
 		// 通常来说前端不应当传递非法参数，对于非法参数的传递
 		// 通常是其他人所进行的
 		log.Warn("Login: invalid params")
+		log.Debug(err, data)
 		app.Response(c, http.StatusOK, ecode.INVALID_PARAMS, nil)
 		return
 	}
@@ -67,6 +75,7 @@ func ValidateAccount(c *gin.Context) {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		// 对于不存在的账户登陆，这时可能的，因为
 		// 你无法预料到用户会干什么
+		log.Debug(err, data)
 		app.Response(c, http.StatusOK, ecode.ERROR_ADMIN_NON_EXIST, nil)
 		return
 	} else if err != nil {
@@ -83,6 +92,7 @@ func ValidateAccount(c *gin.Context) {
 		return
 	}
 
+	// NOTE:返回 session_id, access_token
 	res := make(map[string]any)
 	res["access_token"] = "TODO"
 	res["session_id"] = "TODO"

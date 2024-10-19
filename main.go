@@ -1,20 +1,21 @@
 package main
 
 import (
+	"delivery-backend/internal/server"
 	"delivery-backend/internal/setting"
 	"delivery-backend/test/CA"
-  "delivery-backend/models"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	setting.Setup()
-  models.SetUp()
+	server.Setup()
 
-	if setting.TestSetting.CATest {
-    //NOTE: 请使用该模块测试本地开发环境是否可以正确访问
-    //https://localhost:xxxx
+	if setting.TestSetting.CATest && gin.Mode() == gin.DebugMode {
+		// NOTE: 请使用该模块测试本地开发环境是否可以正确访问
+		// https://localhost:xxxx
 		go CA.LaunchServer()
-		// block main function
-		select {}
 	}
+
+	server.LaunchServer()
 }
