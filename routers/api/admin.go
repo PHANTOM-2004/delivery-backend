@@ -13,29 +13,15 @@ import (
 	"delivery-backend/internal/ecode"
 	"delivery-backend/internal/setting"
 	"delivery-backend/models"
+	"delivery-backend/pkg/utils"
 	"delivery-backend/service"
-	"encoding/base64"
 	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"golang.org/x/crypto/scrypt"
 	"gorm.io/gorm"
 )
-
-func Encrypt(s string) string {
-	// salt: 8 bytes is
-	// a good length.
-	salt := []byte(setting.AppSetting.Salt)
-
-	dk, err := scrypt.Key([]byte(s), salt, 1<<15, 8, 1, 32)
-	if err != nil {
-		log.Panic(err)
-	}
-	res := base64.StdEncoding.EncodeToString(dk)
-	return res
-}
 
 type Login struct {
 	Account  string
@@ -60,7 +46,7 @@ func ValidateAccount(c *gin.Context) {
 	data := Login{
 		Account: c.Query("account"),
 		// 密码经过加密
-		Password: Encrypt(c.Query("password")),
+		Password: utils.Encrypt(c.Query("password"), setting.AppSetting.Salt),
 	}
 
 	err := app.ValidateStruct(data)
@@ -95,7 +81,7 @@ func ValidateAccount(c *gin.Context) {
 	}
 
 	// TODO: return session id, and access token
-	access_token := service.GetAccessToken(data.Account, data.Password)
+	access_token := service.GetAdminAccessToken(data.Account)
 
 	// NOTE:返回 session_id, access_token
 	res := map[string]any{

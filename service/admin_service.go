@@ -11,10 +11,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func GetAccessToken(account string, password string) string {
+func GetAdminAccessToken(account string) string {
 	claims := jwt.MapClaims{
+		"issuer":     "admin",
 		"account":    account,
-		"password":   password,
 		"expires_at": time.Now().Add(3 * time.Hour).Unix(),
 	}
 	tks, err := utils.GenerateToken(claims, setting.AppSetting.JWTSecretKey)
@@ -25,15 +25,15 @@ func GetAccessToken(account string, password string) string {
 	return tks
 }
 
-func AuthAccessToken(access_token string) ecode.Ecode {
+func AuthAdminAccessToken(access_token string) ecode.Ecode {
 	claims, err := utils.ParseToken(access_token, setting.AppSetting.JWTSecretKey)
 	if err != nil {
 		return ecode.ERROR_AUTH_CHECK_TOKEN_FAIL
 	}
 	account := claims["account"].(string)
-	password := claims["password"].(string)
-	a, err := models.GetAdmin(account)
-	if err != nil || a.Password != password {
+	issuer := claims["issuer"].(string)
+	exist, err := models.ExistAdmin(account)
+	if err != nil || !exist || issuer != "admin" {
 		return ecode.ERROR_AUTH_CHECK_TOKEN_FAIL
 	}
 
