@@ -32,9 +32,13 @@ func ExistAdmin(account string) (bool, error) {
 func GetAdmin(account string) (*Admin, error) {
 	a := &Admin{}
 	err := db.Model(&Admin{}).Where("account = ?", account).First(a).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
 	return a, err
 }
 
+// 默认情况下GORM 只会更新非零值的字段
 func EditAdmin(account string, data any) error {
 	err := db.Model(&Admin{}).Where("account = ?", account).Updates(data).Error
 	return err

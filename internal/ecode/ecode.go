@@ -37,15 +37,15 @@ func StatusText(e Ecode) (res string) {
 	case INVALID_PARAMS:
 		res = "请求参数错误"
 	case ERROR_AUTH_NO_TOKEN:
-		res = "未提供AK"
+		res = "未提供access_token"
 	case ERROR_AUTH_CHECK_TOKEN_FAIL:
-		res = "AK鉴权失败"
+		res = "access_token鉴权失败"
 	case ERROR_AUTH_CHECK_TOKEN_TIMEOUT:
-		res = "AK已超时"
+		res = "access_token已超时"
 	case ERROR_AUTH_TOKEN_GENERATE:
-		res = "AK生成失败"
+		res = "access_token生成失败"
 	case ERROR_AUTH:
-		res = "AK错误"
+		res = "access_token错误"
 	default:
 		log.Fatalf("未知错误码[%d]", e)
 	}

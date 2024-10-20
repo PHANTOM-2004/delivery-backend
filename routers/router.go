@@ -4,6 +4,7 @@ import (
 	"delivery-backend/internal/setting"
 	"delivery-backend/middleware/jwt"
 	"delivery-backend/routers/api"
+	v1 "delivery-backend/routers/api/v1"
 
 	"github.com/gin-gonic/gin"
 
@@ -19,11 +20,14 @@ func InitRouter() *gin.Engine {
 
 	gin.SetMode(setting.ServerSetting.RunMode)
 
-	r.GET("/admin-validate", api.ValidateAccount)
+	r.GET("/admin/login", api.AdminLogin)
+	r.GET("/admin/auth", api.GetAuth)
+
 	// TODO: 管理员修改密码, after JWT鉴权
-	admin := r.Group("/admin")
+
+	admin := r.Group("/api/v1/admin")
 	admin.Use(jwt.JWT())
-	admin.GET("/change-password")
+	admin.GET("/change-password", v1.AdminChangePassword)
 
 	// admin := r.Group("/admin")
 

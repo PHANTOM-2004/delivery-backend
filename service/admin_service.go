@@ -1,15 +1,77 @@
 package service
 
 import (
+	"delivery-backend/internal/app"
 	"delivery-backend/internal/ecode"
 	"delivery-backend/internal/setting"
 	"delivery-backend/models"
 	"delivery-backend/pkg/utils"
+	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	log "github.com/sirupsen/logrus"
 )
+
+type Login struct {
+	Account  string
+	Password string
+}
+
+func init() {
+	// NOTE: 在该init中，初始化该模块的数据验证
+	{
+		// register login validation
+		// 约定账号长度最大值为30, 最小值为10
+		// 约定密码最大长度为32, 最小长度为12
+		login_rules := map[string]string{
+			"Account":  "min=10,max=30",
+			"Password": "min=12,max=50",
+		}
+		app.RegisterValidation(Login{}, login_rules)
+	}
+}
+
+func AccountValidate(c *gin.Context) bool {
+	data := Login{
+		Account: c.Query("account"),
+		// 密码经过加密
+		Password: utils.Encrypt(c.Query("password"), setting.AppSetting.Salt),
+	}
+
+	err := app.ValidateStruct(data)
+	if err != nil {
+		// 通常来说前端不应当传递非法参数，对于非法参数的传递
+		// 通常是其他人所进行的
+		log.Warn("Login: invalid params")
+		log.Debug(err, data)
+		app.Response(c, http.StatusOK, ecode.INVALID_PARAMS, nil)
+		return false
+	}
+
+	a, err := models.GetAdmin(data.Account)
+	if a == nil {
+		// 对于不存在的账户登陆，这时可能的，因为
+		// 你无法预料到用户会干什么
+		log.Debug(err, data)
+		app.Response(c, http.StatusOK, ecode.ERROR_ADMIN_NON_EXIST, nil)
+		return false
+	} else if err != nil {
+		// 其他未知错误
+		log.Warn(err)
+		app.Response(c, http.StatusInternalServerError, ecode.ERROR, nil)
+		return false
+	}
+
+	if data.Password != a.Password {
+		// 用户输错密码
+		log.Debug("incorrect password")
+		app.Response(c, http.StatusOK, ecode.ERROR_ADMIN_INCORRECT_PWD, nil)
+		return false
+	}
+	return true
+}
 
 func GetAdminAccessToken(account string) string {
 	claims := jwt.MapClaims{
