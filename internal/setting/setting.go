@@ -1,7 +1,7 @@
 package setting
 
 import (
-	"delivery-backend/pkg/common"
+	"delivery-backend/pkg/utils"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -14,15 +14,43 @@ type Server struct {
 	HTTPPort     int
 	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
+	SSLKeyPath   string
+	SSLCertPath  string
 }
 
 type Test struct {
-	CATest    bool
-	HTTPSPort int
+	CATest            bool
+	HTTPPort          int
+	LocalhostKeyPath  string
+	LocalhostCertPath string
 }
 
 type Log struct {
 	Level string
+}
+
+type App struct {
+	Salt         string
+	JWTSecretKey string
+	AdminToken   string
+}
+
+type Database struct {
+	Type         string
+	User         string
+	Password     string
+	Host         string
+	Name         string
+	TablePrefix  string
+	MaxIdleConns int
+	MaxOpenConns int
+}
+
+type Redis struct {
+	Host     string
+	Password string
+	MaxIdle  int
+	Secret   string
 }
 
 var cfg *ini.File
@@ -30,9 +58,12 @@ var cfg *ini.File
 const conf_path = "conf/app.ini"
 
 var (
-	ServerSetting = &Server{}
-	TestSetting   = &Test{}
-	LogSetting    = &Log{}
+	DatabaseSetting = &Database{}
+	RedisSetting    = &Redis{}
+	ServerSetting   = &Server{}
+	TestSetting     = &Test{}
+	AppSetting      = &App{}
+	LogSetting      = &Log{}
 )
 
 func Setup() {
@@ -45,15 +76,26 @@ func Setup() {
 
 	parseLogSetting()
 	parseServerSetting()
+	parseDatabaseSetting()
+	parseRedisSetting()
 	parseTestSetting()
+	parseAppSetting()
 }
 
 func logCurrentConf(s any, section string) {
-	kv, err := common.StructToStr(s)
+	kv, err := utils.StructToStr(s)
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Println(section + "Setting:\n" + kv)
+}
+
+func parseAppSetting() {
+	err := cfg.Section("app").StrictMapTo(AppSetting)
+	if err != nil {
+		log.Fatal(err)
+	}
+	logCurrentConf(AppSetting, "App")
 }
 
 // NOTE: loglevel会在setup时设置
@@ -81,6 +123,15 @@ func parseTestSetting() {
 	logCurrentConf(TestSetting, "Test")
 }
 
+func parseDatabaseSetting() {
+	err := cfg.Section("database").StrictMapTo(DatabaseSetting)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	logCurrentConf(DatabaseSetting, "Database")
+}
+
 func parseServerSetting() {
 	err := cfg.Section("server").StrictMapTo(ServerSetting)
 	if err != nil {
@@ -90,4 +141,13 @@ func parseServerSetting() {
 	ServerSetting.WriteTimeout = ServerSetting.WriteTimeout * time.Second
 
 	logCurrentConf(ServerSetting, "Server")
+}
+
+func parseRedisSetting() {
+	err := cfg.Section("redis").StrictMapTo(RedisSetting)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	logCurrentConf(RedisSetting, "Redis")
 }
