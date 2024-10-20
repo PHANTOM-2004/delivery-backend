@@ -14,8 +14,8 @@ type Server struct {
 	HTTPPort     int
 	ReadTimeout  time.Duration
 	WriteTimeout time.Duration
-	SSLKeyPath        string
-	SSLCertPath       string
+	SSLKeyPath   string
+	SSLCertPath  string
 }
 
 type Test struct {
@@ -30,8 +30,8 @@ type Log struct {
 }
 
 type App struct {
-	Salt string
-  JWTSecretKey string
+	Salt         string
+	JWTSecretKey string
 }
 
 type Database struct {
@@ -45,12 +45,20 @@ type Database struct {
 	MaxOpenConns int
 }
 
+type Redis struct {
+	Host     string
+	Password string
+	MaxIdle  int
+	Secret   string
+}
+
 var cfg *ini.File
 
 const conf_path = "conf/app.ini"
 
 var (
 	DatabaseSetting = &Database{}
+	RedisSetting    = &Redis{}
 	ServerSetting   = &Server{}
 	TestSetting     = &Test{}
 	AppSetting      = &App{}
@@ -68,6 +76,7 @@ func Setup() {
 	parseLogSetting()
 	parseServerSetting()
 	parseDatabaseSetting()
+	parseRedisSetting()
 	parseTestSetting()
 	parseAppSetting()
 }
@@ -131,4 +140,13 @@ func parseServerSetting() {
 	ServerSetting.WriteTimeout = ServerSetting.WriteTimeout * time.Second
 
 	logCurrentConf(ServerSetting, "Server")
+}
+
+func parseRedisSetting() {
+	err := cfg.Section("redis").StrictMapTo(RedisSetting)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	logCurrentConf(RedisSetting, "Redis")
 }

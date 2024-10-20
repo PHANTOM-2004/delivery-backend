@@ -6,6 +6,8 @@ import (
 	"delivery-backend/routers/api"
 	v1 "delivery-backend/routers/api/v1"
 
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/redis"
 	"github.com/gin-gonic/gin"
 
 	log "github.com/sirupsen/logrus"
@@ -23,16 +25,34 @@ func InitRouter() *gin.Engine {
 	r.GET("/admin/login", api.AdminLogin)
 	r.GET("/admin/auth", api.GetAuth)
 
-	// TODO: 管理员修改密码, after JWT鉴权
+	{
+		// TODO: 管理员修改密码
+		apiv1 := r.Group("/api/v1")
 
-	admin := r.Group("/api/v1/admin")
-	admin.Use(jwt.JWT())
-	admin.GET("/change-password", v1.AdminChangePassword)
+		{
+			// admin group
+			admin := apiv1.Group("/admin")
 
-	// admin := r.Group("/admin")
+			// middleware JWT
+			admin.Use(jwt.JWT())
 
-	// apiv1 := r.Group("/api/v1")
-	// TODO: JWT 鉴权
+			// middleware redis session
+			store, err := redis.NewStore(
+				setting.RedisSetting.MaxIdle,
+				"tcp",
+				setting.RedisSetting.Host,
+				setting.RedisSetting.Password,
+				[]byte(setting.RedisSetting.Secret),
+			)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			admin.Use(sessions.Sessions("Admin Session", store))
+			admin.GET("/change-password", v1.AdminChangePassword)
+		}
+
+	}
 
 	return r
 }

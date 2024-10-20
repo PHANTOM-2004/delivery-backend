@@ -35,9 +35,8 @@ func init() {
 
 func AccountValidate(c *gin.Context) bool {
 	data := Login{
-		Account: c.Query("account"),
-		// 密码经过加密
-		Password: utils.Encrypt(c.Query("password"), setting.AppSetting.Salt),
+		Account:  c.Query("account"),
+		Password: c.Query("password"),
 	}
 
 	err := app.ValidateStruct(data)
@@ -64,7 +63,8 @@ func AccountValidate(c *gin.Context) bool {
 		return false
 	}
 
-	if data.Password != a.Password {
+	en_pwd := utils.Encrypt(data.Password, setting.AppSetting.Salt)
+	if en_pwd != a.Password {
 		// 用户输错密码
 		log.Debug("incorrect password")
 		app.Response(c, http.StatusOK, ecode.ERROR_ADMIN_INCORRECT_PWD, nil)
