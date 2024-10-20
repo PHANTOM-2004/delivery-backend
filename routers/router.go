@@ -25,6 +25,7 @@ func InitRouter() *gin.Engine {
 	r.POST("/admin/login", api.AdminLogin)
 	r.GET("/admin/auth", api.GetAuth)
   r.POST("/admin/create", api.AdminCreate)
+  r.POST("/admin/delete", api.AdminDelete)
 
 	{
 		// TODO: 管理员修改密码

@@ -58,7 +58,7 @@ func CleanAllAdmin() error {
 	return err
 }
 
-func DeleteAdmin(account string) error {
-	err := db.Where("account = ?", account).Delete(&Admin{}).Error
-	return err
+func DeleteAdmin(account string) (error, int64) {
+	res := db.Where("account = ?", account).Delete(&Admin{})
+	return res.Error, res.RowsAffected
 }
