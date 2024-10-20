@@ -16,12 +16,16 @@ const (
 	// admin related error
 	ERROR_ADMIN_NON_EXIST     Ecode = 1002
 	ERROR_ADMIN_INCORRECT_PWD Ecode = 1003
+	ERROR_ADMIN_ACCOUNT_EXIST Ecode = 1004
 
 	ERROR_AUTH_NO_TOKEN            Ecode = 20000
 	ERROR_AUTH_CHECK_TOKEN_FAIL    Ecode = 20001
 	ERROR_AUTH_CHECK_TOKEN_TIMEOUT Ecode = 20002
 	ERROR_AUTH_TOKEN_GENERATE      Ecode = 20003
 	ERROR_AUTH                     Ecode = 20004
+
+	ERROR_SUPER_AUTH          Ecode = 30000
+	ERROR_SUPER_AUTH_NO_TOKEN Ecode = 30001
 )
 
 func StatusText(e Ecode) (res string) {
@@ -32,6 +36,8 @@ func StatusText(e Ecode) (res string) {
 		res = "fail"
 	case ERROR_ADMIN_NON_EXIST:
 		res = "管理员账号不存在"
+	case ERROR_ADMIN_ACCOUNT_EXIST:
+		res = "管理员账号已注册"
 	case ERROR_ADMIN_INCORRECT_PWD:
 		res = "管理员密码输入错误"
 	case INVALID_PARAMS:
@@ -46,6 +52,10 @@ func StatusText(e Ecode) (res string) {
 		res = "access_token生成失败"
 	case ERROR_AUTH:
 		res = "access_token错误"
+	case ERROR_SUPER_AUTH:
+		res = "super_token错误"
+	case ERROR_SUPER_AUTH_NO_TOKEN:
+		res = "super_token未提供"
 	default:
 		log.Fatalf("未知错误码[%d]", e)
 	}

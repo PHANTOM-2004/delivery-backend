@@ -29,6 +29,11 @@ func ExistAdmin(account string) (bool, error) {
 	return true, err
 }
 
+func CreateAdmin(a *Admin) error {
+	err := db.Model(&Admin{}).Create(a).Error
+	return err
+}
+
 func GetAdmin(account string) (*Admin, error) {
 	a := &Admin{}
 	err := db.Model(&Admin{}).Where("account = ?", account).First(a).Error

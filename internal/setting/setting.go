@@ -32,6 +32,7 @@ type Log struct {
 type App struct {
 	Salt         string
 	JWTSecretKey string
+	AdminToken   string
 }
 
 type Database struct {

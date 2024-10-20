@@ -19,6 +19,12 @@ type Login struct {
 	Password string
 }
 
+type SignUp struct {
+	Account   string
+	Password  string
+	AdminName string
+}
+
 func init() {
 	// NOTE: 在该init中，初始化该模块的数据验证
 	{
@@ -30,13 +36,39 @@ func init() {
 			"Password": "min=15,max=50",
 		}
 		app.RegisterValidation(Login{}, login_rules)
+
+		// 注册账号validation
+		signup_rules := login_rules
+		signup_rules["AdminName"] = "min=2,max=20"
+		app.RegisterValidation(SignUp{}, signup_rules)
 	}
 }
 
-func AccountValidate(c *gin.Context) bool {
+func SignUpValidate(c *gin.Context) bool {
+	method := c.Request.Method
+	if method != "POST" {
+		log.Fatal("invalid usage")
+		return false
+	}
+
+	data := SignUp{
+		Account:   c.Query("account"),
+		Password:  c.Query("password"),
+		AdminName: c.Query("admin_name"),
+	}
+	err := app.ValidateStruct(data)
+	if err != nil {
+		app.Response(c, http.StatusOK, ecode.INVALID_PARAMS, nil)
+		log.Warn(err)
+		return false
+	}
+	return true
+}
+
+func AccountValidate(account string, password string, c *gin.Context) bool {
 	data := Login{
-		Account:  c.Query("account"),
-		Password: c.Query("password"),
+		Account:  account,
+		Password: password,
 	}
 
 	err := app.ValidateStruct(data)
