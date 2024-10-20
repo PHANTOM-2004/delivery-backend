@@ -1,3 +1,11 @@
+// 本文件负责编写管理员账户相关的api, 主要是登入认证与密码修改
+//
+// NOTE:对于管理员的注册，不应当放在用户界面。实际上应当通过
+// 后台插入的方式建立管理员账户。因此对于管理员账户，我们仅仅设计
+// 登陆，以及修改密码的功能。同时还需要注意对于密码的修改，
+// 要保证必然是强密码,为了保证安全性，在后端需要再次对其进行验证，
+// 因为我们不能避免管理员/hacker通过api的方式调用并且传递弱密码
+
 package api
 
 import (
@@ -5,6 +13,7 @@ import (
 	"delivery-backend/internal/ecode"
 	"delivery-backend/internal/setting"
 	"delivery-backend/models"
+	"delivery-backend/service"
 	"encoding/base64"
 	"errors"
 	"net/http"
@@ -29,8 +38,8 @@ func Encrypt(s string) string {
 }
 
 type Login struct {
-	Account  string `json:"admin_account"`
-	Password string `json:"admin_password"`
+	Account  string
+	Password string
 }
 
 func init() {
@@ -39,19 +48,12 @@ func init() {
 		// register login validation
 		// 约定账号长度最大值为30, 最小值为10
 		// 约定密码最大长度为32, 最小长度为12
-		rules := map[string]string{
+		login_rules := map[string]string{
 			"Account":  "min=10,max=30",
 			"Password": "min=12,max=50",
 		}
-		app.RegisterValidation(Login{}, rules)
+		app.RegisterValidation(Login{}, login_rules)
 	}
-}
-
-func ExistAccount(c *gin.Context){
-  data := c.Query("account")
-
-
-
 }
 
 func ValidateAccount(c *gin.Context) {
@@ -92,11 +94,14 @@ func ValidateAccount(c *gin.Context) {
 		return
 	}
 
-	// NOTE:返回 session_id, access_token
-	res := make(map[string]any)
-	res["access_token"] = "TODO"
-	res["session_id"] = "TODO"
 	// TODO: return session id, and access token
-	//
+	access_token := service.GetAccessToken(data.Account, data.Password)
+
+	// NOTE:返回 session_id, access_token
+	res := map[string]any{
+		"access_token": access_token,
+		"session_id":   1,
+	}
+
 	app.Response(c, http.StatusOK, ecode.SUCCESS, res)
 }

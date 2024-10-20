@@ -23,7 +23,10 @@ func ExistAdmin(account string) (bool, error) {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return false, nil
 	}
-	return a.ID > 0, err
+	// 此时必定是存在的， 但可能发生其他错误
+	// 因此对于调用者来说需要优先判断error, 如果error不是空
+	// 那么是不可信的
+	return true, err
 }
 
 func GetAdmin(account string) (*Admin, error) {
@@ -50,5 +53,3 @@ func DeleteAdmin(account string) error {
 	err := db.Where("account = ?", account).Delete(&Admin{}).Error
 	return err
 }
-
-

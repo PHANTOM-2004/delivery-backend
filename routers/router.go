@@ -18,7 +18,10 @@ func InitRouter() *gin.Engine {
 
 	gin.SetMode(setting.ServerSetting.RunMode)
 
-	r.GET("/login/admin/auth", api.ValidateAccount)
+	r.GET("/admin-validate", api.ValidateAccount)
+	// TODO: 管理员修改密码, after JWT鉴权
+  admin := r.Group("/admin")
+  admin.GET("/change-passord")
 
 	// admin := r.Group("/admin")
 
