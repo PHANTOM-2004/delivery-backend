@@ -18,7 +18,7 @@ func JWT() gin.HandlerFunc {
 			return
 		}
 
-		code := service.AuthAdminAccessToken(access_token)
+		account, code := service.AuthAdminAccessToken(access_token)
 
 		if code != ecode.SUCCESS {
 			app.Response(c, http.StatusOK, code, nil)
@@ -26,7 +26,8 @@ func JWT() gin.HandlerFunc {
 			return
 		}
 
-		// SUCCESS
+		// SUCCESS, set account
+		c.Set("account", account)
 		// go to next handler
 		c.Next()
 	}

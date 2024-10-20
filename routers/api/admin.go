@@ -14,9 +14,17 @@ import (
 	"delivery-backend/service"
 	"net/http"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
+// NOTE:该接口只允许运维调用，需要验证创建管理员的唯一token.
+func AdminCreate(c *gin.Context) {
+
+}
+
+// NOTE:我们要求前端使用cookie方式存储access_token，
+// 并且设置secure，https only
 func GetAuth(c *gin.Context) {
 	if v := service.AccountValidate(c); !v {
 		return
@@ -36,14 +44,19 @@ func AdminLogin(c *gin.Context) {
 		return
 	}
 
-	// TODO: return session id, and access token
 	account := c.Query("account")
-	access_token := service.GetAdminAccessToken(account)
 
-	// NOTE:返回 session_id, access_token
+	session := sessions.Default(c)
+	session.Set("account", account)
+	session.Save()
+
+	access_token := service.GetAdminAccessToken(account)
+	// NOTE:返回 access_token
+	// 不必考虑session id的问题，gin-session作为中间件自动管理session,
+	// 但是需要注意，这里的自动管理是基于cookie的，也就是说
+	// 对于之后的小程序业务，就不能使用gin-session了
 	res := map[string]any{
 		"access_token": access_token,
-		"session_id":   1,
 	}
 
 	app.Response(c, http.StatusOK, ecode.SUCCESS, res)

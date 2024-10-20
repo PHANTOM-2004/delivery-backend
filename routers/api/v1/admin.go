@@ -6,7 +6,6 @@ import (
 	"delivery-backend/internal/setting"
 	"delivery-backend/models"
 	"delivery-backend/pkg/utils"
-	"delivery-backend/service"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -14,15 +13,16 @@ import (
 )
 
 func AdminChangePassword(c *gin.Context) {
-	// TODO:当前账户实际上从session中获取，对于没有登陆的管理员
-	// 显然不让他修改密码
-
-	if v := service.AccountValidate(c); !v {
-		return
+	// 这里借助JWT进行鉴权，在中间件中，对于通过验证的请求
+	// 会在gin.Context之中设置 account
+	account := c.Query("account")
+	if account == "" {
+		app.Response(c, http.StatusInternalServerError, ecode.ERROR, nil)
+		log.Fatal("AdminChangePassword: account cannot be null string")
+    return
 	}
 
 	// Encrypt
-	account := c.Query("account")
 	new_password := utils.Encrypt(c.Query("new_password"), setting.AppSetting.Salt)
 	data := map[string]any{
 		"password": new_password,

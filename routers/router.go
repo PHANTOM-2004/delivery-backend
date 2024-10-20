@@ -22,7 +22,7 @@ func InitRouter() *gin.Engine {
 
 	gin.SetMode(setting.ServerSetting.RunMode)
 
-	r.GET("/admin/login", api.AdminLogin)
+	r.POST("/admin/login", api.AdminLogin)
 	r.GET("/admin/auth", api.GetAuth)
 
 	{
@@ -48,7 +48,7 @@ func InitRouter() *gin.Engine {
 				log.Fatal(err)
 			}
 
-			admin.Use(sessions.Sessions("Admin Session", store))
+			admin.Use(sessions.Sessions("AdminSession", store))
 			admin.GET("/change-password", v1.AdminChangePassword)
 		}
 

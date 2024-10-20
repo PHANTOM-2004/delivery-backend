@@ -27,7 +27,7 @@ func init() {
 		// 约定密码最大长度为32, 最小长度为12
 		login_rules := map[string]string{
 			"Account":  "min=10,max=30",
-			"Password": "min=12,max=50",
+			"Password": "min=15,max=50",
 		}
 		app.RegisterValidation(Login{}, login_rules)
 	}
@@ -87,23 +87,23 @@ func GetAdminAccessToken(account string) string {
 	return tks
 }
 
-func AuthAdminAccessToken(access_token string) ecode.Ecode {
+func AuthAdminAccessToken(access_token string) (string, ecode.Ecode) {
 	claims, err := utils.ParseToken(access_token, setting.AppSetting.JWTSecretKey)
 	if err != nil {
-		return ecode.ERROR_AUTH_CHECK_TOKEN_FAIL
+		return "", ecode.ERROR_AUTH_CHECK_TOKEN_FAIL
 	}
 	account := claims["account"].(string)
 	issuer := claims["issuer"].(string)
 	exist, err := models.ExistAdmin(account)
 	if err != nil || !exist || issuer != "admin" {
-		return ecode.ERROR_AUTH_CHECK_TOKEN_FAIL
+		return "", ecode.ERROR_AUTH_CHECK_TOKEN_FAIL
 	}
 
 	expires_at := claims["expires_at"].(int64)
 	nowTime := time.Now().Unix()
 	if nowTime > expires_at {
-		return ecode.ERROR_AUTH_CHECK_TOKEN_TIMEOUT
+		return "", ecode.ERROR_AUTH_CHECK_TOKEN_TIMEOUT
 	}
 
-	return ecode.SUCCESS
+	return account, ecode.SUCCESS
 }
