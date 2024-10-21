@@ -5,7 +5,7 @@
 本项目是送餐系统的后端，核心语言为`golang`。后端负责人是陈艺天。
 
 - 与小程序交互
-- 与中台（管理员系统）交互
+- 与中台（管理员系统以及商家）交互
 
 ## 开发注意事项
 
@@ -13,8 +13,28 @@
 
 - `mariadb`
 - `redis`
-- `golang > 1.20`
+- `go > version 1.20`
 - `mkcert`
+- `go-swagger`
+
+```shell
+#注意启动服务
+sudo systemctl start mariadb redis
+```
+
+### 接口文档
+
+```shell
+make
+```
+
+通过`make`启动swagger服务，可以在浏览器中查看`api`文档。
+
+注意前置`swagger`，实际上在`Makefile`中也有检测与安装的规则.
+
+```shell
+go install github.com/go-swagger/go-swagger/cmd/swagger
+```
 
 ### localhost SSL
 
