@@ -1,4 +1,4 @@
-// Package classification 儿子：樊明晨.
+// Package classification 父亲模拟器
 //
 // Documentation of our awesome API.
 //
@@ -23,6 +23,7 @@
 // swagger:meta
 package docs
 
+// 注意：返回一个json数据
 // 通常返回code=200, 请求被正确处理，单数需要校验msg字段是否为"ok";
 // 如果"msg"不是"ok"则说明失败，msg含有对应报错信息.
 // 具体返回的数据存在data中，详细见各个接口对于返回值的说明
