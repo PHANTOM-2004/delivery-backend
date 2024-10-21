@@ -1,8 +1,7 @@
-
 package app
 
 import (
-  "delivery-backend/internal/ecode"
+	"delivery-backend/internal/ecode"
 
 	"github.com/gin-gonic/gin"
 )
