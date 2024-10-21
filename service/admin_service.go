@@ -33,7 +33,7 @@ func init() {
 		// 约定密码最大长度为32, 最小长度为12
 		login_rules := map[string]string{
 			"Account":  "min=10,max=30",
-			"Password": "min=15,max=50",
+			"Password": "min=15,max=30",
 		}
 		app.RegisterValidation(Login{}, login_rules)
 

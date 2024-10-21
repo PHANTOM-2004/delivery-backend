@@ -18,8 +18,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// NOTE:我们要求前端使用cookie方式存储access_token，
-// 并且设置secure，https only
 func GetAuth(c *gin.Context) {
 	account := c.Query("account")
 	password := c.Query("password")
