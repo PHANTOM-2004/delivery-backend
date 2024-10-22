@@ -18,13 +18,16 @@ func JWT() gin.HandlerFunc {
 			return
 		}
 
-		_, code := service.AuthAdminAccessToken(access_token)
+		account, code := service.AuthAdminAccessToken(access_token)
 
 		if code != ecode.SUCCESS {
 			app.Response(c, http.StatusOK, code, nil)
 			c.Abort()
 			return
 		}
+
+		// set jwt_account
+		c.Set("jwt_account", account)
 
 		// go to next handler
 		c.Next()

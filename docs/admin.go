@@ -25,6 +25,13 @@ type SuperToken struct {
 	SuperToken string `json:"super_token"`
 }
 
+// swagger:parameters  admin_change_password
+type AccessToken struct {
+	// 部分api调用的token
+	// required: true
+	AccessToken string `json:"access_token"`
+}
+
 //=============================================================
 // swagger:route GET /admin/auth admin admin_auth
 // JWT, 请求获得access_token
@@ -64,5 +71,6 @@ type SuperToken struct {
 // swagger:route POST /api/v1/admin/change-password v1 admin_change_password
 // 管理员修改密码
 // 在非法请求发出时（管理员不处于登入状态）会返回错误信息。
+// PS: 调用api时，access_token + session 双重认证
 // responses:
 // 200: COMMON

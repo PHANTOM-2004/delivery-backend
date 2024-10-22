@@ -2,8 +2,8 @@ package routers
 
 import (
 	"delivery-backend/internal/setting"
+	"delivery-backend/middleware/filter"
 	"delivery-backend/middleware/jwt"
-	filter "delivery-backend/middleware/login"
 	"delivery-backend/routers/api"
 	v1 "delivery-backend/routers/api/v1"
 
@@ -57,6 +57,8 @@ func InitRouter() *gin.Engine {
 			admin.Use(filter.LoginFilter())
 			// middleware JWT
 			admin.Use(jwt.JWT())
+			// middleware double validation
+			admin.Use(filter.DoubleValidation())
 
 			// apis
 			admin.PUT("/change-password", v1.AdminChangePassword)
