@@ -14,9 +14,11 @@ const (
 	INVALID_PARAMS Ecode = 1001
 
 	// admin related error
-	ERROR_ADMIN_NON_EXIST     Ecode = 1002
-	ERROR_ADMIN_INCORRECT_PWD Ecode = 1003
-	ERROR_ADMIN_ACCOUNT_EXIST Ecode = 1004
+	ERROR_ADMIN_NON_EXIST     Ecode = 10000
+	ERROR_ADMIN_INCORRECT_PWD Ecode = 10001
+	ERROR_ADMIN_ACCOUNT_EXIST Ecode = 10002
+	ERROR_ADMIN_LOGOUT        Ecode = 10003
+	ERROR_ADMIN_NOT_LOGIN     Ecode = 10004
 
 	ERROR_AUTH_NO_TOKEN            Ecode = 20000
 	ERROR_AUTH_CHECK_TOKEN_FAIL    Ecode = 20001
@@ -40,6 +42,10 @@ func StatusText(e Ecode) (res string) {
 		res = "管理员账号已注册"
 	case ERROR_ADMIN_INCORRECT_PWD:
 		res = "管理员密码输入错误"
+	case ERROR_ADMIN_LOGOUT:
+		res = "管理员非法登出请求/已登出"
+	case ERROR_ADMIN_NOT_LOGIN:
+		res = "管理员未登陆"
 	case INVALID_PARAMS:
 		res = "请求参数错误"
 	case ERROR_AUTH_NO_TOKEN:
