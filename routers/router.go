@@ -3,6 +3,7 @@ package routers
 import (
 	"delivery-backend/internal/setting"
 	"delivery-backend/middleware/jwt"
+	filter "delivery-backend/middleware/login"
 	"delivery-backend/routers/api"
 	v1 "delivery-backend/routers/api/v1"
 
@@ -21,37 +22,44 @@ func InitRouter() *gin.Engine {
 	r.Use(gin.Recovery())
 
 	gin.SetMode(setting.ServerSetting.RunMode)
+	// NOTE:注意更新文档
 
-	r.POST("/admin/login", api.AdminLogin)
+	// middleware redis session
+	store, err := redis.NewStore(
+		setting.RedisSetting.MaxIdle,
+		"tcp",
+		setting.RedisSetting.Host,
+		setting.RedisSetting.Password,
+		[]byte(setting.RedisSetting.Secret),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// session for admin usage
+	adminSession := sessions.Sessions("AdminSession", store)
+
+	r.POST("/admin/login", adminSession, api.AdminLogin)
+	r.POST("/admin/logout", adminSession, api.AdminLogout)
+
 	r.GET("/admin/auth", api.GetAuth)
 	r.POST("/admin/create", api.AdminCreate)
-	r.POST("/admin/delete", api.AdminDelete)
+	r.DELETE("/admin/delete", api.AdminDelete)
 
 	{
-		// TODO: 管理员修改密码
 		apiv1 := r.Group("/api/v1")
 
 		{
 			// admin group
 			admin := apiv1.Group("/admin")
-
+			// middleware session
+			admin.Use(adminSession)
+			// middleware allowed only when logged in
+			admin.Use(filter.LoginFilter())
 			// middleware JWT
 			admin.Use(jwt.JWT())
 
-			// middleware redis session
-			store, err := redis.NewStore(
-				setting.RedisSetting.MaxIdle,
-				"tcp",
-				setting.RedisSetting.Host,
-				setting.RedisSetting.Password,
-				[]byte(setting.RedisSetting.Secret),
-			)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			admin.Use(sessions.Sessions("AdminSession", store))
-			admin.GET("/change-password", v1.AdminChangePassword)
+			// apis
+			admin.PUT("/change-password", v1.AdminChangePassword)
 		}
 
 	}
