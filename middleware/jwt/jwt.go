@@ -26,8 +26,9 @@ func JWT() gin.HandlerFunc {
 			return
 		}
 
-		// SUCCESS, set account
-		c.Set("account", account)
+		// set jwt_account
+		c.Set("jwt_account", account)
+
 		// go to next handler
 		c.Next()
 	}

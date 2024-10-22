@@ -33,7 +33,35 @@ func GetAuth(c *gin.Context) {
 	app.Response(c, http.StatusOK, ecode.SUCCESS, res)
 }
 
+func AdminLogout(c *gin.Context) {
+	session := sessions.Default(c)
+	account := session.Get("account")
+	role := session.Get("role")
+
+	// 如果没有account, 本不应发送这个请求
+	if account == nil || role != "admin" {
+		app.Response(c, http.StatusOK, ecode.ERROR_ADMIN_LOGOUT, nil)
+		return
+	}
+
+	// this will mark the session as "written" only if there's
+	// at least one key to delete
+	session.Clear() // account to delete
+	session.Options(sessions.Options{MaxAge: -1})
+	session.Save()
+	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
+}
+
 func AdminLogin(c *gin.Context) {
+	session := sessions.Default(c)
+	session_account := session.Get("account")
+	session_role := session.Get("role")
+	if session_account != nil && session_role == "admin" {
+		// 如果已经登陆，那么利用session的期限直接认证即可
+		app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
+		return
+	}
+
 	account := c.PostForm("account")
 	password := c.PostForm("password")
 
@@ -41,11 +69,9 @@ func AdminLogin(c *gin.Context) {
 		return
 	}
 
-	// set in JWT middleware
-	account = c.MustGet("account").(string)
-
-	session := sessions.Default(c)
+	// set account and role
 	session.Set("account", account)
+	session.Set("role", "admin")
 	session.Save()
 
 	access_token := service.GetAdminAccessToken(account)

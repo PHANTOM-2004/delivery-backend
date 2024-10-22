@@ -8,18 +8,18 @@ import (
 	"delivery-backend/pkg/utils"
 	"net/http"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
 
 func AdminChangePassword(c *gin.Context) {
-	// 这里借助JWT进行鉴权，在中间件中，对于通过验证的请求
-	// 会在gin.Context之中设置 account
-	account := c.Query("account")
-	if account == "" {
-		app.Response(c, http.StatusInternalServerError, ecode.ERROR, nil)
-		log.Fatal("AdminChangePassword: account cannot be null string")
-    return
+	session := sessions.Default(c)
+	account := session.Get("account")
+	role := session.Get("role")
+	if account == nil || role != "admin" {
+		app.Response(c, http.StatusUnauthorized, ecode.ERROR_ADMIN_NOT_LOGIN, nil)
+		return
 	}
 
 	// Encrypt
@@ -28,7 +28,7 @@ func AdminChangePassword(c *gin.Context) {
 		"password": new_password,
 	}
 
-	err := models.EditAdmin(account, data)
+	err := models.EditAdmin(account.(string), data)
 	if err != nil {
 		// 在这里edit， 应当保证成功；因为数据库是存在的
 		app.Response(c, http.StatusInternalServerError, ecode.ERROR, nil)
