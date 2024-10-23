@@ -22,7 +22,53 @@
 sudo systemctl start mariadb redis
 ```
 
+### 启动项目
+
+在项目根目录下执行：
+
+```shell
+go run -v ./
+```
+
+### Docker
+
+为了方便环境的一致性，采用`docker`运行服务。
+- 注意修改`docker-compose.yml`的挂载目录
+- 注意修改配置文件的`redis`以及`mariadb`对应的`host`
+
+#### 启动全部服务
+
+注意进入`deploy/local`目录执行：
+
+```shell
+# docker-compose up -d
+```
+
+#### 关闭全部服务
+
+注意进入`deploy/local`目录执行：
+
+```shell
+# docker-compose down
+```
+
+#### 进入容器内部
+
+进入数据库对应的容器:
+
+```shell
+sudo docker exec -it test_mariadb /bin/bash
+```
+
+进入服务端对应的容器:
+
+```shell
+sudo docker exec -it test_mariadb /bin/bash
+```
+
 ### 接口文档
+
+项目根目录执行
 
 ```shell
 make
@@ -30,7 +76,7 @@ make
 
 通过`make`启动swagger服务，可以在浏览器中查看`api`文档。
 
-注意前置`swagger`，实际上在`Makefile`中也有检测与安装的规则.
+注意前置`swagger`，实际上在`Makefile`中也有检测与安装的规则。
 
 ```shell
 go install github.com/go-swagger/go-swagger/cmd/swagger
