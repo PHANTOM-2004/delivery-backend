@@ -13,7 +13,7 @@
 
 - `mariadb`
 - `redis`
-- `go > version 1.20`
+- `go > version 1.22`
 - `mkcert`
 - `go-swagger`
 
@@ -41,7 +41,7 @@ go run -v ./
 注意进入`deploy/local`目录执行：
 
 ```shell
-# docker-compose up -d
+docker-compose up -d
 ```
 
 #### 关闭全部服务
@@ -49,22 +49,60 @@ go run -v ./
 注意进入`deploy/local`目录执行：
 
 ```shell
-# docker-compose down
+docker-compose down
 ```
 
 #### 进入容器内部
 
-进入数据库对应的容器:
+可以直接从`docker-desktop`进入，像之前`miniob`那样。也可以从终端进入。
+
+从终端进入服务端对应的容器:
 
 ```shell
-sudo docker exec -it test_mariadb /bin/bash
+docker exec -it test_mariadb /bin/bash
 ```
 
-进入服务端对应的容器:
+进入后，注意我们挂载的目录是`/home/Projects`
 
 ```shell
-sudo docker exec -it test_mariadb /bin/bash
+cd /home/Projects && go run -v ./
 ```
+
+即可启动项目。
+
+
+如果希望查数据库表，也可以从终端进入数据库对应的容器(或者从`docker-desktop`进入):
+
+```shell
+docker exec -it test_go_service /bin/bash
+```
+
+在容器内部启动数据库客户端:
+
+```shell
+mariadb -u scarlet -p
+```
+
+然后输入密码, 注意密码不会有回显。默认密码是`2252707`。之后就是熟悉的`SQL-client`
+
+#### 网络问题
+
+理论上是一条命令解决的事情，但是难免在国内开发会有幽默网络问题。
+如果`docker`出现网络问题，来我这里拷贝镜像。然后执行:
+
+```shell
+# 代表把这三个镜像加载到你的本地
+docker load -i local-go_service.tar
+docker load -i mariadb.tar
+docker load -i redis.tar
+```
+
+之后操作和前面一样。
+
+#### 端口绑定问题
+
+如果在`docker`内部启动项目失败，出现`3306`端口占用。说明你安装过`mysql`,把他禁用即可。
+具体怎么禁用可以`Google`一下(很简单)。
 
 ### 接口文档
 
@@ -79,7 +117,7 @@ make
 注意前置`swagger`，实际上在`Makefile`中也有检测与安装的规则。
 
 ```shell
-go install github.com/go-swagger/go-swagger/cmd/swagger
+go install github.com/go-swagger/go-swagger/cmd/swagger@latest
 ```
 
 ### localhost SSL
