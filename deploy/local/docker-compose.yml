@@ -14,6 +14,8 @@ services:
       - "3306:3306"
     volumes:
       - test_mariadb_data:/var/lib/mysql
+      # 初始化db, 创建需要的表
+      - ../../scripts/db:/docker-entrypoint-initdb.d
 
   redis:
     image: redis:latest
@@ -44,7 +46,7 @@ services:
       - redis
     volumes:
       # 这里是我使用的目录
-      - /home/scarlet-arch/Projects/:/home/Projects
+      - /home/yt-chen/Projects/:/home/Projects
       # 例：./myapp:/app  # 将主机的 myapp 目录挂载到容器的 /app
       # 注意修改这里的挂载目录，直接把本地的目录挂载过去,
       # 就不需要在容器内部clone
