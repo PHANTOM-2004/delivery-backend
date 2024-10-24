@@ -1,6 +1,6 @@
 module delivery-backend
 
-go 1.23.2
+go 1.22.0
 
 require (
 	github.com/gin-contrib/sessions v1.0.1

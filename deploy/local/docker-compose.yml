@@ -1,0 +1,57 @@
+services:
+  mariadb:
+    image: mariadb:latest
+    container_name: test_mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: woshinidie
+      # 我们默认使用的数据库是TJ_SE
+      MYSQL_DATABASE: TJ_SE
+      # 默认用户scarlet
+      MYSQL_USER: scarlet
+      # 默认密码2252707
+      MYSQL_PASSWORD: 2252707
+    ports:
+      - "3306:3306"
+    volumes:
+      - test_mariadb_data:/var/lib/mysql
+      # 初始化db, 创建需要的表
+      - ../../scripts/db:/docker-entrypoint-initdb.d
+
+  redis:
+    image: redis:latest
+    container_name: test_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - test_redis_data:/data
+
+  go_service:
+    #为了让bash能够正常运行
+    tty: true
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: test_go_service
+    ports:
+      - "8080:8080"
+      # 默认给9000分配给测试端口
+      - "9000:9000"
+      # 默认启动的服务是8000端口
+      - "8000:8000"
+    environment:
+      # go的代理
+      GOPROXY: "https://goproxy.cn,direct"
+    depends_on:
+      - mariadb
+      - redis
+    volumes:
+      # 这里是我使用的目录
+      - /home/yt-chen/Projects/:/home/Projects
+      # 例：./myapp:/app  # 将主机的 myapp 目录挂载到容器的 /app
+      # 注意修改这里的挂载目录，直接把本地的目录挂载过去,
+      # 就不需要在容器内部clone
+    command: ["/bin/bash"]
+
+volumes:
+  test_mariadb_data:
+  test_redis_data:

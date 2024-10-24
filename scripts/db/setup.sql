@@ -1,16 +1,17 @@
 
 
 -- 创建数据库
-CREATE DATABASE TJ_SE;
+-- CREATE DATABASE TJ_SE;
 
 -- 创建一个user
-CREATE USER 'scarlet'@'localhost' IDENTIFIED BY '2252707';
+-- CREATE USER 'scarlet'@'localhost' IDENTIFIED BY '2252707';
 
 -- 赋予权限
-GRANT ALL PRIVILEGES ON TJ_SE.* TO 'scarlet'@'localhost';
+-- GRANT ALL PRIVILEGES ON TJ_SE.* TO 'scarlet'@'localhost';
 
 -- 建立管理员表
-create table delivery_admin(
+create table if not exists
+delivery_admin(
   `id` int auto_increment,
   `created_at` datetime not null,
   `updated_at` datetime not null,
