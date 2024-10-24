@@ -46,11 +46,10 @@ services:
       - redis
     volumes:
       # 这里是我使用的目录
-      - /home/yt-chen/Projects/:/home/Projects
+      - /home/scarlet-arch/Projects/SE-Delivery/delivery-corebackend:/home/Projects
       # 例：./myapp:/app  # 将主机的 myapp 目录挂载到容器的 /app
-      # 注意修改这里的挂载目录，直接把本地的目录挂载过去,
-      # 就不需要在容器内部clone
-    command: ["/bin/bash"]
+      # 注意修改这里的挂载目录，直接把本地的目录挂载过去,就不需要在容器内部clone
+    command: [ "/bin/bash" ]
 
 volumes:
   test_mariadb_data:
