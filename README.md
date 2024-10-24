@@ -16,18 +16,11 @@
 - `go > version 1.22`
 - `mkcert`
 - `go-swagger`
+- `docker-compose`
 
 ```shell
 #注意启动服务
 sudo systemctl start mariadb redis
-```
-
-### 启动项目
-
-在项目根目录下执行：
-
-```shell
-go run -v ./
 ```
 
 ### Docker
@@ -38,11 +31,14 @@ go run -v ./
 
 #### 启动全部服务
 
+前置：docker logged in
 注意进入`deploy/local`目录执行：
 
 ```shell
 docker-compose up -d
 ```
+如果该命令由于网络问题失败请见后文网络问题的解决方法，然后再执行此命令。
+
 
 #### 关闭全部服务
 
@@ -52,29 +48,49 @@ docker-compose up -d
 docker-compose down
 ```
 
+注意我们对于数据库使用的是持久化卷，再次启动数据库容器并不会丢失数据。
+这也导致，当上游更新数据库时，启动数据库并不会重新初始化，造成容器内数据库信息不同步;
+所以可以考虑删除卷,也就是关闭服务的时候加上`-v`参数。这样下次启动的时候就是全新的数据卷完成初始化。
+
+```shell
+docker-compose down -v
+```
+
+当然也可以手动删除卷
+
+```shell
+docker volume ls #查看有哪些卷
+docker volume rm volumeName #这里替换为对应的卷名称
+```
+
+如果说你数据库里边的数据还想保留(但是你不应当这么做，因为你完全可以在下次重新执行你上次的插入方法)所以先不考虑这个的解决方案。
+
 #### 进入容器内部
 
 可以直接从`docker-desktop`进入，像之前`miniob`那样。也可以从终端进入。
 
-从终端进入服务端对应的容器:
+- 从终端进入服务端对应的容器:
 
 ```shell
-docker exec -it test_mariadb /bin/bash
+docker exec -it test_go_service /bin/bash
 ```
 
 进入后，注意我们挂载的目录是`/home/Projects`
 
 ```shell
-cd /home/Projects && go run -v ./
+cd /home/Projects #进入项目根目录
+go run -v ./ #启动项目
 ```
 
-即可启动项目。
+目前来说，处于测试阶段，因此需要开发者手动启动，因为可能存在一些bug导致服务宕机。
+请测试者注意查看log信息。
 
+- 从终端进入数据库容器
 
 如果希望查数据库表，也可以从终端进入数据库对应的容器(或者从`docker-desktop`进入):
 
 ```shell
-docker exec -it test_go_service /bin/bash
+docker exec -it test_mariadb /bin/bash
 ```
 
 在容器内部启动数据库客户端:
