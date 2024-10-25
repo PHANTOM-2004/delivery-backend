@@ -1,5 +1,8 @@
+go_files = $(shell go list ./... | grep -v /vendor/)
 
-all: serve-swagger
+.PHONY: test format rundt run build
+
+default: rundt
 
 check-swagger:
 	@which swagger || (go install github.com/go-swagger/go-swagger/cmd/swagger@latest)
@@ -9,3 +12,20 @@ swagger: check-swagger
 
 serve-swagger: swagger
 	@swagger serve -F=swagger swagger.yaml
+
+format:
+	@go fmt $(go_files)
+
+test:
+	@go vet $(go_files)
+	@go test -race $(go_files)
+
+build:
+	@mkdir -p target
+	@go build -o target ./...
+
+run:
+	@go run -v . --LocalDebug
+
+rundt:
+	@go run -v . --DockerTest
