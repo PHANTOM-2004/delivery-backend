@@ -1,3 +1,6 @@
+go_files = $(shell go list ./... | grep -v /vendor/)
+
+.PHONY: test format
 
 all: serve-swagger
 
@@ -9,3 +12,11 @@ swagger: check-swagger
 
 serve-swagger: swagger
 	@swagger serve -F=swagger swagger.yaml
+
+format:
+	@go fmt $(go_files)
+
+test:
+	@go vet $(go_files)
+	@go test -race $(go_files)
+

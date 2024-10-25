@@ -1,5 +1,10 @@
 # swagger
 swagger.yaml
+
+# build dirs
+build/
+target/
+
 # local CA
 *.pem
 
