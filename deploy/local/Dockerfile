@@ -7,6 +7,6 @@ RUN  dnf install -y \
     make \ 
     golang 
 
-EXPOSE 80 8000 8080 9000 3306 6379
+EXPOSE 80 8000 8080 9000
 
 CMD ["/bin/bash"]
