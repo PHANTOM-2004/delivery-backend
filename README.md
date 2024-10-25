@@ -88,8 +88,12 @@ docker exec -it test_go_service /bin/bash
 因此直接运行：
 
 ```shell
-go run -v . --dockertest  #启动项目
+make
+# 或者也可以make rundt, 显然前者更方便
 ```
+
+如果希望停止运行, 直接按下`CTRL+C`。
+
 
 如果离开了工作目录, 可以通过如下面命令返回工作目录：
 
@@ -115,6 +119,12 @@ mariadb -u scarlet -p
 ```
 
 然后输入密码, 注意密码不会有回显。默认密码是`2252707`。之后就是熟悉的`SQL-client`
+
+> 对于任何容器的退出，在容器内部输入
+
+```shell
+exit
+```
 
 #### 网络问题
 
