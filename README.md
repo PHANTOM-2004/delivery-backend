@@ -11,34 +11,43 @@
 
 ### Prerequisite
 
+#### Local Debug
+
 - `mariadb`
 - `redis`
 - `go > version 1.22`
 - `mkcert`
 - `go-swagger`
-- `docker-compose`
 
-```shell
-#注意启动服务
-sudo systemctl start mariadb redis
-```
+#### Using Docker
+
+- `go-swagger`(optional)
+- `mkcert`
+- `docker-compose`
 
 ### Docker
 
 为了方便环境的一致性，采用`docker`运行服务。
-- 注意修改`docker-compose.yml`的挂载目录
-- 注意修改配置文件的`redis`以及`mariadb`对应的`host`
+
+- <del>注意修改`docker-compose.yml`的挂载目录</del>
+- <del>注意修改配置文件的`redis`以及`mariadb`对应的`host`</del>
+
+经过配置优化，使用给定的默认配置即可，没有必要再修改配置文件。只需要保证自己的`docker`已经登陆，可以通过如下命令进行验证。
+
+```shell
+docker login
+```
+
 
 #### 启动全部服务
 
-前置：docker logged in
 注意进入`deploy/local`目录执行：
 
 ```shell
 docker-compose up -d
 ```
-如果该命令由于网络问题失败请见后文网络问题的解决方法，然后再执行此命令。
 
+如果该命令由于网络问题失败请见后文网络问题的解决方法，然后再执行此命令。
 
 #### 关闭全部服务
 
@@ -48,7 +57,7 @@ docker-compose up -d
 docker-compose down
 ```
 
-注意我们对于数据库使用的是持久化卷，再次启动数据库容器并不会丢失数据。
+PS:我们对于数据库使用的是持久化卷，再次启动数据库容器并不会丢失数据。
 这也导致，当上游更新数据库时，启动数据库并不会重新初始化，造成容器内数据库信息不同步;
 所以可以考虑删除卷,也就是关闭服务的时候加上`-v`参数。这样下次启动的时候就是全新的数据卷完成初始化。
 
@@ -75,11 +84,17 @@ docker volume rm volumeName #这里替换为对应的卷名称
 docker exec -it test_go_service /bin/bash
 ```
 
-进入后，注意我们挂载的目录是`/home/Projects`
+进入后，注意我们挂载的目录是`/home/Projects`，我们启动后默认工作区正是这个目录。
+因此直接运行：
 
 ```shell
-cd /home/Projects #进入项目根目录
-go run -v ./ #启动项目
+go run -v . --dockertest  #启动项目
+```
+
+如果离开了工作目录, 可以通过如下面命令返回工作目录：
+
+```shell
+cd $PROJECT
 ```
 
 目前来说，处于测试阶段，因此需要开发者手动启动，因为可能存在一些bug导致服务宕机。
@@ -108,17 +123,14 @@ mariadb -u scarlet -p
 
 ```shell
 # 代表把这三个镜像加载到你的本地
-docker load -i local-go_service.tar
+# 注意名字，需要与镜像的名字保持一致
+docker load -i golang.tar
 docker load -i mariadb.tar
 docker load -i redis.tar
 ```
 
 之后操作和前面一样。
 
-#### 端口绑定问题
-
-如果在`docker`内部启动项目失败，出现`3306`端口占用。说明你安装过`mysql`,把他禁用即可。
-具体怎么禁用可以`Google`一下(很简单)。
 
 ### 接口文档
 

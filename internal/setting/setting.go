@@ -2,6 +2,8 @@ package setting
 
 import (
 	"delivery-backend/pkg/utils"
+	"os"
+	"strings"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -55,8 +57,6 @@ type Redis struct {
 
 var cfg *ini.File
 
-const conf_path = "conf/app.ini"
-
 var (
 	DatabaseSetting = &Database{}
 	RedisSetting    = &Redis{}
@@ -66,13 +66,41 @@ var (
 	LogSetting      = &Log{}
 )
 
-func Setup() {
+const FallbackPreset = "localdebug"
+
+var Preset = map[string]string{
+	"localdebug": "conf/app.ini",
+	"dockertest": "conf/app_test_docker.ini",
+}
+
+func parseConfigModeSetting() {
+	n := len(os.Args)
+	preset := FallbackPreset
+	if n <= 1 {
+		// 没有给出多余参数
+		log.Warnf("No preset given, fallback:[%s]", FallbackPreset)
+	} else {
+		// trim the leading --
+		preset = strings.TrimPrefix(os.Args[1], "--")
+	}
+
+	preset = strings.ToLower(preset)
+	path, ok := Preset[preset]
+	if !ok {
+		log.Fatalf("Unknown preset given, supported: %v", Preset)
+	}
+
 	var err error
-	cfg, err = ini.Load(conf_path)
+	cfg, err = ini.Load(path)
 	if err != nil {
 		log.Println(err)
-		log.Fatalf("Failed to parse [%s]", conf_path)
+		log.Fatalf("Failed to parse [%s]", path)
 	}
+}
+
+func Setup() {
+	// 首先确定模式
+	parseConfigModeSetting()
 
 	parseLogSetting()
 	parseServerSetting()
