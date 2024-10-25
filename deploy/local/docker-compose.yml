@@ -10,8 +10,6 @@ services:
       MYSQL_USER: scarlet
       # 默认密码2252707
       MYSQL_PASSWORD: 2252707
-    ports:
-      - "3306:3306"
     volumes:
       - test_mariadb_data:/var/lib/mysql
       # 初始化db, 创建需要的表
@@ -20,17 +18,14 @@ services:
   redis:
     image: redis:latest
     container_name: test_redis
-    ports:
-      - "6379:6379"
     volumes:
       - test_redis_data:/data
 
   go_service:
     #为了让bash能够正常运行
     tty: true
-    build:
-      context: .
-      dockerfile: Dockerfile
+    # 直接考虑改用golang官方镜像,不再使用fedora
+    image: golang:latest
     container_name: test_go_service
     ports:
       - "8080:8080"
@@ -41,15 +36,18 @@ services:
     environment:
       # go的代理
       GOPROXY: "https://goproxy.cn,direct"
+      PROJECT: /home/Projects
     depends_on:
       - mariadb
       - redis
+    # 默认工作区为项目目录
+    working_dir: /home/Projects
     volumes:
-      # 这里是我使用的目录
-      - /home/scarlet-arch/Projects/SE-Delivery/delivery-corebackend:/home/Projects
+      #这里默认直接把项目根目录挂载
+      - ../../:/home/Projects
       # 例：./myapp:/app  # 将主机的 myapp 目录挂载到容器的 /app
       # 注意修改这里的挂载目录，直接把本地的目录挂载过去,就不需要在容器内部clone
-    command: [ "/bin/bash" ]
+    command: ["/bin/bash"]
 
 volumes:
   test_mariadb_data:
