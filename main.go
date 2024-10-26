@@ -29,12 +29,13 @@ func LaunchServer() {
 		MaxHeaderBytes: 1 << 20,
 	}
 	log.Infof("listening port[%d]", setting.ServerSetting.HTTPPort)
-	certFile := setting.ServerSetting.SSLCertPath
-	keyFile := setting.ServerSetting.SSLKeyPath
-	err := s.ListenAndServeTLS(certFile, keyFile)
-	if err != nil {
-		log.Fatal(err)
-	}
+	s.ListenAndServe()
+	// certFile := setting.ServerSetting.SSLCertPath
+	// keyFile := setting.ServerSetting.SSLKeyPath
+	// err := s.ListenAndServeTLS(certFile, keyFile)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 }
 
 func main() {

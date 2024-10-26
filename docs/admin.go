@@ -40,7 +40,7 @@ type AccessToken struct {
 // 200: COMMON
 
 //=============================================================
-// swagger:route POST /admin/login admin admin_login
+// swagger:route POST /admin/login admin-session admin_login
 // 登入的身份认证
 // PS: 通过postform发送参数, 否则会认证错误
 // responses:
@@ -61,14 +61,14 @@ type AccessToken struct {
 // 200: COMMON
 
 // =============================================================
-// swagger:route POST /admin/logout admin admin_logout
+// swagger:route POST /admin/logout admin-session admin_logout
 // 注销管理员账户
 // 在非法请求发出时（管理员不处于登入状态）会返回错误信息。
 // responses:
 // 200: COMMON
 
 // =============================================================
-// swagger:route POST /api/v1/admin/change-password v1 admin_change_password
+// swagger:route POST /admin/change-password admin-session admin_change_password
 // 管理员修改密码
 // 在非法请求发出时（管理员不处于登入状态）会返回错误信息。
 // PS: 调用api时，access_token + session 双重认证

@@ -36,35 +36,32 @@ func InitRouter() *gin.Engine {
 		log.Fatal(err)
 	}
 	// session for admin usage
-	adminSession := sessions.Sessions("AdminSession", store)
-
-	r.POST("/admin/login", adminSession, api.AdminLogin)
-	r.POST("/admin/logout", adminSession, api.AdminLogout)
-
-	r.GET("/admin/auth", api.GetAuth)
-	r.POST("/admin/create", api.AdminCreate)
-	r.DELETE("/admin/delete", api.AdminDelete)
+	admin_session_handler := sessions.Sessions("AdminSession", store)
+  // admin group, for vue3 usage
+	admin := r.Group("/admin")
+  // admin api 
+	admin.POST("/login", admin_session_handler, api.AdminLogin)
+	admin.POST("/logout", admin_session_handler, api.AdminLogout)
+	admin.GET("/auth", api.GetAuth)
+	admin.POST("/create", api.AdminCreate)
+	admin.DELETE("/delete", api.AdminDelete)
 
 	{
-		apiv1 := r.Group("/api/v1")
+		// admin group
+		admin_session := admin.Group("/session")
+		// middleware session
+		admin_session.Use(admin_session_handler)
+		// middleware allowed only when logged in
+		admin_session.Use(filter.LoginFilter())
+		// middleware JWT
+		admin_session.Use(jwt.JWT())
+		// middleware double validation
+		admin_session.Use(filter.DoubleValidation())
 
-		{
-			// admin group
-			admin := apiv1.Group("/admin")
-			// middleware session
-			admin.Use(adminSession)
-			// middleware allowed only when logged in
-			admin.Use(filter.LoginFilter())
-			// middleware JWT
-			admin.Use(jwt.JWT())
-			// middleware double validation
-			admin.Use(filter.DoubleValidation())
-
-			// apis
-			admin.PUT("/change-password", v1.AdminChangePassword)
-		}
-
+		// apis
+		admin_session.PUT("/change-password", v1.AdminChangePassword)
 	}
 
+	// apiv1 := r.Group("/api/v1")
 	return r
 }
