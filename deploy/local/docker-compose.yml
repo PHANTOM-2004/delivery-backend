@@ -27,7 +27,7 @@ services:
       - go_service
     container_name: test_nginx
     ports:
-      # 暴露443端口
+      # 暴露443端口, used by https
       - 443:443
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro # 挂载 Nginx 配置文件
@@ -39,10 +39,10 @@ services:
   node:
     tty: true
     image: node:alpine
-    container_name: test_node
+    container_name: test_vue3_service
     environment:
       # 设置npm源
-      - NPM_CONFIG_REGISTRY=https://registry.npmmirror.com
+      NPM_CONFIG_REGISTRY : https://registry.npmmirror.com
     volumes:
       # 挂载对应的项目根目录
       # ../../ 是后端项目根目录
