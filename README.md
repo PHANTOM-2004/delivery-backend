@@ -78,7 +78,7 @@ docker volume rm volumeName #这里替换为对应的卷名称
 
 可以直接从`docker-desktop`进入，像之前`miniob`那样。也可以从终端进入。
 
-- 从终端进入服务端对应的容器:
+- **从终端进入`golang`服务端对应的容器:**
 
 ```shell
 docker exec -it test_go_service /bin/bash
@@ -104,7 +104,7 @@ cd $PROJECT
 目前来说，处于测试阶段，因此需要开发者手动启动，因为可能存在一些bug导致服务宕机。
 请测试者注意查看log信息。
 
-- 从终端进入数据库容器
+- **从终端进入`mariadb`数据库容器**
 
 如果希望查数据库表，也可以从终端进入数据库对应的容器(或者从`docker-desktop`进入):
 
@@ -120,11 +120,16 @@ mariadb -u scarlet -p
 
 然后输入密码, 注意密码不会有回显。默认密码是`2252707`。之后就是熟悉的`SQL-client`
 
-> 对于任何容器的退出，在容器内部输入
+- **从终端进入`node`容器:**
 
 ```shell
-exit
+docker exec -it test_vue3_service /bin/sh
 ```
+
+进入后就是项目根目录，之后干什么就不用我说了。
+
+
+> PS:对于任何容器的退出，在容器内部输入`exit`
 
 #### 网络问题
 
@@ -137,9 +142,12 @@ exit
 docker load -i golang.tar
 docker load -i mariadb.tar
 docker load -i redis.tar
+...
 ```
 
 之后操作和前面一样。
+
+**PS: 我不想管网络问题了，自己解决去，现在用到的镜像越来越多了。**
 
 
 ### 接口文档
