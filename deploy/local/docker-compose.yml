@@ -22,7 +22,9 @@ services:
       - test_redis_data:/data
 
   nginx:
-    image: nginx:latest
+    image: nginx:mainline-alpine-slim
+    depends_on:
+      - go_service
     container_name: test_nginx
     ports:
       # 暴露443端口
@@ -32,15 +34,18 @@ services:
       # 挂载 SSL 证书
       - ../../localhost-cert.pem:/etc/nginx/certs/localhost-cert.pem:ro
       - ../../localhost-key.pem:/etc/nginx/certs/localhost-key.pem:ro
+    working_dir: /etc/nginx
 
   node:
     tty: true
     image: node:alpine
     container_name: test_node
     environment:
-      - NPM_CONFIG_REGISTRY=https://registry.npm.taobao.org
+      # 设置npm源
+      - NPM_CONFIG_REGISTRY=https://registry.npmmirror.com
     volumes:
       # 挂载对应的项目根目录
+      # ../../ 是后端项目根目录
       - ../../../delivery-adminpanel:/AdminPanel
       # 工作目录也就是项目目录
     working_dir: /AdminPanel
@@ -56,7 +61,6 @@ services:
       GOPROXY: "https://goproxy.cn,direct"
       PROJECT: /home/Projects
     depends_on:
-      - nginx
       - mariadb
       - redis
     # 默认工作区为项目目录
