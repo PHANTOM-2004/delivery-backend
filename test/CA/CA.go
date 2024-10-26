@@ -38,13 +38,14 @@ func LaunchServer() {
 		MaxHeaderBytes: 1 << 20,
 	}
 	// s.ListenAndServe()
-	certFile := setting.TestSetting.LocalhostCertPath
-	keyFile := setting.TestSetting.LocalhostKeyPath
-	log.Infof("test server for HTTPS test launching")
-	log.Infof("listening port[%d]", setting.TestSetting.HTTPPort)
-
-	err := s.ListenAndServeTLS(certFile, keyFile)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// certFile := setting.TestSetting.LocalhostCertPath
+	// keyFile := setting.TestSetting.LocalhostKeyPath
+	// log.Infof("test server for HTTPS test launching")
+	// log.Infof("listening port[%d]", setting.TestSetting.HTTPPort)
+	//
+  s.ListenAndServe()
+	// err := s.ListenAndServeTLS(certFile, keyFile)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 }
