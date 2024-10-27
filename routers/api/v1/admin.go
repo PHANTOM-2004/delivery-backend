@@ -6,6 +6,7 @@ import (
 	"delivery-backend/internal/setting"
 	"delivery-backend/models"
 	"delivery-backend/pkg/utils"
+	"delivery-backend/service"
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
@@ -22,8 +23,14 @@ func AdminChangePassword(c *gin.Context) {
 		return
 	}
 
+	// 新密码, 首先进行校验
+	origin_new_pwd := c.PostForm("password")
+	if v := service.AccountValidate(account.(string), origin_new_pwd, c); !v {
+		return
+	}
+
 	// Encrypt
-	new_password := utils.Encrypt(c.Query("new_password"), setting.AppSetting.Salt)
+	new_password := utils.Encrypt(origin_new_pwd, setting.AppSetting.Salt)
 	data := map[string]any{
 		"password": new_password,
 	}

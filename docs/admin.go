@@ -32,6 +32,13 @@ type AccessToken struct {
 	AccessToken string `json:"access_token"`
 }
 
+// swagger:parameters  admin_create
+type AdminName struct {
+  // 管理员姓名, 最小长度2, 最大长度20
+  // required: true
+	AdminName string `json:"admin_name"`
+}
+
 //=============================================================
 // swagger:route GET /admin/auth admin admin_auth
 // JWT, 请求获得access_token
@@ -42,7 +49,7 @@ type AccessToken struct {
 //=============================================================
 // swagger:route POST /admin/login admin-session admin_login
 // 登入的身份认证
-// PS: 通过postform发送参数, 否则会认证错误
+// PS: 通过postform发送参数, 否则会认证错误. 成功时会返回access_token.
 // responses:
 // 200: COMMON
 
@@ -71,6 +78,7 @@ type AccessToken struct {
 // swagger:route POST /admin/change-password admin-session admin_change_password
 // 管理员修改密码
 // 在非法请求发出时（管理员不处于登入状态）会返回错误信息。
-// PS: 调用api时，access_token + session 双重认证
+// PS: 调用api时，access_token + session 双重认证。
+// 注意通过postform形式传递密码, 不要使用url传参。
 // responses:
 // 200: COMMON
