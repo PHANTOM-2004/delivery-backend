@@ -4,6 +4,7 @@ swagger.yaml
 # build dirs
 build/
 target/
+.idea/
 
 # local CA
 *.pem

@@ -69,6 +69,7 @@ services:
       - redis
     # 默认工作区为项目目录
     working_dir: /home/Projects
+    command: sh -c "make"
     volumes:
       #这里默认直接把项目根目录挂载
       - ../../:/home/Projects
