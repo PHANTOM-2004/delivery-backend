@@ -126,7 +126,7 @@ mariadb -u scarlet -p
 docker exec -it test_vite_service /bin/sh
 ```
 
-PS: 这里默认已经启动了项目，所以无需自己再手动启动。
+PS: 这里默认已经启动了项目，所以无需自己再手动启动。默认启动的时候没有`npm install`，如果报错进入容器进行`npm install`即可。
 
 为了保证`docker`中正确反向代理接受请求，请添加配置:
 
