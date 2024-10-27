@@ -123,10 +123,39 @@ mariadb -u scarlet -p
 - **从终端进入`node`容器:**
 
 ```shell
-docker exec -it test_vue3_service /bin/sh
+docker exec -it test_vite_service /bin/sh
 ```
 
-进入后就是项目根目录，之后干什么就不用我说了。
+PS: 这里默认已经启动了项目，所以无需自己再手动启动。
+
+为了保证`docker`中正确反向代理接受请求，请添加配置:
+
+```javascript
+// vite.config.ts
+export default defineConfig({
+  server: {
+    host: "0.0.0.0",
+    // 其他配置
+  },
+  ...
+})
+```
+
+为了确保在 Docker 开发环境中 HMR（热模块替换）正常工作，你需要在 vite.config.ts 文件中配置 server.watch，启用 usePolling。这样可以让 Vite 在 Docker 环境下及时检测到文件变化。以下是具体的配置示例：
+
+```javascript
+// vite.config.ts
+export default {
+  server: {
+    watch: {
+      usePolling: true, // 启用轮询
+    },
+  },
+};
+```
+
+注意，启用 usePolling 可能会影响性能，特别是在文件数量较多时。
+如果你在其他环境中运行而不需要此功能，可以保持该选项关闭。这样可以在修改源码后，确保你能立即看到效果。
 
 
 > PS:对于任何容器的退出，在容器内部输入`exit`

@@ -25,6 +25,7 @@ services:
     image: nginx:mainline-alpine-slim
     depends_on:
       - go_service
+      - vue_service
     container_name: test_nginx
     ports:
       # 暴露443端口, used by https
@@ -36,19 +37,20 @@ services:
       - ../../localhost-key.pem:/etc/nginx/certs/localhost-key.pem:ro
     working_dir: /etc/nginx
 
-  node:
+  vue_service:
     tty: true
     image: node:alpine
-    container_name: test_vue3_service
+    container_name: test_vite_service
     environment:
       # 设置npm源
-      NPM_CONFIG_REGISTRY : https://registry.npmmirror.com
+      NPM_CONFIG_REGISTRY: https://registry.npmmirror.com
     volumes:
       # 挂载对应的项目根目录
       # ../../ 是后端项目根目录
       - ../../../delivery-adminpanel:/AdminPanel
       # 工作目录也就是项目目录
     working_dir: /AdminPanel
+    command: sh -c "npm install && npm run dev"
 
   go_service:
     #为了让bash能够正常运行
@@ -70,7 +72,9 @@ services:
       - ../../:/home/Projects
       # 例：./myapp:/app  # 将主机的 myapp 目录挂载到容器的 /app
       # 注意修改这里的挂载目录，直接把本地的目录挂载过去,就不需要在容器内部clone
+      - test_go_cache:/go/pkg/mod # 缓存go cache快速启动
 
 volumes:
   test_mariadb_data:
   test_redis_data:
+  test_go_cache:

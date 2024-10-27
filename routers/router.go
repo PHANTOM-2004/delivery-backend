@@ -37,7 +37,7 @@ func InitRouter() *gin.Engine {
 	}
 	// session for admin usage
 	admin_session_handler := sessions.Sessions("AdminSession", store)
-  // admin group, for vue3 usage
+  // admin group, for vite usage
 	admin := r.Group("/admin")
   // admin api 
 	admin.POST("/login", admin_session_handler, api.AdminLogin)
