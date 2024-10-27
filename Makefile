@@ -2,7 +2,17 @@ go_files = $(shell go list ./... | grep -v /vendor/)
 
 .PHONY: test format rundt run build
 
-default: rundt
+# 检查环境变量，设置默认目标
+ifeq ($(GO_SERVICE_ENV),DOCKER_TEST)
+    DEFAULT_GOAL := rundt
+else
+    DEFAULT_GOAL := run
+endif
+
+# 如果没有指定目标，则将默认目标设置为 DEFAULT_GOAL
+ifeq ($(MAKECMDGOALS),)
+    .DEFAULT_GOAL := $(DEFAULT_GOAL)
+endif
 
 check-swagger:
 	@which swagger || (go install github.com/go-swagger/go-swagger/cmd/swagger@latest)

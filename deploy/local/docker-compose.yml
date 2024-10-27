@@ -62,6 +62,8 @@ services:
       # go的代理
       GOPROXY: "https://goproxy.cn,direct"
       PROJECT: /home/Projects
+      # project env for make
+      GO_SERVICE_ENV: DOCKER_TEST
     depends_on:
       - mariadb
       - redis
