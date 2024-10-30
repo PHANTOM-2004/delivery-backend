@@ -43,7 +43,7 @@ func LaunchServer() {
 	// log.Infof("test server for HTTPS test launching")
 	// log.Infof("listening port[%d]", setting.TestSetting.HTTPPort)
 	//
-  s.ListenAndServe()
+	s.ListenAndServe()
 	// err := s.ListenAndServeTLS(certFile, keyFile)
 	// if err != nil {
 	// 	log.Fatal(err)

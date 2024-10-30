@@ -25,7 +25,7 @@ type SuperToken struct {
 	SuperToken string `json:"super_token"`
 }
 
-// swagger:parameters  admin_change_password
+// [UNUSED swagger]:parameters  admin_change_password
 type AccessToken struct {
 	// 部分api调用的token
 	// required: true
@@ -34,8 +34,8 @@ type AccessToken struct {
 
 // swagger:parameters  admin_create
 type AdminName struct {
-  // 管理员姓名, 最小长度2, 最大长度20
-  // required: true
+	// 管理员姓名, 最小长度2, 最大长度20
+	// required: true
 	AdminName string `json:"admin_name"`
 }
 
@@ -49,7 +49,17 @@ type AdminName struct {
 //=============================================================
 // swagger:route POST /admin/login admin-session admin_login
 // 登入的身份认证
-// PS: 通过postform发送参数, 否则会认证错误. 成功时会返回access_token.
+// PS: 通过postform发送参数, 否则会认证错误.
+// responses:
+// 200: COMMON
+//
+
+//=============================================================
+// swagger:route GET /admin/session/login-status admin-session admin_login_status
+// 请求管理员的登陆状态
+// (1) 如果登陆，同时会返回已登录的account，data字段中有一个key为account
+// (2) 在判断httpcode的基础上(httpcode != 401)，只需要判断业务逻辑码是否是SUCCESS即可,不存在error时意味着处于登录状态
+// (3) 可能存在角色错误或者未登陆的错误码
 // responses:
 // 200: COMMON
 
@@ -68,17 +78,16 @@ type AdminName struct {
 // 200: COMMON
 
 // =============================================================
-// swagger:route POST /admin/logout admin-session admin_logout
+// swagger:route POST /admin/session/logout admin-session admin_logout
 // 注销管理员账户
 // 在非法请求发出时（管理员不处于登入状态）会返回错误信息。
 // responses:
 // 200: COMMON
 
 // =============================================================
-// swagger:route POST /admin/change-password admin-session admin_change_password
+// swagger:route PUT /admin/session/change-password admin-session admin_change_password
 // 管理员修改密码
 // 在非法请求发出时（管理员不处于登入状态）会返回错误信息。
-// PS: 调用api时，access_token + session 双重认证。
-// 注意通过postform形式传递密码, 不要使用url传参。
+// PS: 通过postform形式传递密码, 不要使用url传参。
 // responses:
 // 200: COMMON
