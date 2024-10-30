@@ -11,8 +11,13 @@ package api
 import (
 	"delivery-backend/internal/app"
 	"delivery-backend/internal/ecode"
+	"delivery-backend/internal/setting"
+	"delivery-backend/models"
+	"delivery-backend/pkg/utils"
 	"delivery-backend/service"
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -34,31 +39,15 @@ func GetAuth(c *gin.Context) {
 }
 
 func AdminLoginStatus(c *gin.Context) {
-	session := sessions.Default(c)
-	account := session.Get("account")
-	role := session.Get("role")
-	if account == nil || role != "admin" {
-		app.Response(c, http.StatusOK, ecode.ERROR_ADMIN_NOT_LOGIN, nil)
-		return
+	account, _ := c.Get("session_account")
+	res := map[string]string{
+		"account": account.(string),
 	}
-	if role != "admin" {
-		app.Response(c, http.StatusOK, ecode.ERROR_ADMIN_ROLE, nil)
-		return
-	}
-	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
+	app.Response(c, http.StatusOK, ecode.SUCCESS, res)
 }
 
 func AdminLogout(c *gin.Context) {
 	session := sessions.Default(c)
-	account := session.Get("account")
-	role := session.Get("role")
-
-	// 如果没有account, 本不应发送这个请求
-	if account == nil || role != "admin" {
-		app.Response(c, http.StatusOK, ecode.ERROR_ADMIN_LOGOUT, nil)
-		return
-	}
-
 	// this will mark the session as "written" only if there's
 	// at least one key to delete
 	session.Clear() // account to delete
@@ -89,10 +78,36 @@ func AdminLogin(c *gin.Context) {
 	session.Set("role", "admin")
 	session.Save()
 
-	// NOTE:返回 access_token
+	// NOTE:
 	// 不必考虑session id的问题，gin-session作为中间件自动管理session,
 	// 但是需要注意，这里的自动管理是基于cookie的，也就是说
 	// 对于之后的小程序业务，就不能使用gin-session了
+
+	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
+}
+
+func AdminChangePassword(c *gin.Context) {
+	account, _ := c.Get("session_account")
+
+	// 新密码, 首先进行校验
+	origin_new_pwd := c.PostForm("password")
+	if v := service.AccountValidate(account.(string), origin_new_pwd, c); !v {
+		return
+	}
+
+	// Encrypt
+	new_password := utils.Encrypt(origin_new_pwd, setting.AppSetting.Salt)
+	data := map[string]any{
+		"password": new_password,
+	}
+
+	err := models.EditAdmin(account.(string), data)
+	if err != nil {
+		// 在这里edit， 应当保证成功；因为数据库是存在的
+		app.Response(c, http.StatusInternalServerError, ecode.ERROR, nil)
+		log.Warn("Password Update Failure[internal]")
+		return
+	}
 
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
 }
