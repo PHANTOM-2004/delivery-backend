@@ -33,6 +33,21 @@ func GetAuth(c *gin.Context) {
 	app.Response(c, http.StatusOK, ecode.SUCCESS, res)
 }
 
+func AdminLoginStatus(c *gin.Context) {
+	session := sessions.Default(c)
+	account := session.Get("account")
+	role := session.Get("role")
+	if account == nil || role != "admin" {
+		app.Response(c, http.StatusOK, ecode.ERROR_ADMIN_NOT_LOGIN, nil)
+		return
+	}
+	if role != "admin" {
+		app.Response(c, http.StatusOK, ecode.ERROR_ADMIN_ROLE, nil)
+		return
+	}
+	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
+}
+
 func AdminLogout(c *gin.Context) {
 	session := sessions.Default(c)
 	account := session.Get("account")
@@ -74,14 +89,10 @@ func AdminLogin(c *gin.Context) {
 	session.Set("role", "admin")
 	session.Save()
 
-	access_token := service.GetAdminAccessToken(account)
 	// NOTE:返回 access_token
 	// 不必考虑session id的问题，gin-session作为中间件自动管理session,
 	// 但是需要注意，这里的自动管理是基于cookie的，也就是说
 	// 对于之后的小程序业务，就不能使用gin-session了
-	res := map[string]any{
-		"access_token": access_token,
-	}
 
-	app.Response(c, http.StatusOK, ecode.SUCCESS, res)
+	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
 }

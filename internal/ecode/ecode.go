@@ -19,7 +19,7 @@ const (
 	ERROR_ADMIN_ACCOUNT_EXIST Ecode = 10002
 	ERROR_ADMIN_LOGOUT        Ecode = 10003
 	ERROR_ADMIN_NOT_LOGIN     Ecode = 10004
-	ERROR_ADMIN_DOUBLE_AUTH   Ecode = 10005
+	ERROR_ADMIN_ROLE          Ecode = 10005
 
 	ERROR_AUTH_NO_TOKEN            Ecode = 20000
 	ERROR_AUTH_CHECK_TOKEN_FAIL    Ecode = 20001
@@ -47,8 +47,8 @@ func StatusText(e Ecode) (res string) {
 		res = "管理员非法登出请求/已登出"
 	case ERROR_ADMIN_NOT_LOGIN:
 		res = "管理员未登陆"
-	case ERROR_ADMIN_DOUBLE_AUTH:
-		res = "管理员双重认证失败"
+	case ERROR_ADMIN_ROLE:
+		res = "管理员身份错误"
 	case INVALID_PARAMS:
 		res = "请求参数错误"
 	case ERROR_AUTH_NO_TOKEN:
