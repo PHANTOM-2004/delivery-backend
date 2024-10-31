@@ -79,7 +79,7 @@ func StatusText(e Ecode) (res string) {
 	case ERROR_SUPER_AUTH_NO_TOKEN:
 		res = "super_token未提供"
 	default:
-		log.Fatalf("未知错误码[%d]", e)
+		log.Panicf("未知错误码[%d]", e)
 	}
 	return
 }

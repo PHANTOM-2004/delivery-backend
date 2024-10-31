@@ -8,8 +8,9 @@ import (
 
 func Response(c *gin.Context, httpCode int, errCode ecode.Ecode, data any) {
 	c.JSON(httpCode, gin.H{
-		"code": httpCode,
-		"msg":  ecode.StatusText(errCode),
-		"data": data,
+		"code":  httpCode,
+		"ecode": errCode,
+		"msg":   ecode.StatusText(errCode),
+		"data":  data,
 	})
 }
