@@ -26,33 +26,7 @@ import (
 func GetAuth(c *gin.Context) {
 	// 通过refresh_token, 获得access_token
 	//
-	// cookie中读取refresh_token
-	refresh_token, err := c.Cookie("refresh_token")
-	if errors.Is(err, http.ErrNoCookie) {
-		app.Response(c, http.StatusOK, ecode.ERROR_AUTH_NO_REFRESH_TOKEN, nil)
-		return
-	}
-
-	log.Debug("pass: refresh_token exists")
-
-	// 校验refresh token
-	account, code := service.AuthAdminRefreshToken(refresh_token)
-	if code != ecode.SUCCESS {
-		app.Response(c, http.StatusOK, code, nil)
-		return
-	}
-
-	log.Debug("pass: refresh_token validation")
-
-	// 检查refresh token是否在黑名单中
-	valid := service.ValidateAdminToken(refresh_token)
-	if !valid {
-		app.Response(c, http.StatusOK, ecode.ERROR_AUTH_REFRESH_TOKEN_EXPIRED, nil)
-		c.Abort()
-		return
-	}
-
-	log.Debug("pass: refresh_token not in blacklist")
+	account := c.GetString("jwt_account")
 
 	// 提供access_token
 	access_token := service.GetAdminAccessToken(account)

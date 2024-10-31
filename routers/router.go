@@ -39,24 +39,37 @@ func InitRouter() *gin.Engine {
 
 	// admin group, for vite usage
 	admin := r.Group("/admin")
+
 	// admin api
-	admin.GET("/auth", api.GetAuth)
+
 	admin.POST("/create", api.AdminCreate)
 	admin.DELETE("/delete", api.AdminDelete)
 	admin.POST("/login", api.AdminLogin)
 	admin.POST("/logout", api.AdminLogout)
 
 	{
-		// admin group
-		admin_jwt := admin.Group("/jwt")
-		// check jwt access_token existence;jwt access_token validate
-		admin_jwt.Use(jwt.JWTAK())
+		apiv1 := r.Group("/api/v1")
 
-		// apis
-		admin_jwt.GET("/login-status", api.AdminLoginStatus)
-		admin_jwt.PUT("/change-password", api.AdminChangePassword)
+		{
+
+			// admin group
+			admin_jwt := apiv1.Group("/admin/jwt")
+
+			// apis
+			{
+				admin_jwt_ak := admin_jwt.Group("/")
+				admin_jwt_ak.Use(jwt.JWTAK())
+				admin_jwt_ak.PUT("/change-password", api.AdminChangePassword)
+			}
+
+			{
+				admin_jwt_rk := admin_jwt.Group("/")
+				admin_jwt_rk.Use(jwt.JWTRK())
+				admin_jwt_rk.GET("/auth", api.GetAuth)
+				admin_jwt_rk.GET("/login-status", api.AdminLoginStatus)
+			}
+		}
 	}
 
-	// apiv1 := r.Group("/api/v1")
 	return r
 }
