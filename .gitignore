@@ -1,6 +1,9 @@
 # swagger
 swagger.yaml
 
+# other txt
+*.txt
+
 # build dirs
 build/
 target/
