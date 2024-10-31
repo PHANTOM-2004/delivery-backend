@@ -2,10 +2,8 @@ package routers
 
 import (
 	"delivery-backend/internal/setting"
-	"delivery-backend/middleware/filter"
 	"delivery-backend/middleware/jwt"
 	"delivery-backend/routers/api"
-	v1 "delivery-backend/routers/api/v1"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/redis"
@@ -35,31 +33,28 @@ func InitRouter() *gin.Engine {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// session for admin usage
+	// session for admin usage,暂时不使用
 	admin_session_handler := sessions.Sessions("AdminSession", store)
-  // admin group, for vite usage
+	log.Debug("Currently session not used", admin_session_handler)
+
+	// admin group, for vite usage
 	admin := r.Group("/admin")
-  // admin api 
-	admin.POST("/login", admin_session_handler, api.AdminLogin)
-	admin.POST("/logout", admin_session_handler, api.AdminLogout)
+	// admin api
 	admin.GET("/auth", api.GetAuth)
 	admin.POST("/create", api.AdminCreate)
 	admin.DELETE("/delete", api.AdminDelete)
+	admin.POST("/login", api.AdminLogin)
+	admin.POST("/logout", api.AdminLogout)
 
 	{
 		// admin group
-		admin_session := admin.Group("/session")
-		// middleware session
-		admin_session.Use(admin_session_handler)
-		// middleware allowed only when logged in
-		admin_session.Use(filter.LoginFilter())
-		// middleware JWT
-		admin_session.Use(jwt.JWT())
-		// middleware double validation
-		admin_session.Use(filter.DoubleValidation())
+		admin_jwt := admin.Group("/jwt")
+		// check jwt access_token existence;jwt access_token validate
+		admin_jwt.Use(jwt.JWTAK())
 
 		// apis
-		admin_session.PUT("/change-password", v1.AdminChangePassword)
+		admin_jwt.GET("/login-status", api.AdminLoginStatus)
+		admin_jwt.PUT("/change-password", api.AdminChangePassword)
 	}
 
 	// apiv1 := r.Group("/api/v1")

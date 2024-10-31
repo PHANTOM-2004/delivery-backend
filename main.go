@@ -1,6 +1,7 @@
 package main
 
 import (
+	"delivery-backend/internal/gredis"
 	"delivery-backend/internal/setting"
 	"delivery-backend/models"
 	"delivery-backend/routers"
@@ -15,6 +16,7 @@ import (
 func Setup() {
 	setting.Setup()
 	models.SetUp()
+	gredis.Setup()
 
 	// set server mode
 	gin.SetMode(setting.ServerSetting.RunMode)

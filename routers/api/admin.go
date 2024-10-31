@@ -11,57 +11,87 @@ package api
 import (
 	"delivery-backend/internal/app"
 	"delivery-backend/internal/ecode"
+	"delivery-backend/internal/setting"
+	"delivery-backend/models"
+	"delivery-backend/pkg/utils"
 	"delivery-backend/service"
+	"errors"
 	"net/http"
 
-	"github.com/gin-contrib/sessions"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/gin-gonic/gin"
 )
 
 func GetAuth(c *gin.Context) {
-	account := c.Query("account")
-	password := c.Query("password")
-	if v := service.AccountValidate(account, password, c); !v {
+	// 通过refresh_token, 获得access_token
+	//
+	// cookie中读取refresh_token
+	refresh_token, err := c.Cookie("refresh_token")
+	if errors.Is(err, http.ErrNoCookie) {
+		app.Response(c, http.StatusOK, ecode.ERROR_AUTH_NO_REFRESH_TOKEN, nil)
 		return
 	}
 
+	log.Debug("pass: refresh_token exists")
+
+	// 校验refresh token
+	account, code := service.AuthAdminRefreshToken(refresh_token)
+	if code != ecode.SUCCESS {
+		app.Response(c, http.StatusOK, code, nil)
+		return
+	}
+
+	log.Debug("pass: refresh_token validation")
+
+	// 检查refresh token是否在黑名单中
+	valid := service.ValidateAdminToken(refresh_token)
+	if !valid {
+		app.Response(c, http.StatusOK, ecode.ERROR_AUTH_REFRESH_TOKEN_EXPIRED, nil)
+		c.Abort()
+		return
+	}
+
+	log.Debug("pass: refresh_token not in blacklist")
+
 	// 提供access_token
 	access_token := service.GetAdminAccessToken(account)
-	res := map[string]any{
-		"access_token": access_token,
+	service.SetAccessToken(c, access_token)
+
+	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
+
+	log.Debug("pass: response access_token")
+}
+
+func AdminLoginStatus(c *gin.Context) {
+	account := c.GetString("jwt_account")
+	res := map[string]string{
+		"account": account,
 	}
 	app.Response(c, http.StatusOK, ecode.SUCCESS, res)
 }
 
 func AdminLogout(c *gin.Context) {
-	session := sessions.Default(c)
-	account := session.Get("account")
-	role := session.Get("role")
-
-	// 如果没有account, 本不应发送这个请求
-	if account == nil || role != "admin" {
-		app.Response(c, http.StatusOK, ecode.ERROR_ADMIN_LOGOUT, nil)
-		return
+	// NOTE: add redis blacklist refresh_token
+	access_token, err := c.Cookie("access_token")
+	if errors.Is(err, http.ErrNoCookie) {
+		log.Debug("logout when no access_token provided")
+	} else {
+		service.DisableAdminToken(access_token, setting.AppSetting.AdminAKAge)
 	}
 
-	// this will mark the session as "written" only if there's
-	// at least one key to delete
-	session.Clear() // account to delete
-	session.Options(sessions.Options{MaxAge: -1})
-	session.Save()
+	refresh_token, err := c.Cookie("refresh_token")
+	if errors.Is(err, http.ErrNoCookie) {
+		log.Debug("logout when no refresh_token provided")
+	} else {
+		service.DisableAdminToken(refresh_token, setting.AppSetting.AdminRKAge)
+	}
+
+	service.DeleteTokens(c)
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
 }
 
 func AdminLogin(c *gin.Context) {
-	session := sessions.Default(c)
-	session_account := session.Get("account")
-	session_role := session.Get("role")
-	if session_account != nil && session_role == "admin" {
-		// 如果已经登陆，那么利用session的期限直接认证即可
-		app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
-		return
-	}
-
 	account := c.PostForm("account")
 	password := c.PostForm("password")
 
@@ -69,19 +99,38 @@ func AdminLogin(c *gin.Context) {
 		return
 	}
 
-	// set account and role
-	session.Set("account", account)
-	session.Set("role", "admin")
-	session.Save()
-
+	// return refresh_token, access_token
+	refresh_token := service.GetAdminRefreshToken(account)
 	access_token := service.GetAdminAccessToken(account)
-	// NOTE:返回 access_token
-	// 不必考虑session id的问题，gin-session作为中间件自动管理session,
-	// 但是需要注意，这里的自动管理是基于cookie的，也就是说
-	// 对于之后的小程序业务，就不能使用gin-session了
-	res := map[string]any{
-		"access_token": access_token,
+
+	service.SetAccessToken(c, access_token)
+	service.SetRefreshToken(c, refresh_token)
+
+	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
+}
+
+func AdminChangePassword(c *gin.Context) {
+	account := c.GetString("jwt_account")
+
+	// 新密码, 首先进行校验
+	origin_new_pwd := c.PostForm("password")
+	if v := service.AccountValidate(account, origin_new_pwd, c); !v {
+		return
 	}
 
-	app.Response(c, http.StatusOK, ecode.SUCCESS, res)
+	// Encrypt
+	new_password := utils.Encrypt(origin_new_pwd, setting.AppSetting.Salt)
+	data := map[string]any{
+		"password": new_password,
+	}
+
+	err := models.EditAdmin(account, data)
+	if err != nil {
+		// 在这里edit， 应当保证成功；因为数据库是存在的
+		app.Response(c, http.StatusInternalServerError, ecode.ERROR, nil)
+		log.Warn("Password Update Failure[internal]")
+		return
+	}
+
+	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
 }

@@ -35,6 +35,8 @@ type App struct {
 	Salt         string
 	JWTSecretKey string
 	AdminToken   string
+	AdminAKAge   int
+	AdminRKAge   int
 }
 
 type Database struct {
@@ -49,10 +51,11 @@ type Database struct {
 }
 
 type Redis struct {
-	Host     string
-	Password string
-	MaxIdle  int
-	Secret   string
+	Host      string
+	Password  string
+	MaxIdle   int
+	MaxActive int
+	Secret    string
 }
 
 var cfg *ini.File

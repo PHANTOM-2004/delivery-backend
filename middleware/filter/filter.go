@@ -14,9 +14,16 @@ func LoginFilter() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		session := sessions.Default(c)
 		account := session.Get("account")
+		role := session.Get("role")
 
-		if account != nil {
+		if account == nil {
 			app.Response(c, http.StatusUnauthorized, ecode.ERROR_ADMIN_NOT_LOGIN, nil)
+			c.Abort()
+			return
+		}
+
+		if role != "admin" {
+			app.Response(c, http.StatusUnauthorized, ecode.ERROR_ADMIN_ROLE, nil)
 			c.Abort()
 			return
 		}
@@ -47,7 +54,7 @@ func DoubleValidation() gin.HandlerFunc {
 		}
 
 		if jwt_account != session_account {
-			app.Response(c, http.StatusUnauthorized, ecode.ERROR_ADMIN_DOUBLE_AUTH, nil)
+			app.Response(c, http.StatusUnauthorized, ecode.ERROR, nil)
 			c.Abort()
 			return
 		}

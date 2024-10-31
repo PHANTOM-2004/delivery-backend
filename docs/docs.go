@@ -24,10 +24,12 @@
 package docs
 
 // 注意：返回一个json数据
-// 通常返回code=200, 请求被正确处理，单数需要校验msg字段是否为"ok";
+// (1) 通常返回code=200, 请求被正确处理，单数需要校验msg字段是否为"ok";
 // 如果"msg"不是"ok"则说明失败，msg含有对应报错信息.
 // 具体返回的数据存在data中，详细见各个接口对于返回值的说明
-// PS:如果出现服务器内部错误的code(500)，及时告诉开发者
+// (2) 注意token鉴权失败的情况，需要刷新access_token
+//
+// (3) 如果出现code=500，及时告诉开发者
 // swagger:response COMMON
 type CommonResponse struct {
 	// in:body
