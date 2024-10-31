@@ -2,7 +2,7 @@ package routers
 
 import (
 	"delivery-backend/internal/setting"
-	"delivery-backend/middleware/filter"
+	"delivery-backend/middleware/jwt"
 	"delivery-backend/routers/api"
 
 	"github.com/gin-contrib/sessions"
@@ -33,31 +33,28 @@ func InitRouter() *gin.Engine {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// session for admin usage
+	// session for admin usage,暂时不使用
 	admin_session_handler := sessions.Sessions("AdminSession", store)
+	log.Debug("Currently session not used", admin_session_handler)
+
 	// admin group, for vite usage
 	admin := r.Group("/admin")
 	// admin api
 	admin.GET("/auth", api.GetAuth)
 	admin.POST("/create", api.AdminCreate)
 	admin.DELETE("/delete", api.AdminDelete)
-	admin.POST("/login", admin_session_handler, api.AdminLogin)
+	admin.POST("/login", api.AdminLogin)
 
 	{
-		// NOTE: 对于有状态服务，采取session已经是比较好的选择
-		// 因此不再使用JWT鉴权
-
 		// admin group
-		admin_session := admin.Group("/session")
-		// middleware session
-		admin_session.Use(admin_session_handler)
-		// middleware allowed only when logged in
-		admin_session.Use(filter.LoginFilter())
+		admin_jwt := admin.Group("/jwt")
+		// jwt access_token
+		admin_jwt.Use(jwt.JWT())
 
 		// apis
-		admin_session.POST("/logout", api.AdminLogout)
-		admin_session.GET("/login-status", api.AdminLoginStatus)
-		admin_session.PUT("/change-password", api.AdminChangePassword)
+		admin_jwt.POST("/logout", api.AdminLogout)
+		admin_jwt.GET("/login-status", api.AdminLoginStatus)
+		admin_jwt.PUT("/change-password", api.AdminChangePassword)
 	}
 
 	// apiv1 := r.Group("/api/v1")

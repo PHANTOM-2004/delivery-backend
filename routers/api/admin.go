@@ -15,31 +15,37 @@ import (
 	"delivery-backend/models"
 	"delivery-backend/pkg/utils"
 	"delivery-backend/service"
+	"errors"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
 func GetAuth(c *gin.Context) {
-	account := c.Query("account")
-	password := c.Query("password")
-	if v := service.AccountValidate(account, password, c); !v {
+	// 通过refresh_token, 获得access_token
+	refresh_token, err := c.Cookie("refresh_token")
+	if errors.Is(err, http.ErrNoCookie) {
+		app.Response(c, http.StatusOK, ecode.ERROR_AUTH_NO_REFRESH_TOKEN, nil)
+		return
+	}
+
+	account, code := service.AuthAdminRefreshToken(refresh_token)
+	if code != ecode.SUCCESS {
+		app.Response(c, http.StatusOK, code, nil)
 		return
 	}
 
 	// 提供access_token
 	access_token := service.GetAdminAccessToken(account)
-	res := map[string]any{
-		"access_token": access_token,
-	}
-	app.Response(c, http.StatusOK, ecode.SUCCESS, res)
+	service.SetAccessToken(c, access_token)
+
+	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
 }
 
 func AdminLoginStatus(c *gin.Context) {
-	account, _ := c.Get("session_account")
+	account, _ := c.Get("jwt_account")
 	res := map[string]string{
 		"account": account.(string),
 	}
@@ -47,25 +53,12 @@ func AdminLoginStatus(c *gin.Context) {
 }
 
 func AdminLogout(c *gin.Context) {
-	session := sessions.Default(c)
-	// this will mark the session as "written" only if there's
-	// at least one key to delete
-	session.Clear() // account to delete
-	session.Options(sessions.Options{MaxAge: -1})
-	session.Save()
+	// TODO: add redis blacklist refresh_token
+  // also add middle for blacklist refresh_token check
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
 }
 
 func AdminLogin(c *gin.Context) {
-	session := sessions.Default(c)
-	session_account := session.Get("account")
-	session_role := session.Get("role")
-	if session_account != nil && session_role == "admin" {
-		// 如果已经登陆，那么利用session的期限直接认证即可
-		app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
-		return
-	}
-
 	account := c.PostForm("account")
 	password := c.PostForm("password")
 
@@ -73,21 +66,18 @@ func AdminLogin(c *gin.Context) {
 		return
 	}
 
-	// set account and role
-	session.Set("account", account)
-	session.Set("role", "admin")
-	session.Save()
+	// return refresh_token, access_token
+	refresh_token := service.GetAdminRefreshToken(account)
+	access_token := service.GetAdminAccessToken(account)
 
-	// NOTE:
-	// 不必考虑session id的问题，gin-session作为中间件自动管理session,
-	// 但是需要注意，这里的自动管理是基于cookie的，也就是说
-	// 对于之后的小程序业务，就不能使用gin-session了
+	service.SetAccessToken(c, access_token)
+	service.SetRefreshToken(c, refresh_token)
 
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
 }
 
 func AdminChangePassword(c *gin.Context) {
-	account, _ := c.Get("session_account")
+	account, _ := c.Get("jwt_account")
 
 	// 新密码, 首先进行校验
 	origin_new_pwd := c.PostForm("password")
