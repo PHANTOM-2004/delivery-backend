@@ -108,8 +108,24 @@ func AccountValidate(account string, password string, c *gin.Context) bool {
 func GetAdminAccessToken(account string) string {
 	claims := jwt.MapClaims{
 		"issuer":     "admin",
+		"type":       "access",
 		"account":    account,
-		"expires_at": time.Now().Add(3 * time.Hour).Unix(),
+		"expires_at": time.Now().Add(10 * time.Minute).Unix(),
+	}
+	tks, err := utils.GenerateToken(claims, setting.AppSetting.JWTSecretKey)
+	if err != nil {
+		// 这里不应当出错
+		log.Fatal(err)
+	}
+	return tks
+}
+
+func GetAdminRefreshToken(account string) string {
+	claims := jwt.MapClaims{
+		"issuer":     "admin",
+		"type":       "refresh",
+		"account":    account,
+		"expires_at": time.Now().Add(25 * time.Minute).Unix(),
 	}
 	tks, err := utils.GenerateToken(claims, setting.AppSetting.JWTSecretKey)
 	if err != nil {
@@ -122,20 +138,65 @@ func GetAdminAccessToken(account string) string {
 func AuthAdminAccessToken(access_token string) (string, ecode.Ecode) {
 	claims, err := utils.ParseToken(access_token, setting.AppSetting.JWTSecretKey)
 	if err != nil {
-		return "", ecode.ERROR_AUTH_CHECK_TOKEN_FAIL
+		return "", ecode.ERROR_AUTH_CHECK_ACCESS_TOKEN
 	}
 	account := claims["account"].(string)
 	issuer := claims["issuer"].(string)
+	t := claims["type"].(string)
 	exist, err := models.ExistAdmin(account)
-	if err != nil || !exist || issuer != "admin" {
-		return "", ecode.ERROR_AUTH_CHECK_TOKEN_FAIL
+	if err != nil || !exist || issuer != "admin" || t != "access" {
+		return "", ecode.ERROR_AUTH_CHECK_ACCESS_TOKEN
 	}
 
 	expires_at := claims["expires_at"].(int64)
 	nowTime := time.Now().Unix()
 	if nowTime > expires_at {
-		return "", ecode.ERROR_AUTH_CHECK_TOKEN_TIMEOUT
+		return "", ecode.ERROR_AUTH_ACCESS_TOKEN_EXPIRED
 	}
 
 	return account, ecode.SUCCESS
+}
+
+func AuthAdminRefreshToken(refresh_token string) (string, ecode.Ecode) {
+	claims, err := utils.ParseToken(refresh_token, setting.AppSetting.JWTSecretKey)
+	if err != nil {
+		return "", ecode.ERROR_AUTH_CHECK_REFRESH_TOKEN
+	}
+	account := claims["account"].(string)
+	issuer := claims["issuer"].(string)
+	t := claims["type"].(string)
+	exist, err := models.ExistAdmin(account)
+	if err != nil || !exist || issuer != "admin" || t != "refresh" {
+		return "", ecode.ERROR_AUTH_CHECK_REFRESH_TOKEN
+	}
+
+	expires_at := claims["expires_at"].(int64)
+	nowTime := time.Now().Unix()
+	if nowTime > expires_at {
+		return "", ecode.ERROR_AUTH_REFRESH_TOKEN_EXPIRED
+	}
+
+	return account, ecode.SUCCESS
+}
+
+func SetRefreshToken(c *gin.Context, refresh_token string) {
+	c.SetCookie(
+		"refresh_token",
+		refresh_token,
+		30*60,
+		"",
+		"",
+		true,
+		true)
+}
+
+func SetAccessToken(c *gin.Context, access_token string) {
+	c.SetCookie(
+		"access_token",
+		access_token,
+		10*60,
+		"",
+		"",
+		true,
+		true)
 }
