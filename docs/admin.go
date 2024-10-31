@@ -81,7 +81,7 @@ type AdminName struct {
 // 200: COMMON
 
 // =============================================================
-// swagger:route POST /admin/jwt/logout admin-jwt admin_logout
+// swagger:route POST /admin/logout admin-jwt admin_logout
 // 注销管理员账户
 // 在非法请求发出时（管理员不处于登入状态）会返回错误信息。
 // responses:

@@ -44,6 +44,7 @@ func InitRouter() *gin.Engine {
 	admin.POST("/create", api.AdminCreate)
 	admin.DELETE("/delete", api.AdminDelete)
 	admin.POST("/login", api.AdminLogin)
+	admin.POST("/logout", api.AdminLogout)
 
 	{
 		// admin group
@@ -52,7 +53,6 @@ func InitRouter() *gin.Engine {
 		admin_jwt.Use(jwt.JWT())
 
 		// apis
-		admin_jwt.POST("/logout", api.AdminLogout)
 		admin_jwt.GET("/login-status", api.AdminLoginStatus)
 		admin_jwt.PUT("/change-password", api.AdminChangePassword)
 	}

@@ -54,7 +54,8 @@ func AdminLoginStatus(c *gin.Context) {
 
 func AdminLogout(c *gin.Context) {
 	// TODO: add redis blacklist refresh_token
-  // also add middle for blacklist refresh_token check
+	// also add middle for blacklist refresh_token check
+	service.DeleteTokens(c)
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
 }
 

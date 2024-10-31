@@ -179,6 +179,26 @@ func AuthAdminRefreshToken(refresh_token string) (string, ecode.Ecode) {
 	return account, ecode.SUCCESS
 }
 
+func DeleteTokens(c *gin.Context) {
+	c.SetCookie(
+		"access_token",
+		"",
+		-1,
+		"",
+		"",
+		true,
+		true)
+
+	c.SetCookie(
+		"refresh_token",
+		"",
+		-1,
+		"",
+		"",
+		true,
+		true)
+}
+
 func SetRefreshToken(c *gin.Context, refresh_token string) {
 	c.SetCookie(
 		"refresh_token",

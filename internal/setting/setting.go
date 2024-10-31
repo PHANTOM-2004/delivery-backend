@@ -51,10 +51,11 @@ type Database struct {
 }
 
 type Redis struct {
-	Host     string
-	Password string
-	MaxIdle  int
-	Secret   string
+	Host      string
+	Password  string
+	MaxIdle   int
+	MaxActive int
+	Secret    string
 }
 
 var cfg *ini.File
