@@ -149,8 +149,6 @@ func ValidateAdminToken(admin_token string) bool {
 }
 
 func DeleteTokens(c *gin.Context) {
-	// TODO: add redis blacklist refresh_token
-	// also add middle for blacklist refresh_token check
 
 	c.SetCookie(
 		"access_token",
@@ -169,6 +167,8 @@ func DeleteTokens(c *gin.Context) {
 		"",
 		true,
 		true)
+
+	log.Debug("admin tokens clears")
 }
 
 func SetRefreshToken(c *gin.Context, refresh_token string) {

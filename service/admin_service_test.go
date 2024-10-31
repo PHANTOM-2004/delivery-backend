@@ -3,6 +3,8 @@ package service
 import (
 	"fmt"
 	"testing"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -11,6 +13,10 @@ var (
 )
 
 func TestGetAdminAccessToken(t *testing.T) {
+	log.SetLevel(log.DebugLevel)
+
 	tks := GetAdminAccessToken(account)
 	fmt.Println(tks)
+	account, code := AuthAdminAccessToken(tks)
+	fmt.Println(account, code)
 }

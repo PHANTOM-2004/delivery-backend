@@ -25,36 +25,68 @@ import (
 
 func GetAuth(c *gin.Context) {
 	// 通过refresh_token, 获得access_token
+	//
+	// cookie中读取refresh_token
 	refresh_token, err := c.Cookie("refresh_token")
 	if errors.Is(err, http.ErrNoCookie) {
 		app.Response(c, http.StatusOK, ecode.ERROR_AUTH_NO_REFRESH_TOKEN, nil)
 		return
 	}
 
+	log.Debug("pass: refresh_token exists")
+
+	// 校验refresh token
 	account, code := service.AuthAdminRefreshToken(refresh_token)
 	if code != ecode.SUCCESS {
 		app.Response(c, http.StatusOK, code, nil)
 		return
 	}
 
+	log.Debug("pass: refresh_token validation")
+
+	// 检查refresh token是否在黑名单中
+	valid := service.ValidateAdminToken(refresh_token)
+	if !valid {
+		app.Response(c, http.StatusOK, ecode.ERROR_AUTH_REFRESH_TOKEN_EXPIRED, nil)
+		c.Abort()
+		return
+	}
+
+	log.Debug("pass: refresh_token not in blacklist")
+
 	// 提供access_token
 	access_token := service.GetAdminAccessToken(account)
 	service.SetAccessToken(c, access_token)
 
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
+
+	log.Debug("pass: response access_token")
 }
 
 func AdminLoginStatus(c *gin.Context) {
-	account, _ := c.Get("jwt_account")
+	account := c.GetString("jwt_account")
 	res := map[string]string{
-		"account": account.(string),
+		"account": account,
 	}
 	app.Response(c, http.StatusOK, ecode.SUCCESS, res)
 }
 
 func AdminLogout(c *gin.Context) {
-	// TODO: add redis blacklist refresh_token
-	// also add middle for blacklist refresh_token check
+	// NOTE: add redis blacklist refresh_token
+	access_token, err := c.Cookie("access_token")
+	if errors.Is(err, http.ErrNoCookie) {
+		log.Debug("logout when no access_token provided")
+	} else {
+		service.DisableAdminToken(access_token, setting.AppSetting.AdminAKAge)
+	}
+
+	refresh_token, err := c.Cookie("refresh_token")
+	if errors.Is(err, http.ErrNoCookie) {
+		log.Debug("logout when no refresh_token provided")
+	} else {
+		service.DisableAdminToken(refresh_token, setting.AppSetting.AdminRKAge)
+	}
+
 	service.DeleteTokens(c)
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
 }
@@ -78,11 +110,11 @@ func AdminLogin(c *gin.Context) {
 }
 
 func AdminChangePassword(c *gin.Context) {
-	account, _ := c.Get("jwt_account")
+	account := c.GetString("jwt_account")
 
 	// 新密码, 首先进行校验
 	origin_new_pwd := c.PostForm("password")
-	if v := service.AccountValidate(account.(string), origin_new_pwd, c); !v {
+	if v := service.AccountValidate(account, origin_new_pwd, c); !v {
 		return
 	}
 
@@ -92,7 +124,7 @@ func AdminChangePassword(c *gin.Context) {
 		"password": new_password,
 	}
 
-	err := models.EditAdmin(account.(string), data)
+	err := models.EditAdmin(account, data)
 	if err != nil {
 		// 在这里edit， 应当保证成功；因为数据库是存在的
 		app.Response(c, http.StatusInternalServerError, ecode.ERROR, nil)

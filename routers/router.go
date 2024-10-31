@@ -49,8 +49,8 @@ func InitRouter() *gin.Engine {
 	{
 		// admin group
 		admin_jwt := admin.Group("/jwt")
-		// jwt access_token
-		admin_jwt.Use(jwt.JWT())
+		// check jwt access_token existence;jwt access_token validate
+		admin_jwt.Use(jwt.JWTAK())
 
 		// apis
 		admin_jwt.GET("/login-status", api.AdminLoginStatus)
