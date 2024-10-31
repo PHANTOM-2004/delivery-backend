@@ -25,6 +25,20 @@
 - `mkcert`
 - `docker-compose`
 
+#### localhost SSL
+
+对于本地的调试（在服务器部署之前），直接访问[localhost:80](https://localhost:80)是不可行的，因为没有对应证书。因此我们使用[mkcert](https://github.com/FiloSottile/mkcert)提供认证服务。
+
+```shell
+# install命令只需要执行一次
+mkcert -install
+# 生成证书
+mkcert -key-file ./localhost-key.pem -cert-file ./localhost-cert.pem localhost
+```
+
+同时服务端会启动一个监听`localhost`的服务用于排查，这一服务会在部署时关闭。
+
+
 ### Docker
 
 为了方便环境的一致性，采用`docker`运行服务。
@@ -37,7 +51,6 @@
 ```shell
 docker login
 ```
-
 
 #### 启动全部服务
 
@@ -93,7 +106,6 @@ make
 ```
 
 如果希望停止运行, 直接按下`CTRL+C`。
-
 
 如果离开了工作目录, 可以通过如下面命令返回工作目录：
 
@@ -157,7 +169,6 @@ export default {
 注意，启用 usePolling 可能会影响性能，特别是在文件数量较多时。
 如果你在其他环境中运行而不需要此功能，可以保持该选项关闭。这样可以在修改源码后，确保你能立即看到效果。
 
-
 > PS:对于任何容器的退出，在容器内部输入`exit`
 
 #### 网络问题
@@ -178,8 +189,11 @@ docker load -i redis.tar
 
 **PS: 我不想管网络问题了，自己解决去，现在用到的镜像越来越多了。**
 
-
 ### 接口文档
+
+- [apifox](https://apifox.com/apidoc/shared-7796c67b-1b9f-4919-9c83-957d81103b31)
+
+- swagger
 
 项目根目录执行
 
@@ -195,15 +209,4 @@ make
 go install github.com/go-swagger/go-swagger/cmd/swagger@latest
 ```
 
-### localhost SSL
 
-对于本地的调试（在服务器部署之前），直接访问[localhost:80](https://localhost:80)是不可行的，因为没有对应证书。因此我们使用[mkcert](https://github.com/FiloSottile/mkcert)提供认证服务。
-
-```shell
-# install命令只需要执行一次
-mkcert -install
-# 生成证书
-mkcert -key-file ./localhost-key.pem -cert-file ./localhost-cert.pem localhost
-```
-
-同时服务端会启动一个监听`localhost`的服务用于排查，这一服务会在部署时关闭。
