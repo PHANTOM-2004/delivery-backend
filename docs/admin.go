@@ -2,14 +2,14 @@ package docs
 
 // =============================================================
 // 用于登入与认证的参数，注意后端处理的最大范围, 否则会返回错误
-// swagger:parameters admin_auth admin_login admin_create admin_delete
+// swagger:parameters admin_login admin_create admin_delete
 type AdminAccountParam struct {
 	// 账户名：最小长度10，最大长度30
 	// required: true
 	Account string `json:"account"`
 }
 
-// swagger:parameters admin_auth admin_login admin_create admin_change_password
+// swagger:parameters admin_login admin_create admin_change_password
 type AdminPasswordParam struct {
 	// 密码：最小长度15, 最大长度30
 	// required: true
@@ -41,21 +41,24 @@ type AdminName struct {
 
 //=============================================================
 // swagger:route GET /admin/auth admin admin_auth
-// JWT, 请求获得access_token
-// 通过url参数发送请求; 获得返回返回字段在data中，key="access_token"
+// 请求获得access_token
+// (1) 通过refresh_token获取access_token
+// (2) 注意错误码，如果出现refresh_token过期说明需要重新登录
 // responses:
 // 200: COMMON
 
 //=============================================================
-// swagger:route POST /admin/login admin-session admin_login
+// swagger:route POST /admin/login admin-jwt admin_login
 // 登入的身份认证
+// (1) 返回access_token, refresh_token
+// (2) 其中access_token是短期的有效token, refresh_token是长期有效token, 后者用于刷新acess_token
 // PS: 通过postform发送参数, 否则会认证错误.
 // responses:
 // 200: COMMON
 //
 
 //=============================================================
-// swagger:route GET /admin/session/login-status admin-session admin_login_status
+// swagger:route GET /admin/jwt/login-status admin-jwt admin_login_status
 // 请求管理员的登陆状态
 // (1) 如果登陆，同时会返回已登录的account，data字段中有一个key为account
 // (2) 在判断httpcode的基础上(httpcode != 401)，只需要判断业务逻辑码是否是SUCCESS即可,不存在error时意味着处于登录状态
@@ -78,14 +81,14 @@ type AdminName struct {
 // 200: COMMON
 
 // =============================================================
-// swagger:route POST /admin/session/logout admin-session admin_logout
+// swagger:route POST /admin/jwt/logout admin-jwt admin_logout
 // 注销管理员账户
 // 在非法请求发出时（管理员不处于登入状态）会返回错误信息。
 // responses:
 // 200: COMMON
 
 // =============================================================
-// swagger:route PUT /admin/session/change-password admin-session admin_change_password
+// swagger:route PUT /admin/jwt/change-password admin-jwt admin_change_password
 // 管理员修改密码
 // 在非法请求发出时（管理员不处于登入状态）会返回错误信息。
 // PS: 通过postform形式传递密码, 不要使用url传参。
