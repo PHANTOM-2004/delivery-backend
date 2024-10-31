@@ -35,6 +35,8 @@ type App struct {
 	Salt         string
 	JWTSecretKey string
 	AdminToken   string
+	AdminAKAge   int
+	AdminRKAge   int
 }
 
 type Database struct {

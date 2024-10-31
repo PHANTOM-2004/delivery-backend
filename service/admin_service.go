@@ -183,7 +183,7 @@ func SetRefreshToken(c *gin.Context, refresh_token string) {
 	c.SetCookie(
 		"refresh_token",
 		refresh_token,
-		30*60,
+		(setting.AppSetting.AdminRKAge+2)*60,
 		"",
 		"",
 		true,
@@ -194,7 +194,7 @@ func SetAccessToken(c *gin.Context, access_token string) {
 	c.SetCookie(
 		"access_token",
 		access_token,
-		10*60,
+		(setting.AppSetting.AdminAKAge+5)*60,
 		"",
 		"",
 		true,
