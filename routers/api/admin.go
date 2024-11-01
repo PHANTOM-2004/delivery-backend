@@ -15,7 +15,6 @@ import (
 	"delivery-backend/models"
 	"delivery-backend/pkg/utils"
 	"delivery-backend/service"
-	"errors"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
@@ -46,22 +45,7 @@ func AdminLoginStatus(c *gin.Context) {
 }
 
 func AdminLogout(c *gin.Context) {
-	// NOTE: add redis blacklist refresh_token
-	access_token, err := c.Cookie("access_token")
-	if errors.Is(err, http.ErrNoCookie) {
-		log.Debug("logout when no access_token provided")
-	} else {
-		service.DisableAdminToken(access_token, setting.AppSetting.AdminAKAge)
-	}
-
-	refresh_token, err := c.Cookie("refresh_token")
-	if errors.Is(err, http.ErrNoCookie) {
-		log.Debug("logout when no refresh_token provided")
-	} else {
-		service.DisableAdminToken(refresh_token, setting.AppSetting.AdminRKAge)
-	}
-
-	service.DeleteTokens(c)
+	service.DisbleAdminTokens(c)
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
 }
 
@@ -86,14 +70,14 @@ func AdminLogin(c *gin.Context) {
 func AdminChangePassword(c *gin.Context) {
 	account := c.GetString("jwt_account")
 
+	new_pwd := c.PostForm("password")
 	// 新密码, 首先进行校验
-	origin_new_pwd := c.PostForm("password")
-	if v := service.AccountValidate(account, origin_new_pwd, c); !v {
+	if v := service.PasswordValidate(new_pwd, c); !v {
 		return
 	}
 
 	// Encrypt
-	new_password := utils.Encrypt(origin_new_pwd, setting.AppSetting.Salt)
+	new_password := utils.Encrypt(new_pwd, setting.AppSetting.Salt)
 	data := map[string]any{
 		"password": new_password,
 	}
@@ -106,5 +90,10 @@ func AdminChangePassword(c *gin.Context) {
 		return
 	}
 
+	// 应当删除tokens
+	service.DisbleAdminTokens(c)
+
+	// 返回响应
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
+	log.Debug("password updated")
 }

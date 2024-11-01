@@ -12,6 +12,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+type Password struct {
+	Password string
+}
+
 type Login struct {
 	Account  string
 	Password string
@@ -29,10 +33,18 @@ func init() {
 		// register login validation
 		// 约定账号长度最大值为30, 最小值为10
 		// 约定密码最大长度为32, 最小长度为12
-		login_rules := map[string]string{
-			"Account":  "min=10,max=30",
+
+		// 修改密码validation
+		password_rules := map[string]string{
 			"Password": "min=15,max=30",
 		}
+
+		app.RegisterValidation(Password{}, password_rules)
+
+		// 登录validation
+		login_rules := password_rules
+		login_rules["Account"] = "min=10,max=30"
+
 		app.RegisterValidation(Login{}, login_rules)
 
 		// 注册账号validation
@@ -54,6 +66,19 @@ func SignUpValidate(c *gin.Context) bool {
 		Password:  c.Query("password"),
 		AdminName: c.Query("admin_name"),
 	}
+	err := app.ValidateStruct(data)
+	if err != nil {
+		app.Response(c, http.StatusOK, ecode.INVALID_PARAMS, nil)
+		log.Warn(err)
+		return false
+	}
+	return true
+}
+
+
+func PasswordValidate(password string, c *gin.Context) bool {
+	data := Password{password}
+
 	err := app.ValidateStruct(data)
 	if err != nil {
 		app.Response(c, http.StatusOK, ecode.INVALID_PARAMS, nil)

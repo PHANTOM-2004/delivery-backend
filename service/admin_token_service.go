@@ -7,6 +7,7 @@ import (
 	"delivery-backend/pkg/utils"
 	"errors"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -136,7 +137,27 @@ func AuthAdminRefreshToken(refresh_token string) (string, ecode.Ecode) {
 	return account, ecode.SUCCESS
 }
 
-func DisableAdminToken(admin_token string, expire_minute int) error {
+// 将token加入黑名单，同时删除cookie中token
+func DisbleAdminTokens(c *gin.Context) {
+	// NOTE: add redis blacklist refresh_token
+	access_token, err := c.Cookie("access_token")
+	if errors.Is(err, http.ErrNoCookie) {
+		log.Debug("logout when no access_token provided")
+	} else {
+		disableAdminToken(access_token, setting.AppSetting.AdminAKAge)
+	}
+
+	refresh_token, err := c.Cookie("refresh_token")
+	if errors.Is(err, http.ErrNoCookie) {
+		log.Debug("logout when no refresh_token provided")
+	} else {
+		disableAdminToken(refresh_token, setting.AppSetting.AdminRKAge)
+	}
+
+	deleteTokens(c)
+}
+
+func disableAdminToken(admin_token string, expire_minute int) error {
 	key := "ADMIN_TK_" + admin_token
 	return gredis.Set(key, "", time.Duration(expire_minute)*time.Minute)
 }
@@ -148,8 +169,7 @@ func ValidateAdminToken(admin_token string) bool {
 	return !gredis.Exists(key)
 }
 
-func DeleteTokens(c *gin.Context) {
-
+func deleteTokens(c *gin.Context) {
 	c.SetCookie(
 		"access_token",
 		"",
