@@ -6,7 +6,7 @@ import (
 	"delivery-backend/internal/setting"
 	"delivery-backend/models"
 	"delivery-backend/pkg/utils"
-	"delivery-backend/service"
+	"delivery-backend/service/admin_service"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -65,7 +65,7 @@ func AdminCreate(c *gin.Context) {
 	if v := superTokenCheck(c); !v {
 		return
 	}
-	if v := service.SignUpValidate(c); !v {
+	if v := admin_service.SignUpValidate(c); !v {
 		return
 	}
 

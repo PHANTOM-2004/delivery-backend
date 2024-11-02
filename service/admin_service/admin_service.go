@@ -1,4 +1,4 @@
-package service
+package admin_service
 
 import (
 	"delivery-backend/internal/app"
@@ -75,7 +75,6 @@ func SignUpValidate(c *gin.Context) bool {
 	return true
 }
 
-
 func PasswordValidate(password string, c *gin.Context) bool {
 	data := Password{password}
 
@@ -105,17 +104,18 @@ func AccountValidate(account string, password string, c *gin.Context) bool {
 	}
 
 	a, err := models.GetAdmin(data.Account)
-	if a == nil {
+	if err != nil {
+		// 其他未知错误
+		log.Warn(err)
+		app.Response(c, http.StatusInternalServerError, ecode.ERROR, nil)
+		return false
+	} else if a == nil {
 		// 对于不存在的账户登陆，这时可能的，因为
 		// 你无法预料到用户会干什么
 		log.Debug(err, data)
 		app.Response(c, http.StatusOK, ecode.ERROR_ADMIN_NON_EXIST, nil)
 		return false
-	} else if err != nil {
-		// 其他未知错误
-		log.Warn(err)
-		app.Response(c, http.StatusInternalServerError, ecode.ERROR, nil)
-		return false
+
 	}
 
 	en_pwd := utils.Encrypt(data.Password, setting.AppSetting.Salt)

@@ -3,7 +3,6 @@ package jwt
 import (
 	"delivery-backend/internal/app"
 	"delivery-backend/internal/ecode"
-	"delivery-backend/service"
 	"errors"
 	"net/http"
 
@@ -11,7 +10,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func JWTRK() gin.HandlerFunc {
+type (
+	TokenValidationFunc = func(string) bool
+	TokenAuthFunc       = func(string) (string, ecode.Ecode)
+)
+
+func JWTRK(v TokenValidationFunc, a TokenAuthFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// cookie中读取refresh_token
 		refresh_token, err := c.Cookie("refresh_token")
@@ -23,7 +27,7 @@ func JWTRK() gin.HandlerFunc {
 		log.Debug("pass: refresh_token exists")
 
 		// 校验refresh token
-		account, code := service.AuthAdminRefreshToken(refresh_token)
+		account, code := a(refresh_token)
 		if code != ecode.SUCCESS {
 			app.Response(c, http.StatusOK, code, nil)
 			return
@@ -32,7 +36,7 @@ func JWTRK() gin.HandlerFunc {
 		log.Debug("pass: refresh_token validation")
 
 		// 检查refresh token是否在黑名单中
-		valid := service.ValidateAdminToken(refresh_token)
+		valid := v(refresh_token)
 		if !valid {
 			app.Response(c, http.StatusOK, ecode.ERROR_AUTH_REFRESH_TOKEN_EXPIRED, nil)
 			c.Abort()
@@ -48,7 +52,7 @@ func JWTRK() gin.HandlerFunc {
 	}
 }
 
-func JWTAK() gin.HandlerFunc {
+func JWTAK(v TokenValidationFunc, a TokenAuthFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		access_token, err := c.Cookie("access_token")
 		if errors.Is(err, http.ErrNoCookie) {
@@ -60,7 +64,7 @@ func JWTAK() gin.HandlerFunc {
 
 		log.Debug("pass: received jwt access_token")
 
-		account, code := service.AuthAdminAccessToken(access_token)
+		account, code := a(access_token)
 		if code != ecode.SUCCESS {
 			app.Response(c, http.StatusOK, code, nil)
 			c.Abort()
@@ -70,7 +74,7 @@ func JWTAK() gin.HandlerFunc {
 		log.Debug("pass: access_token validation")
 
 		// 检查是否在黑名单中
-		valid := service.ValidateAdminToken(access_token)
+		valid := v(access_token)
 		if !valid {
 			app.Response(c, http.StatusOK, ecode.ERROR_AUTH_ACCESS_TOKEN_EXPIRED, nil)
 			c.Abort()

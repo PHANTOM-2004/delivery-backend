@@ -21,6 +21,14 @@ const (
 	ERROR_ADMIN_NOT_LOGIN     Ecode = 10004
 	ERROR_ADMIN_ROLE          Ecode = 10005
 
+	// merchant related
+	ERROR_MERCHANT_NON_EXIST     Ecode = 11000
+	ERROR_MERCHANT_INCORRECT_PWD Ecode = 11001
+	ERROR_MERCHANT_ACCOUNT_EXIST Ecode = 11002
+	ERROR_MERCHANT_LOGOUT        Ecode = 11003
+	ERROR_MERCHANT_NOT_LOGIN     Ecode = 11004
+	ERROR_MERCHANT_ROLE          Ecode = 11005
+
 	ERROR_AUTH_NO_ACCESS_TOKEN       Ecode = 20000
 	ERROR_AUTH_ACCESS_TOKEN_EXPIRED  Ecode = 20001
 	ERROR_AUTH_NO_REFRESH_TOKEN      Ecode = 20002
@@ -56,6 +64,19 @@ func StatusText(e Ecode) (res string) {
 		res = "管理员未登陆"
 	case ERROR_ADMIN_ROLE:
 		res = "管理员身份错误"
+
+	case ERROR_MERCHANT_NON_EXIST:
+		res = "商家账号不存在"
+	case ERROR_MERCHANT_ACCOUNT_EXIST:
+		res = "商家账号已注册"
+	case ERROR_MERCHANT_INCORRECT_PWD:
+		res = "商家密码输入错误"
+	case ERROR_MERCHANT_LOGOUT:
+		res = "商家非法登出请求/已登出"
+	case ERROR_MERCHANT_NOT_LOGIN:
+		res = "商家未登陆"
+	case ERROR_MERCHANT_ROLE:
+		res = "商家身份错误"
 
 		// refresh_token and access_token
 	case ERROR_AUTH_NO_REFRESH_TOKEN:
