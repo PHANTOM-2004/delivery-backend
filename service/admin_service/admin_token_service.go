@@ -32,7 +32,7 @@ func SetRefreshToken(c *gin.Context, refresh_token string) {
 }
 
 func SetAccessToken(c *gin.Context, access_token string) {
-	jwt_token.SetRefreshToken(c, access_token, setting.AppSetting.AdminAKAge)
+	jwt_token.SetAccessToken(c, access_token, setting.AppSetting.AdminAKAge)
 }
 
 func GetAccessToken(account string) string {
