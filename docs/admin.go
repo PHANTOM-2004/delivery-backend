@@ -6,6 +6,7 @@ package docs
 type AdminAccountParam struct {
 	// 账户名：最小长度10，最大长度30
 	// required: true
+	// in: formData
 	Account string `json:"account"`
 }
 
@@ -13,6 +14,7 @@ type AdminAccountParam struct {
 type AdminPasswordParam struct {
 	// 密码：最小长度15, 最大长度30
 	// required: true
+	// in: formData
 	Password string `json:"password"`
 }
 
@@ -25,22 +27,31 @@ type SuperToken struct {
 	SuperToken string `json:"super_token"`
 }
 
-// [UNUSED swagger]:parameters  admin_change_password
+// swagger:parameters admin_change_password merchant_create merchant_delete merchant_change_password
 type AccessToken struct {
-	// 部分api调用的token
+	// 通过cookie发送,client不必手动handle
+  // in: cookie
 	// required: true
 	AccessToken string `json:"access_token"`
+}
+
+// swagger:parameters admin_auth admin_logout admin_login_status  merchant_login_status merchant_auth merchant_logout
+type RefreshToken struct {
+	// 通过cookie发送,client不必手动handle
+  // in: cookie
+	RefreshToken string `json:"refresh_token"`
 }
 
 // swagger:parameters  admin_create
 type AdminName struct {
 	// 管理员姓名, 最小长度2, 最大长度20
 	// required: true
+	// in: formData
 	AdminName string `json:"admin_name"`
 }
 
 //=============================================================
-// swagger:route GET /api/v1/admin/jwt/auth v1-admin-jwt admin_auth
+// swagger:route GET /api/v1/admin/jwt/auth v1-admin admin_auth
 // 请求获得access_token
 // (1) 通过refresh_token获取access_token
 // (2) 注意错误码，如果出现refresh_token过期说明需要重新登录
@@ -58,7 +69,7 @@ type AdminName struct {
 //
 
 //=============================================================
-// swagger:route GET /api/v1/admin/jwt/login-status v1-admin-jwt admin_login_status
+// swagger:route GET /api/v1/admin/jwt/login-status v1-admin admin_login_status
 // 请求管理员的登陆状态
 // (1) 如果登陆，同时会返回已登录的account，data字段中有一个key为account
 // (2) 在判断httpcode的基础上(httpcode != 401)，只需要判断业务逻辑码是否是SUCCESS即可,不存在error时意味着处于登录状态
@@ -88,7 +99,7 @@ type AdminName struct {
 // 200: COMMON
 
 // =============================================================
-// swagger:route PUT /api/v1/admin/jwt/change-password v1-admin-jwt admin_change_password
+// swagger:route PUT /api/v1/admin/jwt/change-password v1-admin admin_change_password
 // 管理员修改密码
 // 在非法请求发出时（管理员不处于登入状态）会返回错误信息。
 // PS: 通过postform形式传递密码, 不要使用url传参。
