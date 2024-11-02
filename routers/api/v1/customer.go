@@ -4,6 +4,7 @@ import (
 	"delivery-backend/internal/app"
 	"delivery-backend/internal/ecode"
 	"delivery-backend/internal/setting"
+	"delivery-backend/models"
 	"delivery-backend/service/customer_service"
 	"net/http"
 	"path/filepath"
@@ -19,7 +20,7 @@ func getLicenseFileName() string {
 	if err != nil {
 		log.Warn(err)
 	}
-	path := setting.AppSetting.LicenseStorePath + "/merchant_license-" + id.String()
+	path := setting.AppSetting.LicenseStorePath + "/merchant-license-" + id.String()
 	return path
 }
 
@@ -32,6 +33,28 @@ func checkLicenseType(name string) bool {
 		}
 	}
 	return false
+}
+
+// 传入page_id, 作为url传送
+func GetMerchantApplication(c *gin.Context) {
+	page := c.Param("page")
+	page_cnt, err := strconv.Atoi(page)
+	if err != nil {
+		app.Response(c, http.StatusOK, ecode.INVALID_PARAMS, nil)
+		return
+	}
+
+	res, err := models.GetMerchantApplication(page_cnt)
+	if err != nil {
+		app.Response(c, http.StatusInternalServerError, ecode.ERROR, nil)
+		return
+	}
+
+	data := map[string]any{
+		"applications": res,
+	}
+
+	app.Response(c, http.StatusOK, ecode.SUCCESS, data)
 }
 
 // 由顾客/骑手发起申请，提出商务合作请求
@@ -77,10 +100,25 @@ func MerchantApply(c *gin.Context) {
 		return
 	}
 
+	// 插入数据库
+
+	data := models.MerchantApplication{
+		Status:      a.Status,
+		Description: a.Description,
+		License:     path,
+		Email:       a.Email,
+		PhoneNumber: a.PhoneNumber,
+	}
+
+	err = models.CreateMerchantApplication(&data)
+	if err != nil {
+		log.Warn(err)
+		app.Response(c, http.StatusInternalServerError, ecode.ERROR, nil)
+		return
+	}
+
 	// 成功保存
 	log.Debugf("license[%s] saved to %s", file.Filename, path)
-
-	// 插入数据库
 
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
 }

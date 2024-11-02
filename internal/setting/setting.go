@@ -42,6 +42,7 @@ type App struct {
 	LicensePhotoSize int
 	LicenseStorePath string
 	LicenseAllowExts []string
+	LicensePageSize  int
 }
 
 type Database struct {
