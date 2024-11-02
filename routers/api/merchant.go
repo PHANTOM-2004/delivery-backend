@@ -14,10 +14,6 @@ import (
 )
 
 func MerchantDelete(c *gin.Context) {
-	if v := superTokenCheck(c); !v {
-		return
-	}
-
 	account := c.PostForm("account")
 	err, rows := models.DeleteMerchant(account)
 	if err != nil {
@@ -40,9 +36,6 @@ func MerchantDelete(c *gin.Context) {
 }
 
 func MerchantCreate(c *gin.Context) {
-	if v := superTokenCheck(c); !v {
-		return
-	}
 	if v := merchant_service.SignUpValidate(c); !v {
 		return
 	}
@@ -51,7 +44,7 @@ func MerchantCreate(c *gin.Context) {
 	account := c.PostForm("account")
 	encrypted_password := utils.Encrypt(c.PostForm("password"), setting.AppSetting.Salt)
 	merchant_name := c.PostForm("merchant_name")
-	phone_numer := c.PostForm("phone_numer")
+	phone_numer := c.PostForm("phone_number")
 
 	data := models.Merchant{
 		MerchantName: merchant_name,
@@ -59,6 +52,7 @@ func MerchantCreate(c *gin.Context) {
 		Password:     encrypted_password,
 		PhoneNumber:  phone_numer,
 	}
+
 	err := models.CreateMerchant(&data)
 	if err != nil {
 		res := map[string]string{
