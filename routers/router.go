@@ -69,7 +69,7 @@ func InitRouter() *gin.Engine {
 
 		{
 			merchant_jwt_rk := merchant_jwt.Group("/")
-			rk_hanlder := jwt.JWTAK(
+			rk_hanlder := jwt.JWTRK(
 				merchant_service.ValidateToken,
 				merchant_service.AuthRefreshToken,
 			)
@@ -95,11 +95,12 @@ func InitRouter() *gin.Engine {
 			admin_jwt_ak.PUT("/change-password", api.AdminChangePassword)
 			admin_jwt_ak.POST("/merchant-create", api.MerchantCreate)
 			admin_jwt_ak.POST("/merchant-delete", api.MerchantDelete)
+			admin_jwt_ak.GET("/merchant-application/:page", v1.GetMerchantApplication)
 		}
 
 		{
 			admin_jwt_rk := admin_jwt.Group("/")
-			rk_hanlder := jwt.JWTAK(
+			rk_hanlder := jwt.JWTRK(
 				admin_service.ValidateToken,
 				admin_service.AuthRefreshToken,
 			)
