@@ -66,7 +66,7 @@ func CleanAllMerchants() error {
 	return err
 }
 
-func DeleteMerchant(id uint) (error, int64) {
-	res := db.Where("id = ?", id).Delete(&Merchant{})
+func DeleteMerchant(account string) (error, int64) {
+	res := db.Where("account = ?", account).Delete(&Merchant{})
 	return res.Error, res.RowsAffected
 }

@@ -49,63 +49,63 @@ func InitRouter() *gin.Engine {
 
 	// merchant
 	merchant := r.Group("/merchant")
+	merchant.POST("/create", api.MerchantCreate)
+	merchant.DELETE("/delete", api.MerchantDelete)
 	merchant.POST("/login", api.MerchantLogin)
 	merchant.POST("/logout", api.MerchantLogout)
 
+	apiv1 := r.Group("/api/v1")
 	{
-		apiv1 := r.Group("/api/v1")
+		// merchant group
+		merchant_jwt := apiv1.Group("/merchant/jwt")
 		{
-			// merchant group
-			merchant_jwt := apiv1.Group("/merchant/jwt")
-			{
-				merchant_jwt_ak := merchant_jwt.Group("/")
-				ak_hanlder := jwt.JWTAK(
-					merchant_service.ValidateToken,
-					merchant_service.AuthAccessToken,
-				)
-				merchant_jwt_ak.Use(ak_hanlder)
+			merchant_jwt_ak := merchant_jwt.Group("/")
+			ak_hanlder := jwt.JWTAK(
+				merchant_service.ValidateToken,
+				merchant_service.AuthAccessToken,
+			)
+			merchant_jwt_ak.Use(ak_hanlder)
 
-				merchant_jwt_ak.PUT("/change-password", api.MerchantChangePassword)
-			}
-
-			{
-				merchant_jwt_rk := merchant_jwt.Group("/")
-				rk_hanlder := jwt.JWTAK(
-					merchant_service.ValidateToken,
-					merchant_service.AuthRefreshToken,
-				)
-				merchant_jwt_rk.Use(rk_hanlder)
-				merchant_jwt_rk.GET("/auth", api.MerchantGetAuth)
-				merchant_jwt_rk.GET("/login-status", api.MerchantLoginStatus)
-			}
+			merchant_jwt_ak.PUT("/change-password", api.MerchantChangePassword)
 		}
 
 		{
+			merchant_jwt_rk := merchant_jwt.Group("/")
+			rk_hanlder := jwt.JWTAK(
+				merchant_service.ValidateToken,
+				merchant_service.AuthRefreshToken,
+			)
+			merchant_jwt_rk.Use(rk_hanlder)
+			merchant_jwt_rk.GET("/auth", api.MerchantGetAuth)
+			merchant_jwt_rk.GET("/login-status", api.MerchantLoginStatus)
+		}
+	}
 
-			// admin group
-			admin_jwt := apiv1.Group("/admin/jwt")
+	{
 
-			// apis
-			{
-				admin_jwt_ak := admin_jwt.Group("/")
-				ak_hanlder := jwt.JWTAK(
-					admin_service.ValidateToken,
-					admin_service.AuthAccessToken,
-				)
-				admin_jwt_ak.Use(ak_hanlder)
-				admin_jwt_ak.PUT("/change-password", api.AdminChangePassword)
-			}
+		// admin group
+		admin_jwt := apiv1.Group("/admin/jwt")
 
-			{
-				admin_jwt_rk := admin_jwt.Group("/")
-				rk_hanlder := jwt.JWTAK(
-					admin_service.ValidateToken,
-					admin_service.AuthRefreshToken,
-				)
-				admin_jwt_rk.Use(rk_hanlder)
-				admin_jwt_rk.GET("/auth", api.AdminGetAuth)
-				admin_jwt_rk.GET("/login-status", api.AdminLoginStatus)
-			}
+		// apis
+		{
+			admin_jwt_ak := admin_jwt.Group("/")
+			ak_hanlder := jwt.JWTAK(
+				admin_service.ValidateToken,
+				admin_service.AuthAccessToken,
+			)
+			admin_jwt_ak.Use(ak_hanlder)
+			admin_jwt_ak.PUT("/change-password", api.AdminChangePassword)
+		}
+
+		{
+			admin_jwt_rk := admin_jwt.Group("/")
+			rk_hanlder := jwt.JWTAK(
+				admin_service.ValidateToken,
+				admin_service.AuthRefreshToken,
+			)
+			admin_jwt_rk.Use(rk_hanlder)
+			admin_jwt_rk.GET("/auth", api.AdminGetAuth)
+			admin_jwt_rk.GET("/login-status", api.AdminLoginStatus)
 		}
 	}
 

@@ -32,9 +32,6 @@ func init() {
 	// NOTE: 在该init中，初始化该模块的数据验证
 	{
 		// register login validation
-		// 约定账号长度最大值为30, 最小值为10
-		// 约定密码最大长度为32, 最小长度为12
-
 		// 修改密码validation
 		password_rules := map[string]string{
 			"Password": "min=8,max=30",

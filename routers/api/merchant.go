@@ -13,6 +13,64 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+func MerchantDelete(c *gin.Context) {
+	if v := superTokenCheck(c); !v {
+		return
+	}
+
+	account := c.PostForm("account")
+	err, rows := models.DeleteMerchant(account)
+	if err != nil {
+		res := map[string]string{
+			"error": err.Error(),
+		}
+		app.Response(c, http.StatusOK, ecode.ERROR, res)
+		return
+	}
+
+	if rows <= 0 {
+		res := map[string]string{
+			"warn": "delete nothing",
+		}
+		app.Response(c, http.StatusOK, ecode.SUCCESS, res)
+		return
+	}
+
+	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
+}
+
+func MerchantCreate(c *gin.Context) {
+	if v := superTokenCheck(c); !v {
+		return
+	}
+	if v := merchant_service.SignUpValidate(c); !v {
+		return
+	}
+
+	// create account
+	account := c.PostForm("account")
+	encrypted_password := utils.Encrypt(c.PostForm("password"), setting.AppSetting.Salt)
+	merchant_name := c.PostForm("merchant_name")
+	phone_numer := c.PostForm("phone_numer")
+
+	data := models.Merchant{
+		MerchantName: merchant_name,
+		Account:      account,
+		Password:     encrypted_password,
+		PhoneNumber:  phone_numer,
+	}
+	err := models.CreateMerchant(&data)
+	if err != nil {
+		res := map[string]string{
+			"error": err.Error(),
+		}
+		app.Response(c, http.StatusOK, ecode.ERROR, res)
+		return
+	}
+
+	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
+}
+
 func MerchantGetAuth(c *gin.Context) {
 	// 通过refresh_token, 获得access_token
 	// 通过refresh_token, 获得access_token
@@ -93,5 +151,3 @@ func MerchantChangePassword(c *gin.Context) {
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
 	log.Debug("password updated")
 }
-
-
