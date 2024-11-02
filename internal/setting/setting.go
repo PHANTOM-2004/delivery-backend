@@ -32,11 +32,13 @@ type Log struct {
 }
 
 type App struct {
-	Salt         string
-	JWTSecretKey string
-	AdminToken   string
-	AdminAKAge   int
-	AdminRKAge   int
+	Salt          string
+	JWTSecretKey  string
+	AdminToken    string
+	AdminAKAge    int
+	AdminRKAge    int
+	MerchantAKAge int
+	MerchantRKAge int
 }
 
 type Database struct {

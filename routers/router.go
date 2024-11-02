@@ -4,6 +4,7 @@ import (
 	"delivery-backend/internal/setting"
 	"delivery-backend/middleware/jwt"
 	"delivery-backend/routers/api"
+	"delivery-backend/service/admin_service"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/redis"
@@ -60,13 +61,21 @@ func InitRouter() *gin.Engine {
 			// apis
 			{
 				admin_jwt_ak := admin_jwt.Group("/")
-				admin_jwt_ak.Use(jwt.JWTAK())
+				ak_hanlder := jwt.JWTAK(
+					admin_service.ValidateToken,
+					admin_service.AuthAccessToken,
+				)
+				admin_jwt_ak.Use(ak_hanlder)
 				admin_jwt_ak.PUT("/change-password", api.AdminChangePassword)
 			}
 
 			{
 				admin_jwt_rk := admin_jwt.Group("/")
-				admin_jwt_rk.Use(jwt.JWTRK())
+				rk_hanlder := jwt.JWTAK(
+					admin_service.ValidateToken,
+					admin_service.AuthRefreshToken,
+				)
+				admin_jwt_rk.Use(rk_hanlder)
 				admin_jwt_rk.GET("/auth", api.AdminGetAuth)
 				admin_jwt_rk.GET("/login-status", api.AdminLoginStatus)
 			}
