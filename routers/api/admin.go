@@ -13,6 +13,7 @@ import (
 	"delivery-backend/internal/ecode"
 	"delivery-backend/internal/setting"
 	"delivery-backend/models"
+	jwt_token "delivery-backend/pkg/jwt"
 	"delivery-backend/pkg/utils"
 	"delivery-backend/service"
 	"net/http"
@@ -28,7 +29,7 @@ func GetAuth(c *gin.Context) {
 	account := c.GetString("jwt_account")
 
 	// 提供access_token
-	access_token := service.GetAdminAccessToken(account)
+	access_token := jwt_token.GetAccessToken("admin", account, setting.AppSetting.AdminAKAge)
 	service.SetAccessToken(c, access_token)
 
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
@@ -58,8 +59,8 @@ func AdminLogin(c *gin.Context) {
 	}
 
 	// return refresh_token, access_token
-	refresh_token := service.GetAdminRefreshToken(account)
-	access_token := service.GetAdminAccessToken(account)
+	refresh_token := jwt_token.GetRefreshToken("admin", account, setting.AppSetting.AdminRKAge)
+	access_token := jwt_token.GetAccessToken("admin", account, setting.AppSetting.AdminRKAge)
 
 	service.SetAccessToken(c, access_token)
 	service.SetRefreshToken(c, refresh_token)

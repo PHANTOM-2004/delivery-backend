@@ -39,13 +39,15 @@ func InitRouter() *gin.Engine {
 
 	// admin group, for vite usage
 	admin := r.Group("/admin")
-
 	// admin api
-
 	admin.POST("/create", api.AdminCreate)
 	admin.DELETE("/delete", api.AdminDelete)
 	admin.POST("/login", api.AdminLogin)
 	admin.POST("/logout", api.AdminLogout)
+
+	// merchant
+	merchant := r.Group("/merchant")
+	merchant.POST("/login")
 
 	{
 		apiv1 := r.Group("/api/v1")

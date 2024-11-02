@@ -75,7 +75,6 @@ func SignUpValidate(c *gin.Context) bool {
 	return true
 }
 
-
 func PasswordValidate(password string, c *gin.Context) bool {
 	data := Password{password}
 
