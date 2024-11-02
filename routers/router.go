@@ -4,6 +4,7 @@ import (
 	"delivery-backend/internal/setting"
 	"delivery-backend/middleware/jwt"
 	"delivery-backend/routers/api"
+	v1 "delivery-backend/routers/api/v1"
 	"delivery-backend/service/admin_service"
 	"delivery-backend/service/merchant_service"
 
@@ -20,6 +21,7 @@ func InitRouter() *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
+	r.MaxMultipartMemory = int64(setting.AppSetting.LicensePhotoSize << 20) // MiB
 
 	gin.SetMode(setting.ServerSetting.RunMode)
 	// NOTE:注意更新文档
@@ -39,20 +41,26 @@ func InitRouter() *gin.Engine {
 	admin_session_handler := sessions.Sessions("AdminSession", store)
 	log.Debug("Currently session not used", admin_session_handler)
 
-	// admin group, for vite usage
+	// admin group
 	admin := r.Group("/admin")
-	// admin api
 	admin.POST("/create", api.AdminCreate)
 	admin.DELETE("/delete", api.AdminDelete)
 	admin.POST("/login", api.AdminLogin)
 	admin.POST("/logout", api.AdminLogout)
-
 	// merchant
 	merchant := r.Group("/merchant")
 	merchant.POST("/login", api.MerchantLogin)
 	merchant.POST("/logout", api.MerchantLogout)
 
 	apiv1 := r.Group("/api/v1")
+
+	{
+		// customer group
+		// TODO: 身份校验
+		customer := apiv1.Group("/customer")
+		customer.POST("/business-application", v1.MerchantApply)
+	}
+
 	{
 		// merchant group
 		merchant_jwt := apiv1.Group("/merchant/jwt")
@@ -80,11 +88,8 @@ func InitRouter() *gin.Engine {
 	}
 
 	{
-
 		// admin group
 		admin_jwt := apiv1.Group("/admin/jwt")
-
-		// apis
 		{
 			admin_jwt_ak := admin_jwt.Group("/")
 			ak_hanlder := jwt.JWTAK(
