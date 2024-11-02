@@ -27,10 +27,10 @@ type SuperToken struct {
 	SuperToken string `json:"super_token"`
 }
 
-// swagger:parameters admin_change_password merchant_create merchant_delete merchant_change_password
+// swagger:parameters admin_change_password merchant_create merchant_delete merchant_change_password get_merchant_application
 type AccessToken struct {
 	// 通过cookie发送,client不必手动handle
-  // in: cookie
+	// in: cookie
 	// required: true
 	AccessToken string `json:"access_token"`
 }
@@ -38,7 +38,7 @@ type AccessToken struct {
 // swagger:parameters admin_auth admin_logout admin_login_status  merchant_login_status merchant_auth merchant_logout
 type RefreshToken struct {
 	// 通过cookie发送,client不必手动handle
-  // in: cookie
+	// in: cookie
 	RefreshToken string `json:"refresh_token"`
 }
 

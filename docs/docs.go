@@ -9,6 +9,7 @@
 //
 //	 Consumes:
 //	 - https
+//	 - multipart/form-data
 //
 //	 Produces:
 //	 - application/json
@@ -48,3 +49,5 @@ type CommonResponse struct {
 		Data map[string]any `json:"data"`
 	}
 }
+
+// https://github.com/go-swagger/go-swagger/blob/master/fixtures/goparsing/classification/operations/noparams.go#L28-L33
