@@ -97,6 +97,8 @@ func disableToken(prefix string, token string, expire_minute int) error {
 	return gredis.Set(key, "", time.Duration(expire_minute)*time.Minute)
 }
 
+// 判断token是否在redis黑名单中
+// 当token有效返回true，无效返回false
 func ValidateToken(prefix string, token string) bool {
 	key := prefix + token
 	return !gredis.Exists(key)

@@ -5,6 +5,7 @@ import (
 	"delivery-backend/middleware/jwt"
 	"delivery-backend/routers/api"
 	"delivery-backend/service/admin_service"
+	"delivery-backend/service/merchant_service"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/redis"
@@ -48,10 +49,36 @@ func InitRouter() *gin.Engine {
 
 	// merchant
 	merchant := r.Group("/merchant")
-	merchant.POST("/login")
+	merchant.POST("/login", api.MerchantLogin)
+	merchant.POST("/logout", api.MerchantLogout)
 
 	{
 		apiv1 := r.Group("/api/v1")
+		{
+			// merchant group
+			merchant_jwt := apiv1.Group("/merchant/jwt")
+			{
+				merchant_jwt_ak := merchant_jwt.Group("/")
+				ak_hanlder := jwt.JWTAK(
+					merchant_service.ValidateToken,
+					merchant_service.AuthAccessToken,
+				)
+				merchant_jwt_ak.Use(ak_hanlder)
+
+				merchant_jwt_ak.PUT("/change-password", api.MerchantChangePassword)
+			}
+
+			{
+				merchant_jwt_rk := merchant_jwt.Group("/")
+				rk_hanlder := jwt.JWTAK(
+					merchant_service.ValidateToken,
+					merchant_service.AuthRefreshToken,
+				)
+				merchant_jwt_rk.Use(rk_hanlder)
+				merchant_jwt_rk.GET("/auth", api.MerchantGetAuth)
+				merchant_jwt_rk.GET("/login-status", api.MerchantLoginStatus)
+			}
+		}
 
 		{
 
