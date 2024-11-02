@@ -67,7 +67,7 @@ func InitRouter() *gin.Engine {
 			{
 				admin_jwt_rk := admin_jwt.Group("/")
 				admin_jwt_rk.Use(jwt.JWTRK())
-				admin_jwt_rk.GET("/auth", api.GetAuth)
+				admin_jwt_rk.GET("/auth", api.AdminGetAuth)
 				admin_jwt_rk.GET("/login-status", api.AdminLoginStatus)
 			}
 		}

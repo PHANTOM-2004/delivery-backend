@@ -3,7 +3,7 @@ package jwt
 import (
 	"delivery-backend/internal/app"
 	"delivery-backend/internal/ecode"
-	"delivery-backend/service"
+	"delivery-backend/service/admin_service"
 	"errors"
 	"net/http"
 
@@ -23,7 +23,7 @@ func JWTRK() gin.HandlerFunc {
 		log.Debug("pass: refresh_token exists")
 
 		// 校验refresh token
-		account, code := service.AuthAdminRefreshToken(refresh_token)
+		account, code := admin_service.AuthAdminRefreshToken(refresh_token)
 		if code != ecode.SUCCESS {
 			app.Response(c, http.StatusOK, code, nil)
 			return
@@ -32,7 +32,7 @@ func JWTRK() gin.HandlerFunc {
 		log.Debug("pass: refresh_token validation")
 
 		// 检查refresh token是否在黑名单中
-		valid := service.ValidateAdminToken(refresh_token)
+		valid := admin_service.ValidateAdminToken(refresh_token)
 		if !valid {
 			app.Response(c, http.StatusOK, ecode.ERROR_AUTH_REFRESH_TOKEN_EXPIRED, nil)
 			c.Abort()
@@ -60,7 +60,7 @@ func JWTAK() gin.HandlerFunc {
 
 		log.Debug("pass: received jwt access_token")
 
-		account, code := service.AuthAdminAccessToken(access_token)
+		account, code := admin_service.AuthAdminAccessToken(access_token)
 		if code != ecode.SUCCESS {
 			app.Response(c, http.StatusOK, code, nil)
 			c.Abort()
@@ -70,7 +70,7 @@ func JWTAK() gin.HandlerFunc {
 		log.Debug("pass: access_token validation")
 
 		// 检查是否在黑名单中
-		valid := service.ValidateAdminToken(access_token)
+		valid := admin_service.ValidateAdminToken(access_token)
 		if !valid {
 			app.Response(c, http.StatusOK, ecode.ERROR_AUTH_ACCESS_TOKEN_EXPIRED, nil)
 			c.Abort()

@@ -1,4 +1,4 @@
-package service
+package admin_service
 
 import (
 	"delivery-backend/internal/app"

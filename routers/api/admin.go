@@ -13,9 +13,8 @@ import (
 	"delivery-backend/internal/ecode"
 	"delivery-backend/internal/setting"
 	"delivery-backend/models"
-	jwt_token "delivery-backend/pkg/jwt"
 	"delivery-backend/pkg/utils"
-	"delivery-backend/service"
+	"delivery-backend/service/admin_service"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
@@ -23,14 +22,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetAuth(c *gin.Context) {
+func AdminGetAuth(c *gin.Context) {
 	// 通过refresh_token, 获得access_token
 	//
 	account := c.GetString("jwt_account")
 
 	// 提供access_token
-	access_token := jwt_token.GetAccessToken("admin", account, setting.AppSetting.AdminAKAge)
-	service.SetAccessToken(c, access_token)
+	access_token := admin_service.GetAccessToken(account)
+	admin_service.SetAccessToken(c, access_token)
 
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
 
@@ -46,7 +45,7 @@ func AdminLoginStatus(c *gin.Context) {
 }
 
 func AdminLogout(c *gin.Context) {
-	service.DisbleAdminTokens(c)
+	admin_service.DisbleTokens(c)
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
 }
 
@@ -54,16 +53,16 @@ func AdminLogin(c *gin.Context) {
 	account := c.PostForm("account")
 	password := c.PostForm("password")
 
-	if v := service.AccountValidate(account, password, c); !v {
+	if v := admin_service.AccountValidate(account, password, c); !v {
 		return
 	}
 
 	// return refresh_token, access_token
-	refresh_token := jwt_token.GetRefreshToken("admin", account, setting.AppSetting.AdminRKAge)
-	access_token := jwt_token.GetAccessToken("admin", account, setting.AppSetting.AdminRKAge)
+	refresh_token := admin_service.GetRefreshToken(account)
+	access_token := admin_service.GetAccessToken(account)
 
-	service.SetAccessToken(c, access_token)
-	service.SetRefreshToken(c, refresh_token)
+	admin_service.SetAccessToken(c, access_token)
+	admin_service.SetRefreshToken(c, refresh_token)
 
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
 }
@@ -73,7 +72,7 @@ func AdminChangePassword(c *gin.Context) {
 
 	new_pwd := c.PostForm("password")
 	// 新密码, 首先进行校验
-	if v := service.PasswordValidate(new_pwd, c); !v {
+	if v := admin_service.PasswordValidate(new_pwd, c); !v {
 		return
 	}
 
@@ -92,7 +91,7 @@ func AdminChangePassword(c *gin.Context) {
 	}
 
 	// 应当删除tokens
-	service.DisbleAdminTokens(c)
+	admin_service.DisbleTokens(c)
 
 	// 返回响应
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)

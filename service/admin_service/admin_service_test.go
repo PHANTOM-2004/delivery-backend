@@ -1,4 +1,4 @@
-package service
+package admin_service
 
 import (
 	jwt_token "delivery-backend/pkg/jwt"
@@ -18,6 +18,6 @@ func TestGetAdminAccessToken(t *testing.T) {
 
 	tks := jwt_token.GetAccessToken("admin", account, 10)
 	fmt.Println(tks)
-	account, code := AuthAdminAccessToken(tks)
+	account, code := AuthAccessToken(tks)
 	fmt.Println(account, code)
 }
