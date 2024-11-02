@@ -49,8 +49,6 @@ func InitRouter() *gin.Engine {
 
 	// merchant
 	merchant := r.Group("/merchant")
-	merchant.POST("/create", api.MerchantCreate)
-	merchant.DELETE("/delete", api.MerchantDelete)
 	merchant.POST("/login", api.MerchantLogin)
 	merchant.POST("/logout", api.MerchantLogout)
 
@@ -95,6 +93,8 @@ func InitRouter() *gin.Engine {
 			)
 			admin_jwt_ak.Use(ak_hanlder)
 			admin_jwt_ak.PUT("/change-password", api.AdminChangePassword)
+			admin_jwt_ak.POST("/merchant-create", api.MerchantCreate)
+			admin_jwt_ak.POST("/merchant-delete", api.MerchantDelete)
 		}
 
 		{
