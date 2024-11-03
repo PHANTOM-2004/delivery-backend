@@ -105,3 +105,27 @@ type AdminName struct {
 // PS: 通过postform形式传递密码, 不要使用url传参。
 // responses:
 // 200: COMMON
+
+// swagger:parameters admin_approve_application admin_disapprove_application
+type MerchantApplicationID struct {
+	// 申请表id
+	// in: path
+	ID string `json:"id"`
+}
+
+// =============================================================
+// swagger:route PUT /api/v1/admin/jwt/merchant-application/{id}/approve v1-admin admin_approve_application
+// 管理员通过商家发起的申请
+// 如果同意，会判断是否存在关联的商家账号，如果存在必然是封禁状态，那么会对状态进行解禁; 如果不存在关联的商家账号，那么会为该申请创建一个新账号。
+// PS: 目前新账号会放在日志中，后续新账号会发送到申请邮箱中。
+// responses:
+// 200: COMMON
+
+// =============================================================
+// swagger:route PUT /api/v1/admin/jwt/merchant-application/{id}/disapprove v1-admin admin_disapprove_application
+// 管理员拒绝商家发起的申请
+// 如果拒绝, 仍然会判断是否有关联的商家账号，如果没有关联的商家账号，那么仅拒绝申请。
+// 如果有关联的商家账号，还会把这个关联的商家账号进行冻结。
+// 在非法请求发出时（管理员不处于登入状态）会返回错误信息。
+// responses:
+// 200: COMMON
