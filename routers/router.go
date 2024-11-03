@@ -2,6 +2,7 @@ package routers
 
 import (
 	"delivery-backend/internal/setting"
+	"delivery-backend/middleware/filter"
 	"delivery-backend/middleware/jwt"
 	"delivery-backend/routers/api"
 	v1 "delivery-backend/routers/api/v1"
@@ -67,23 +68,26 @@ func InitRouter() *gin.Engine {
 		{
 			merchant_jwt_ak := merchant_jwt.Group("/")
 			ak_hanlder := jwt.JWTAK(
-				merchant_service.ValidateToken,
+				merchant_service.TokenInBlacklist,
 				merchant_service.AuthAccessToken,
 			)
-			merchant_jwt_ak.Use(ak_hanlder)
+			merchant_jwt_ak.Use(ak_hanlder, filter.MerchantBlacklistFilter())
 
-			merchant_jwt_ak.PUT("/change-password", api.MerchantChangePassword)
+			merchant_jwt_ak.PUT("/change-password",
+				api.MerchantChangePassword)
 		}
 
 		{
 			merchant_jwt_rk := merchant_jwt.Group("/")
 			rk_hanlder := jwt.JWTRK(
-				merchant_service.ValidateToken,
+				merchant_service.TokenInBlacklist,
 				merchant_service.AuthRefreshToken,
 			)
-			merchant_jwt_rk.Use(rk_hanlder)
-			merchant_jwt_rk.GET("/auth", api.MerchantGetAuth)
-			merchant_jwt_rk.GET("/login-status", api.MerchantLoginStatus)
+			merchant_jwt_rk.Use(rk_hanlder, filter.MerchantBlacklistFilter())
+			merchant_jwt_rk.GET("/auth",
+				api.MerchantGetAuth)
+			merchant_jwt_rk.GET("/login-status",
+				api.MerchantLoginStatus)
 		}
 	}
 
@@ -93,25 +97,34 @@ func InitRouter() *gin.Engine {
 		{
 			admin_jwt_ak := admin_jwt.Group("/")
 			ak_hanlder := jwt.JWTAK(
-				admin_service.ValidateToken,
+				admin_service.TokenInBlacklist,
 				admin_service.AuthAccessToken,
 			)
 			admin_jwt_ak.Use(ak_hanlder)
 			admin_jwt_ak.PUT("/change-password", api.AdminChangePassword)
-			admin_jwt_ak.POST("/merchant-create", api.MerchantCreate)
-			admin_jwt_ak.POST("/merchant-delete", api.MerchantDelete)
-			admin_jwt_ak.GET("/merchant-application/:page", v1.GetMerchantApplication)
+			admin_jwt_ak.POST("/merchant-create",
+				api.MerchantCreate)
+			admin_jwt_ak.POST("/merchant-delete",
+				api.MerchantDelete)
+			admin_jwt_ak.GET("/merchant-application/:page",
+				v1.GetMerchantApplication)
+			admin_jwt_ak.POST("/merchant-application/:id/approve",
+				v1.ApproveMerchantApplication)
+			admin_jwt_ak.POST("/merchant-application/:id/disapprove",
+				v1.DisapproveMerchantApplication)
 		}
 
 		{
 			admin_jwt_rk := admin_jwt.Group("/")
 			rk_hanlder := jwt.JWTRK(
-				admin_service.ValidateToken,
+				admin_service.TokenInBlacklist,
 				admin_service.AuthRefreshToken,
 			)
 			admin_jwt_rk.Use(rk_hanlder)
-			admin_jwt_rk.GET("/auth", api.AdminGetAuth)
-			admin_jwt_rk.GET("/login-status", api.AdminLoginStatus)
+			admin_jwt_rk.GET("/auth",
+				api.AdminGetAuth)
+			admin_jwt_rk.GET("/login-status",
+				api.AdminLoginStatus)
 		}
 	}
 

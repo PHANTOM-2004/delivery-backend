@@ -30,7 +30,7 @@ delivery_merchant_application (
     `created_at` datetime not null,
     `updated_at` datetime not null,
     `deleted_at` datetime,
-    `status` tinyint default 0 not null comment '1 代表不通过审核，2 代表未审核，3代表通过审核',
+    `status` tinyint default 2 not null comment '1 代表不通过审核，2 代表未审核，3代表通过审核',
     `description` varchar(300) not null comment '申请账号时的简述',
     `license` varchar(200) not null comment '存放了营业执照的路径，需要商家上传图片',
     `email` varchar(50) not null comment '商家接收账号和密码的地址',

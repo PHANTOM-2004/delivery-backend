@@ -3,6 +3,7 @@ package merchant_service
 import (
 	"delivery-backend/internal/app"
 	"delivery-backend/internal/ecode"
+	"delivery-backend/internal/gredis"
 	"delivery-backend/internal/setting"
 	"delivery-backend/models"
 	"delivery-backend/pkg/utils"
@@ -52,6 +53,16 @@ func init() {
 		signup_rules["PhoneNumber"] = "required,e164"
 		app.RegisterValidation(SignUp{}, signup_rules)
 	}
+}
+
+func DisableAccount(account string) {
+	key := "MERCH_ACC_" + account
+	gredis.Set(key, "", 0)
+}
+
+func AccountInBlacklist(account string) bool {
+	exist := gredis.Exists("MERCH_ACC_" + account)
+	return exist
 }
 
 func AccountValidate(account string, password string, c *gin.Context) bool {

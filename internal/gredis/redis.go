@@ -21,6 +21,7 @@ func Setup() {
 	})
 }
 
+// Zero expiration means the key has no expiration time.
 func Set(key string, data any, expiration time.Duration) error {
 	value, err := json.Marshal(data)
 	if err != nil {
