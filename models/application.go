@@ -14,6 +14,7 @@ type MerchantApplication struct {
 	License     string
 	Email       string
 	PhoneNumber string
+	Name        string
 }
 
 const (

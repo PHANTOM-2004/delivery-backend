@@ -35,6 +35,7 @@ delivery_merchant_application (
     `license` varchar(200) not null comment '存放了营业执照的路径，需要商家上传图片',
     `email` varchar(50) not null comment '商家接收账号和密码的地址',
     `phone_number` varchar(30) not null comment '申请表创建者的联系方式',
+    `name` varchar(20) not null comment '申请表创建者姓名',
     primary key (id)
 ) engine = innodb default charset = utf8 comment = '商家账户申请表';
 
@@ -50,7 +51,7 @@ delivery_merchant (
     `account` varchar(50) not null unique,
     `password` varchar(50) not null,
     `status` tinyint default 1 not null comment '1 代表账户状态有效, 0 代表账户状态无效',
-    `application_id` int unique comment '每一个商家账号关联唯一一个商家申请表',
+    `merchant_application_id` int unique comment '每一个商家账号关联唯一一个商家申请表',
     foreign key (application_id) references delivery_merchant_application (
         id
     ) on delete set null,

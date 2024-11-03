@@ -9,10 +9,12 @@ import (
 
 type Merchant struct {
 	gorm.Model
-	MerchantName string
-	PhoneNumber  string
-	Account      string
-	Password     string
+	MerchantName          string
+	PhoneNumber           string
+	Account               string
+	Password              string
+	MerchantApplicationID int
+	MerchantApplication   MerchantApplication
 }
 
 // 优先判断其他错误， 找不到时id返回为0,
@@ -50,6 +52,17 @@ func GetMerchantByID(id uint) (*Merchant, error) {
 	}
 
 	return m, err
+}
+
+func EnableMerchant(id uint) error {
+	err := db.Model(&Merchant{}).Where("id = ?", id).Update("status", 1).Error
+	return err
+}
+
+// 禁用merchant账号
+func DisableMerchant(id uint) error {
+	err := db.Model(&Merchant{}).Where("id = ?", id).Update("status", 0).Error
+	return err
 }
 
 func EditMerchant(id uint, data any) error {
