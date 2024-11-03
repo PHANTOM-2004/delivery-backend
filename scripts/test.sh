@@ -13,11 +13,14 @@ curl -b cookies.txt https://localhost/api/v1/admin/jwt/auth --request GET
 curl -b cookies.txt https://localhost/api/v1/admin/jwt/merchant-application/1
 
 # 上传申请表
-►curl -F "status=1" \
+curl \
   -F "description=ok" \
   -F "email=666@qq.com" \
   -F "phone_number=+8618537775175" \
   -F "license=@Makefile.png" \
-  "https://localhost/api/v1/customer/business-application" \
-  -H "Content-Type: multipart/form-data" \
+  -F "name=szc" \
+  https://localhost/api/v1/customer/merchant-application -H "Content-Type: multipart/form-data" \
   --request POST
+
+# 通过商家申请
+curl -b cookies.txt https://localhost/api/v1/admin/jwt/merchant-application/1/approve --request POST

@@ -52,7 +52,7 @@ delivery_merchant (
     `password` varchar(50) not null,
     `status` tinyint default 1 not null comment '1 代表账户状态有效, 0 代表账户状态无效',
     `merchant_application_id` int unique comment '每一个商家账号关联唯一一个商家申请表',
-    foreign key (application_id) references delivery_merchant_application (
+    foreign key (merchant_application_id) references delivery_merchant_application (
         id
     ) on delete set null,
     primary key (id)
