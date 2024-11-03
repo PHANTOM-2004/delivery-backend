@@ -3,6 +3,7 @@ package merchant_service
 import (
 	"delivery-backend/internal/app"
 	"delivery-backend/internal/ecode"
+	"delivery-backend/internal/gredis"
 	"delivery-backend/internal/setting"
 	"delivery-backend/models"
 	"delivery-backend/pkg/utils"
@@ -52,6 +53,58 @@ func init() {
 		signup_rules["PhoneNumber"] = "required,e164"
 		app.RegisterValidation(SignUp{}, signup_rules)
 	}
+}
+
+// 返回redis黑名单中account对应的key
+func getAccountKey(account string) string {
+	return "MERCH_ACC_" + account
+}
+
+func EnableAccount(merchant_id uint, account string) error {
+	key := getAccountKey(account)
+
+	exist := gredis.Exists(key)
+	if !exist {
+		// NOTE: 这不允许发生，对接的前端心里有点B数
+		log.Warnf("Enable account[%s] that is not in blacklist", account)
+		return nil
+	}
+
+	// 写入redis
+	err := gredis.Delete(key)
+	if err != nil {
+		return err
+	}
+
+	// 写入数据库
+	err = models.EnableMerchant(merchant_id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DisableAccount(merchant_id uint, account string) error {
+	key := getAccountKey(account)
+	// 首先设置缓存中账户状态为禁用
+	err := gredis.Set(key, "", 0)
+	if err != nil {
+		return err
+	}
+	// 然后设置数据库商家的状态为禁用状态
+	err = models.DisableMerchant(merchant_id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// 只从redis中查询状态
+func AccountInBlacklist(account string) bool {
+	key := getAccountKey(account)
+	exist := gredis.Exists(key)
+	return exist
 }
 
 func AccountValidate(account string, password string, c *gin.Context) bool {
@@ -126,4 +179,34 @@ func PasswordValidate(password string, c *gin.Context) bool {
 		return false
 	}
 	return true
+}
+
+// 管理员端为Merchant创建
+func CreateMerchantFromApplication(application_id uint) error {
+	a, err := models.
+		GetMerchantApplication(int(application_id))
+	if err != nil {
+		log.Warnf("Merchant Application id[%d] not found", application_id)
+		return err
+	}
+
+	// TODO: 暂定注册规则为随机字符串,后续按照需要更改
+	account := "M" + utils.RandString(10)
+	password := "P" + utils.RandString(11)
+	en_password := utils.Encrypt(password, setting.AppSetting.Salt)
+
+	m := models.Merchant{
+		Account:               account,
+		Password:              en_password,
+		PhoneNumber:           a.PhoneNumber,
+		MerchantName:          a.Name,
+		MerchantApplicationID: int(application_id),
+	}
+
+	err = models.CreateMerchant(&m)
+	if err == nil {
+		log.Debugf("created merchant:account[%s],password[%s]",
+      account, password)
+	}
+	return err
 }

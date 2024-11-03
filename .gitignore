@@ -3,6 +3,12 @@ swagger.yaml
 
 # other txt
 *.txt
+*.jpeg
+*.jpg
+*.png
+
+# runtime 
+runtime/
 
 # build dirs
 build/

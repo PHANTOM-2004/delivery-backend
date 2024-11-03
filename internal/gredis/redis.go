@@ -21,6 +21,7 @@ func Setup() {
 	})
 }
 
+// Zero expiration means the key has no expiration time.
 func Set(key string, data any, expiration time.Duration) error {
 	value, err := json.Marshal(data)
 	if err != nil {
@@ -64,15 +65,13 @@ func Get(key string) ([]byte, error) {
 	return []byte(value), nil
 }
 
-func Delete(key string) (bool, error) {
+func Delete(key string) error {
 	ctx := context.Background()
-	res, err := Rdb.Del(ctx, key).Result()
+	_, err := Rdb.Del(ctx, key).Result()
 	if err == redis.Nil {
 		// 不存在
-		return false, nil
-	} else if err != nil {
-		return false, err
+		log.Warn("redis: delete non exist key:", key)
+		return nil
 	}
-
-	return res != 0, nil
+	return err
 }

@@ -13,6 +13,10 @@ type Merchant struct {
 	PhoneNumber  string
 	Account      string
 	Password     string
+	// 在告诉gorm默认值的时候gorm才知道默认值，否则这里会插入一个0
+	Status                int8 `gorm:"default:1"`
+	MerchantApplicationID int
+	MerchantApplication   MerchantApplication
 }
 
 // 优先判断其他错误， 找不到时id返回为0,
@@ -50,6 +54,17 @@ func GetMerchantByID(id uint) (*Merchant, error) {
 	}
 
 	return m, err
+}
+
+func EnableMerchant(id uint) error {
+	err := db.Model(&Merchant{}).Where("id = ?", id).Update("status", 1).Error
+	return err
+}
+
+// 禁用merchant账号
+func DisableMerchant(id uint) error {
+	err := db.Model(&Merchant{}).Where("id = ?", id).Update("status", 0).Error
+	return err
 }
 
 func EditMerchant(id uint, data any) error {

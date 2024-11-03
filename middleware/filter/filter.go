@@ -3,6 +3,7 @@ package filter
 import (
 	"delivery-backend/internal/app"
 	"delivery-backend/internal/ecode"
+	"delivery-backend/service/merchant_service"
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
@@ -10,6 +11,23 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// 过滤商家黑名单
+func MerchantBlacklistFilter() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		account := c.GetString("jwt_account")
+		in_blacklist := merchant_service.AccountInBlacklist(account)
+		if in_blacklist {
+			app.Response(c, http.StatusUnauthorized,
+				ecode.ERROR_MERCHANT_ACCOUNT_BANNED, nil)
+			c.Abort()
+			return
+		}
+		log.Debug("pass: merchant account not in blacklist")
+		c.Next()
+	}
+}
+
+// UNUSED
 func LoginFilter() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		session := sessions.Default(c)
@@ -17,13 +35,15 @@ func LoginFilter() gin.HandlerFunc {
 		role := session.Get("role")
 
 		if account == nil {
-			app.Response(c, http.StatusUnauthorized, ecode.ERROR_ADMIN_NOT_LOGIN, nil)
+			app.Response(c, http.StatusUnauthorized,
+				ecode.ERROR_ADMIN_NOT_LOGIN, nil)
 			c.Abort()
 			return
 		}
 
 		if role != "admin" {
-			app.Response(c, http.StatusUnauthorized, ecode.ERROR_ADMIN_ROLE, nil)
+			app.Response(c, http.StatusUnauthorized,
+				ecode.ERROR_ADMIN_ROLE, nil)
 			c.Abort()
 			return
 		}
@@ -35,6 +55,7 @@ func LoginFilter() gin.HandlerFunc {
 	}
 }
 
+// UNUSED
 func DoubleValidation() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		session_account, exist := c.Get("session_account")

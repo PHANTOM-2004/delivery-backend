@@ -22,9 +22,9 @@ func DisbleTokens(c *gin.Context) {
 }
 
 // 判断token是否在redis黑名单中
-// 当token有效返回true，无效返回false
-func ValidateToken(admin_token string) bool {
-	return jwt_token.ValidateToken("ADMIN_TK_", admin_token)
+// 当token在黑名单中返回true，否则返回false
+func TokenInBlacklist(admin_token string) bool {
+	return jwt_token.TokenInBlacklist("ADMIN_TK_", admin_token)
 }
 
 func SetRefreshToken(c *gin.Context, refresh_token string) {
