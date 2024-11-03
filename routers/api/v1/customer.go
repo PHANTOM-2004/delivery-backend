@@ -8,7 +8,6 @@ import (
 	"delivery-backend/service/customer_service"
 	"net/http"
 	"path/filepath"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -35,28 +34,6 @@ func checkLicenseType(name string) bool {
 	return false
 }
 
-// 传入page_id, 作为url传送
-func GetMerchantApplication(c *gin.Context) {
-	page := c.Param("page")
-	page_cnt, err := strconv.Atoi(page)
-	if err != nil {
-		app.Response(c, http.StatusOK, ecode.INVALID_PARAMS, nil)
-		return
-	}
-
-	res, err := models.GetMerchantApplication(page_cnt)
-	if err != nil {
-		app.Response(c, http.StatusInternalServerError, ecode.ERROR, nil)
-		return
-	}
-
-	data := map[string]any{
-		"applications": res,
-	}
-
-	app.Response(c, http.StatusOK, ecode.SUCCESS, data)
-}
-
 // 由顾客/骑手发起申请，提出商务合作请求
 // https://gin-gonic.com/docs/examples/upload-file/single-file/
 func MerchantApply(c *gin.Context) {
@@ -69,14 +46,7 @@ func MerchantApply(c *gin.Context) {
 		return
 	}
 
-	status, err := strconv.Atoi(c.PostForm("status"))
-	if err != nil {
-		app.Response(c, http.StatusOK, ecode.INVALID_PARAMS, nil)
-		return
-	}
-
 	a := customer_service.Application{
-		Status:      int8(status),
 		Description: c.PostForm("description"),
 		Email:       c.PostForm("email"),
 		PhoneNumber: c.PostForm("phone_number"),
@@ -103,7 +73,6 @@ func MerchantApply(c *gin.Context) {
 	// 插入数据库
 
 	data := models.MerchantApplication{
-		Status:      a.Status,
 		Description: a.Description,
 		License:     path,
 		Email:       a.Email,

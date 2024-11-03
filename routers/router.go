@@ -58,7 +58,7 @@ func InitRouter() *gin.Engine {
 		// customer group
 		// TODO: 身份校验
 		customer := apiv1.Group("/customer")
-		customer.POST("/business-application", v1.MerchantApply)
+		customer.POST("/merchant-application", v1.MerchantApply)
 	}
 
 	{
