@@ -71,6 +71,7 @@ func InitRouter() *gin.Engine {
 				merchant_service.TokenInBlacklist,
 				merchant_service.AuthAccessToken,
 			)
+			// middleware: 过滤在黑名单中的商家
 			merchant_jwt_ak.Use(ak_hanlder, filter.MerchantBlacklistFilter())
 
 			merchant_jwt_ak.PUT("/change-password",
@@ -83,6 +84,7 @@ func InitRouter() *gin.Engine {
 				merchant_service.TokenInBlacklist,
 				merchant_service.AuthRefreshToken,
 			)
+			// middleware: 过滤在黑名单中的商家
 			merchant_jwt_rk.Use(rk_hanlder, filter.MerchantBlacklistFilter())
 			merchant_jwt_rk.GET("/auth",
 				api.MerchantGetAuth)
@@ -108,9 +110,9 @@ func InitRouter() *gin.Engine {
 				api.MerchantDelete)
 			admin_jwt_ak.GET("/merchant-application/:page",
 				v1.GetMerchantApplication)
-			admin_jwt_ak.POST("/merchant-application/:id/approve",
+			admin_jwt_ak.PUT("/merchant-application/:id/approve",
 				v1.ApproveMerchantApplication)
-			admin_jwt_ak.POST("/merchant-application/:id/disapprove",
+			admin_jwt_ak.PUT("/merchant-application/:id/disapprove",
 				v1.DisapproveMerchantApplication)
 		}
 

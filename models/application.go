@@ -9,12 +9,13 @@ import (
 
 type MerchantApplication struct {
 	gorm.Model
-	Status      int8
-	Description string
-	License     string
-	Email       string
-	PhoneNumber string
-	Name        string
+	// 在告诉gorm默认值的时候gorm才知道默认值，否则这里会插入一个0
+	Status      int8   `gorm:"default:2"`
+	Description string 
+	License     string 
+	Email       string 
+	PhoneNumber string 
+	Name        string 
 }
 
 const (
@@ -33,7 +34,7 @@ func CreateMerchantApplication(a *MerchantApplication) error {
 func GetRelatedMerchant(application_id int) (*Merchant, error) {
 	res := Merchant{}
 	err := db.Model(&Merchant{}).
-		Where("application_id = ?", application_id).
+		Where("merchant_application_id = ?", application_id).
 		First(&res).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil

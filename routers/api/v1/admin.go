@@ -4,6 +4,7 @@ import (
 	"delivery-backend/internal/app"
 	"delivery-backend/internal/ecode"
 	"delivery-backend/models"
+	"delivery-backend/service/merchant_service"
 	"errors"
 	"net/http"
 	"strconv"
@@ -31,7 +32,7 @@ func GetMerchantApplication(c *gin.Context) {
 	}
 
 	data := map[string]any{
-		"applications": res,
+		"Applications": res,
 	}
 
 	app.Response(c, http.StatusOK, ecode.SUCCESS, data)
@@ -51,6 +52,8 @@ func ApproveMerchantApplication(c *gin.Context) {
 	//
 	// 需要判定先前状态, 这种申请必然不频繁，所以直接从数据库查询即可
 	// 至于先前状态，实际上只需要找商家账号是否存在即可
+	//
+	// 1. 查找相关联的账号
 	m, err := models.GetRelatedMerchant(id)
 	if err != nil {
 		log.Warn(err)
@@ -58,27 +61,69 @@ func ApproveMerchantApplication(c *gin.Context) {
 		return
 	}
 
+	// 2. 存在商家账号
 	if m != nil {
 		// 说明商家有账号，所以需要检查是否解冻这个账号
-		// TODO:通过redis黑名单+db冻结
+		log.Debugf("related account[%s] found", m.Account)
+		merchant_service.EnableAccount(m.ID, m.Account)
+		log.Debugf("merchant account[%s] enabled", m.Account)
 	}
 
-	// 更新状态
+	// 3.更新申请表的状态
 	err = models.ApproveApplication(id)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		log.Warnf("application form id[%d] not found", id)
-		app.Response(c, http.StatusOK, ecode.ERROR_MERCHANT_APPLICATION_NOT_FOUND, nil)
+		app.Response(c, http.StatusOK,
+			ecode.ERROR_MERCHANT_APPLICATION_NOT_FOUND, nil)
 		return
 	} else if err != nil {
+		log.Warn(err)
+		app.ResponseInternalError(c)
+		return
+	}
+
+	if m != nil {
+		app.ResponseSuccess(c)
+		log.Debugf("application form id[%d] approved", id)
+		return
+	}
+
+	// 4.考虑为商家注册账号
+	err = merchant_service.CreateMerchantFromApplication(uint(id))
+	if err != nil {
+		log.Warn(err)
+		app.ResponseInternalError(c)
+		return
+	}
+
+	app.ResponseSuccess(c)
+	log.Debugf("application form id[%d] approved; account created", id)
+}
+
+func DisapproveMerchantApplication(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		log.Debug(err)
+		app.Response(c, http.StatusOK, ecode.INVALID_PARAMS, nil)
+		return
+	}
+	m, err := models.GetRelatedMerchant(id)
+	if err != nil {
 		log.Warn(err)
 		app.Response(c, http.StatusInternalServerError, ecode.ERROR, nil)
 		return
 	}
 
-	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
+	if m == nil {
+		// 没有关联的商家账号，那么那么无需冻结和解冻操作
+		log.Debug("No related merchant account")
+		app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
+		return
+	}
 
-	log.Debugf("application form id[d] approved", id)
-}
-
-func DisapproveMerchantApplication(c *gin.Context) {
+	// 有关联的商家账号，需要冻结
+	// NOTE:正常来说，关联的商家此时必然是非冻结状态，否则就是多次disapprove
+	merchant_service.DisableAccount(m.ID, m.Account)
+	log.Debugf("Disable merchant account: %s", m.Account)
+	app.ResponseSuccess(c)
 }

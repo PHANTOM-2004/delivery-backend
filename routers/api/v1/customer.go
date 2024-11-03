@@ -50,6 +50,7 @@ func MerchantApply(c *gin.Context) {
 		Description: c.PostForm("description"),
 		Email:       c.PostForm("email"),
 		PhoneNumber: c.PostForm("phone_number"),
+		Name:        c.PostForm("name"),
 	}
 
 	err = app.ValidateStruct(a)
@@ -77,6 +78,7 @@ func MerchantApply(c *gin.Context) {
 		License:     path,
 		Email:       a.Email,
 		PhoneNumber: a.PhoneNumber,
+		Name:        a.Name,
 	}
 
 	err = models.CreateMerchantApplication(&data)

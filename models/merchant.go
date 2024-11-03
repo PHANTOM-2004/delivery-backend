@@ -9,10 +9,12 @@ import (
 
 type Merchant struct {
 	gorm.Model
-	MerchantName          string
-	PhoneNumber           string
-	Account               string
-	Password              string
+	MerchantName string
+	PhoneNumber  string
+	Account      string
+	Password     string
+	// 在告诉gorm默认值的时候gorm才知道默认值，否则这里会插入一个0
+	Status                int8 `gorm:"default:1"`
 	MerchantApplicationID int
 	MerchantApplication   MerchantApplication
 }
