@@ -114,6 +114,11 @@ func InitRouter() *gin.Engine {
 				v1.ApproveMerchantApplication)
 			admin_jwt_ak.PUT("/merchant-application/:id/disapprove",
 				v1.DisapproveMerchantApplication)
+
+      //NOTE: license的图片静态文件路由
+			license_path := setting.AppSetting.LicenseStorePath
+			log.Infof("Serving Static File: [%s]", license_path)
+			admin_jwt_ak.Static("/merchant-application/license", license_path)
 		}
 
 		{
