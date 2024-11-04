@@ -1,5 +1,7 @@
 package docs
 
+import "github.com/go-openapi/runtime"
+
 // =============================================================
 // 用于登入与认证的参数，注意后端处理的最大范围, 否则会返回错误
 // swagger:parameters admin_login admin_create admin_delete
@@ -27,7 +29,7 @@ type SuperToken struct {
 	SuperToken string `json:"super_token"`
 }
 
-// swagger:parameters admin_change_password merchant_create merchant_delete merchant_change_password get_merchant_application
+// swagger:parameters admin_change_password merchant_create merchant_delete merchant_change_password get_merchant_application admin_get_merchant_license
 type AccessToken struct {
 	// 通过cookie发送,client不必手动handle
 	// in: cookie
@@ -129,3 +131,23 @@ type MerchantApplicationID struct {
 // 在非法请求发出时（管理员不处于登入状态）会返回错误信息。
 // responses:
 // 200: COMMON
+
+// swagger:parameters  admin_get_merchant_license
+type MerchantLicenseRequest struct {
+	// example: merchant-license-02fd3ce1-fdcb-4a30-94a4-db3f9c241871.png
+	// in: path
+	ID string `json:"*filepath"`
+}
+
+// swagger:response merchant_license
+type MerchantLicenseResponse struct {
+	// 执照图片
+	// Required:true
+	License runtime.File
+}
+
+// =============================================================
+// swagger:route GET /api/v1/admin/jwt/merchant-application/license/{*file_path} v1-admin admin_get_merchant_license
+// 请求得到商家执照; 如果路径内容不存在则对应httpcode=404
+// responses:
+// 200: merchant_license
