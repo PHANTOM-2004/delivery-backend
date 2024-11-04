@@ -2,6 +2,14 @@ services:
   mariadb:
     image: mariadb:lts
     container_name: test_mariadb
+    # https://mariadb.com/kb/en/using-healthcheck-sh/
+    # 添加连接状态检查
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 5
     environment:
       MYSQL_ROOT_PASSWORD: woshinidie
       # 我们默认使用的数据库是TJ_SE
@@ -11,13 +19,19 @@ services:
       # 默认密码2252707
       MYSQL_PASSWORD: 2252707
     volumes:
-      - test_mariadb_data:/var/lib/mysql
+      # - test_mariadb_data:/var/lib/mysql
       # 初始化db, 创建需要的表
       - ../../scripts/db:/docker-entrypoint-initdb.d
 
   redis:
     image: redis:alpine
     container_name: test_redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      start_period: 10s
+      interval: 20s
+      timeout: 5s
+      retries: 5
     volumes:
       - test_redis_data:/data
 
@@ -50,7 +64,7 @@ services:
       - ../../../delivery-adminpanel:/AdminPanel
       # 工作目录也就是项目目录
     working_dir: /AdminPanel
-    command: sh -c "npm install && npm run dev"
+    command: sh -c "npm ci && npm run dev"
 
   go_service:
     #为了让bash能够正常运行
@@ -65,8 +79,12 @@ services:
       # project env for make
       GO_SERVICE_ENV: DOCKER_TEST
     depends_on:
-      - mariadb
-      - redis
+      # 添加容器的healthcheck
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
     # 默认工作区为项目目录
     working_dir: /home/Projects
     command: sh -c "make"
@@ -78,6 +96,7 @@ services:
       - test_go_cache:/go/pkg/mod # 缓存go cache快速启动
 
 volumes:
-  test_mariadb_data:
+  # 暂时先不需要mariadb的持久卷，每次通过curl进行创建
+  # test_mariadb_data:
   test_redis_data:
   test_go_cache:
