@@ -19,7 +19,7 @@ func getLicenseFileName() string {
 	if err != nil {
 		log.Warn(err)
 	}
-	path := setting.AppSetting.LicenseStorePath + "/merchant-license-" + id.String()
+	path := "merchant-license-" + id.String()
 	return path
 }
 
@@ -64,7 +64,8 @@ func MerchantApply(c *gin.Context) {
 
 	// 保存证书，并且使用id重命名
 	ext := filepath.Ext(file.Filename)
-	path := getLicenseFileName() + ext
+	name := getLicenseFileName() + ext
+	path := setting.AppSetting.LicenseStorePath + "/" + name
 	err = c.SaveUploadedFile(file, path)
 	if err != nil {
 		log.Warn(err)
@@ -76,7 +77,7 @@ func MerchantApply(c *gin.Context) {
 
 	data := models.MerchantApplication{
 		Description: a.Description,
-		License:     path,
+		License:     name,
 		Email:       a.Email,
 		PhoneNumber: a.PhoneNumber,
 		Name:        a.Name,
