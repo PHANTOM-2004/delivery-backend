@@ -13,14 +13,8 @@ import (
 func InitRouter() *gin.Engine {
 	defer log.Info("testing router initialized")
 	r := gin.New()
-	r.GET("/", func(c *gin.Context) {
-		log.Println("got [/]")
-		c.JSON(http.StatusOK, gin.H{
-			"message": "[/]test",
-		})
-	})
 	r.GET("/test", func(c *gin.Context) {
-		log.Println("got [/test]")
+		log.Println("received [/test] GET")
 		c.JSON(http.StatusOK, gin.H{
 			"message": "[/test]test",
 		})

@@ -52,6 +52,32 @@ mkcert -key-file ./localhost-key.pem -cert-file ./localhost-cert.pem localhost
 docker login
 ```
 
+在这一部分会先说明如何正确启动项目，跟踪服务端。目前经过更改，暂且对于数据库不使用持久卷，方便每次更新的`api`测试。后面的子栏目会继续说明命令。
+
+- 启动服务
+
+注意进入`deploy/local`目录执行：
+
+```shell
+docker-compose up -d
+```
+
+
+- 追踪日志(可以替换后面的`test_go_service`为你希望追踪的容器名)： 
+
+```shell
+docker logs -f test_go_service
+```
+
+- 通过脚本插入数据: 
+
+最后的文件名就是使用的对应脚本，存放在`scripts`文件夹中，注意发送域名是`http://localhost:8000`，这是在容器内部发送，注意看清楚内容。至于插入了什么数据，请自行阅读；前端也可以根据需要添加新的`example`欢迎提出`MR` .
+
+```shell
+docker exec test_go_service /bin/sh -c scripts/admin_example.sh
+```
+
+
 #### 启动全部服务
 
 注意进入`deploy/local`目录执行：
