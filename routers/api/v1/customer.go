@@ -63,7 +63,8 @@ func MerchantApply(c *gin.Context) {
 	log.Debug("uploaded: ", file.Filename)
 
 	// 保存证书，并且使用id重命名
-	path := getLicenseFileName()
+	ext := filepath.Ext(file.Filename)
+	path := getLicenseFileName() + ext
 	err = c.SaveUploadedFile(file, path)
 	if err != nil {
 		log.Warn(err)

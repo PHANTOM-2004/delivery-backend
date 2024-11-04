@@ -20,6 +20,8 @@ func JWTRK(b TokenInBlacklistFunc, a TokenAuthFunc) gin.HandlerFunc {
 		// cookie中读取refresh_token
 		refresh_token, err := c.Cookie("refresh_token")
 		if errors.Is(err, http.ErrNoCookie) {
+			defer log.Debug("fail: no refresh_token")
+      defer c.Abort()
 			app.Response(c, http.StatusUnauthorized, ecode.ERROR_AUTH_NO_REFRESH_TOKEN, nil)
 			return
 		}
@@ -29,6 +31,7 @@ func JWTRK(b TokenInBlacklistFunc, a TokenAuthFunc) gin.HandlerFunc {
 		// 校验refresh token
 		account, code := a(refresh_token)
 		if code != ecode.SUCCESS {
+      defer c.Abort()
 			app.Response(c, http.StatusUnauthorized, code, nil)
 			return
 		}
@@ -38,9 +41,9 @@ func JWTRK(b TokenInBlacklistFunc, a TokenAuthFunc) gin.HandlerFunc {
 		// 检查refresh token是否在黑名单中
 		in_blacklist := b(refresh_token)
 		if in_blacklist {
+			defer log.Debug("fail: refresh_token in blacklist")
+      defer c.Abort()
 			app.Response(c, http.StatusUnauthorized, ecode.ERROR_AUTH_REFRESH_TOKEN_EXPIRED, nil)
-			c.Abort()
-			log.Debug("fail: refresh_token in blacklist")
 			return
 		}
 
