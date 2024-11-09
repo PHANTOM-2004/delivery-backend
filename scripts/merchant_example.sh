@@ -112,4 +112,19 @@ curl -b cookies.txt \
 curl -b cookies.txt \
   http://localhost:8000/api/v1/merchant/jwt/restaurant/1/categories
 
+# 向餐厅1插入dish 1
+curl -b cookies.txt \
+  -F "name=雪豹炒鸡扒" \
+  -F "price=2089" \
+  -F "image=@Makefile.png" \
+  -F "description=好的" \
+  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/category/1/dish/create \
+  --request POST
+
+# 向餐厅1插入dish 2
+
+# 获得餐厅1所有category
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/categories
+
 set +x

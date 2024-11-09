@@ -21,7 +21,7 @@ func InitRouter() *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
-	r.MaxMultipartMemory = int64(setting.AppSetting.LicensePhotoSize << 20) // MiB
+	r.MaxMultipartMemory = int64(setting.AppSetting.MaxImageSize << 20) // MiB
 
 	gin.SetMode(setting.ServerSetting.RunMode)
 	// NOTE:注意更新文档
@@ -118,6 +118,16 @@ func InitRouter() *gin.Engine {
 				merchant_restaurant.POST(
 					"/category/create",
 					v1.CreateCategory,
+				)
+
+				merchant_restaurant.PUT(
+					"/category/:category_id/dish/:dish_id/update",
+					v1.UpdateDish,
+				)
+
+				merchant_restaurant.POST(
+					"/category/:category_id/dish/create",
+					v1.CreateDish,
 				)
 
 			}

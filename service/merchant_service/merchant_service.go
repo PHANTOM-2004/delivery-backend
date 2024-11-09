@@ -83,7 +83,7 @@ func AccountValidate(account string, password string, c *gin.Context) (uint, boo
 	if m == nil {
 		// 商家不存在
 		log.Debug(err, data)
-		app.Response(c, http.StatusOK, ecode.ERROR_MERCHANT_NON_EXIST, nil)
+		app.Response(c, http.StatusOK, ecode.ERROR_MERCHANT_NON_FOUND, nil)
 		return 0, false
 	}
 

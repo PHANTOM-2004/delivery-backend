@@ -14,7 +14,7 @@ const (
 	INVALID_PARAMS Ecode = 1001
 
 	// admin related error
-	ERROR_ADMIN_NON_EXIST     Ecode = 10000
+	ERROR_ADMIN_NOT_FOUND     Ecode = 10000
 	ERROR_ADMIN_INCORRECT_PWD Ecode = 10001
 	ERROR_ADMIN_ACCOUNT_EXIST Ecode = 10002
 	ERROR_ADMIN_LOGOUT        Ecode = 10003
@@ -22,7 +22,7 @@ const (
 	ERROR_ADMIN_ROLE          Ecode = 10005
 
 	// merchant related
-	ERROR_MERCHANT_NON_EXIST      Ecode = 11000
+	ERROR_MERCHANT_NON_FOUND      Ecode = 11000
 	ERROR_MERCHANT_INCORRECT_PWD  Ecode = 11001
 	ERROR_MERCHANT_ACCOUNT_EXIST  Ecode = 11002
 	ERROR_MERCHANT_LOGOUT         Ecode = 11003
@@ -34,7 +34,9 @@ const (
 	ERROR_MERCHANT_APPLICATION_NOT_FOUND Ecode = 12000
 
 	ERROR_RESTAURANT_EXIST     Ecode = 13000
-	ERROR_RESTAURANT_NOT_EXIST Ecode = 13001
+	ERROR_RESTAURANT_NOT_FOUND Ecode = 13001
+
+	ERROR_CATEGORY_NOT_FOUND Ecode = 14000
 
 	ERROR_AUTH_NO_ACCESS_TOKEN       Ecode = 20000
 	ERROR_AUTH_ACCESS_TOKEN_EXPIRED  Ecode = 20001
@@ -59,7 +61,7 @@ func StatusText(e Ecode) (res string) {
 
 	case INVALID_PARAMS:
 		res = "请求参数错误"
-	case ERROR_ADMIN_NON_EXIST:
+	case ERROR_ADMIN_NOT_FOUND:
 		res = "管理员账号不存在"
 	case ERROR_ADMIN_ACCOUNT_EXIST:
 		res = "管理员账号已注册"
@@ -72,7 +74,7 @@ func StatusText(e Ecode) (res string) {
 	case ERROR_ADMIN_ROLE:
 		res = "管理员身份错误"
 
-	case ERROR_MERCHANT_NON_EXIST:
+	case ERROR_MERCHANT_NON_FOUND:
 		res = "商家账号不存在"
 	case ERROR_MERCHANT_ACCOUNT_EXIST:
 		res = "商家账号已注册"
@@ -94,8 +96,11 @@ func StatusText(e Ecode) (res string) {
 
 	case ERROR_RESTAURANT_EXIST:
 		res = "该商铺名已经存在"
-	case ERROR_RESTAURANT_NOT_EXIST:
+	case ERROR_RESTAURANT_NOT_FOUND:
 		res = "商铺不存在"
+
+	case ERROR_CATEGORY_NOT_FOUND:
+		res = "类别不存在"
 
 		// refresh_token and access_token
 	case ERROR_AUTH_NO_REFRESH_TOKEN:

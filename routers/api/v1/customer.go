@@ -7,32 +7,10 @@ import (
 	"delivery-backend/models"
 	"delivery-backend/service/customer_service"
 	"net/http"
-	"path/filepath"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 )
-
-func getLicenseFileName() string {
-	id, err := uuid.NewRandom()
-	if err != nil {
-		log.Warn(err)
-	}
-	path := "merchant-license-" + id.String()
-	return path
-}
-
-func checkLicenseType(name string) bool {
-	ext := filepath.Ext(name)
-	allows := setting.AppSetting.LicenseAllowExts
-	for i := range allows {
-		if ext == allows[i] {
-			return true
-		}
-	}
-	return false
-}
 
 // 由顾客/骑手发起申请，提出商务合作请求
 // https://gin-gonic.com/docs/examples/upload-file/single-file/
@@ -40,8 +18,13 @@ func MerchantApply(c *gin.Context) {
 	// TODO: 顾客身份校验
 
 	file, err := c.FormFile("license")
-	if err != nil || !checkLicenseType(file.Filename) {
-		log.Debug(err)
+	if err != nil {
+		app.ResponseInvalidParams(c)
+		return
+	}
+	ext, v := setting.AppSetting.CheckLicenseExt(file.Filename)
+	if !v {
+		log.Debugf("wrong ext[%s]", ext)
 		app.ResponseInvalidParams(c)
 		return
 	}
@@ -60,18 +43,16 @@ func MerchantApply(c *gin.Context) {
 		return
 	}
 
-	log.Debug("uploaded: ", file.Filename)
-
-	// 保存证书，并且使用id重命名
-	ext := filepath.Ext(file.Filename)
-	name := getLicenseFileName() + ext
-	path := setting.AppSetting.LicenseStorePath + "/" + name
-	err = c.SaveUploadedFile(file, path)
+	log.Debug("uploadint: ", file.Filename)
+	// 保存证书，并且使用id重命名,更改回ext
+	name := setting.AppSetting.GenLicenseName() + ext
+	dst := setting.AppSetting.GetLicenseStorePath(name)
+	err = c.SaveUploadedFile(file, dst)
 	if err != nil {
-		log.Warn(err)
-		app.Response(c, http.StatusInternalServerError, ecode.ERROR, nil)
+		app.ResponseInternalError(c, err)
 		return
 	}
+	log.Trace("saved to:", dst)
 
 	// 插入数据库
 
@@ -91,7 +72,7 @@ func MerchantApply(c *gin.Context) {
 	}
 
 	// 成功保存
-	log.Debugf("license[%s] saved to %s", file.Filename, path)
+	log.Debugf("license[%s] saved to %s", file.Filename, dst)
 
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
 }

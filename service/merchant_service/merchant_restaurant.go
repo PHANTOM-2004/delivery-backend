@@ -27,7 +27,7 @@ func RestaurantAuth() gin.HandlerFunc {
 		r, err := models.GetRestaurantByID(uint(restaurant_id))
 		if r.ID == 0 {
 			// restaurant不存在
-			app.Response(c, http.StatusOK, ecode.ERROR_RESTAURANT_NOT_EXIST, nil)
+			app.Response(c, http.StatusOK, ecode.ERROR_RESTAURANT_NOT_FOUND, nil)
 			c.Abort()
 			return
 		}

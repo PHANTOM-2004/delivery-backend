@@ -3,9 +3,11 @@ package setting
 import (
 	"delivery-backend/pkg/utils"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/go-ini/ini"
@@ -32,17 +34,65 @@ type Log struct {
 }
 
 type App struct {
-	Salt             string
-	JWTSecretKey     string
-	AdminToken       string
-	AdminAKAge       int
-	AdminRKAge       int
-	MerchantAKAge    int
-	MerchantRKAge    int
-	LicensePhotoSize int
-	LicenseStorePath string
-	LicenseAllowExts []string
-	LicensePageSize  int
+	Salt               string
+	JWTSecretKey       string
+	AdminToken         string
+	AdminAKAge         int
+	AdminRKAge         int
+	MerchantAKAge      int
+	MerchantRKAge      int
+	MaxImageSize       int
+	LicenseStorePath   string
+	LicenseAllowExts   []string
+	LicensePageSize    int
+	DishImageAllowExts []string
+	DishImageStorePath string
+}
+
+func (a *App) GetLicenseStorePath(name string) string {
+	path := a.LicenseStorePath + "/" + name
+	return path
+}
+
+func (a *App) GenLicenseName() string {
+	id, err := uuid.NewRandom()
+	if err != nil {
+		log.Warn(err)
+	}
+	path := "merchant-license-" + id.String()
+	return path
+}
+
+func (a *App) checkExt(allows []string, name string) (string, bool) {
+	ext := filepath.Ext(name)
+	for i := range allows {
+		if ext == allows[i] {
+			return ext, true
+		}
+	}
+	return ext, false
+}
+
+func (a *App) CheckLicenseExt(name string) (string, bool) {
+	return a.checkExt(a.LicenseAllowExts, name)
+}
+
+func (a *App) CheckDishImageExt(name string) (string, bool) {
+	return a.checkExt(a.DishImageAllowExts, name)
+}
+
+func (a *App) GetDishImageStorePath(name string) string {
+	path := a.DishImageStorePath + "/" + name
+	return path
+}
+
+func (a *App) GenDishImageName() string {
+	id, err := uuid.NewRandom()
+	if err != nil {
+		log.Warn(err)
+	}
+	path := "dish-" + id.String()
+	return path
 }
 
 type Database struct {
