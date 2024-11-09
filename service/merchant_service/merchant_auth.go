@@ -11,6 +11,35 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// 根据参数category_id, restaurant_id, 校验修改的category是否是商家自己的
+// 避免api被滥用于越权修改
+func CategoryAuth() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		category_id, err := strconv.Atoi(c.Param("category_id"))
+		if err != nil {
+			app.ResponseInvalidParams(c)
+			return
+		}
+
+		//////////////////// 校验是否是自己的dish
+		restaurant_id := c.GetUint("restaurant_id")
+		category, err := models.GetCategory(uint(category_id))
+		if err != nil {
+			app.ResponseInternalError(c, err)
+			return
+		} else if category.ID == 0 {
+			// 找不到category
+			app.Response(c, http.StatusOK, ecode.ERROR_CATEGORY_NOT_FOUND, nil)
+			return
+		} else if category.RestaurantID != restaurant_id {
+			// 不是自己的category
+			app.Response(c, http.StatusOK, ecode.ERROR_MERCHANT_UNAUTH, nil)
+			return
+		}
+		c.Next()
+	}
+}
+
 // 对入参restaurant_id进行验证，验证是否存在这个restaurant
 // 对参数进行验证，对商家身份进行验证，商家必须访问的是自己的店铺
 // 如果通过验证，会把restaurant_id设置在gin.Context

@@ -4,13 +4,11 @@ import (
 	"delivery-backend/internal/app"
 	"delivery-backend/internal/ecode"
 	"delivery-backend/models"
-	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 )
 
 // TODO:设置一个恰当的脚本进行整个流程的参数验证
@@ -94,6 +92,15 @@ func UpdateCategory(c *gin.Context) {
 	// NOTE:此处由于验证了商家必然更改自己的商铺，
 	// 但是也需要验证category对应的外键是否是restaurant_id
 	category, err := models.GetCategory(uint(category_id))
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+	if category.ID == 0 {
+		// 记录没有找到
+		app.Response(c, http.StatusOK, ecode.ERROR_CATEGORY_NOT_FOUND, nil)
+		return
+	}
 	if category.RestaurantID != restaurant_id {
 		// 商家修改的不是自己店铺的category
 		app.Response(c, http.StatusUnauthorized, ecode.ERROR_MERCHANT_UNAUTH, nil)
@@ -101,10 +108,8 @@ func UpdateCategory(c *gin.Context) {
 	}
 
 	err = models.UpdateCategory(uint(category_id), data)
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		app.Response(c, http.StatusOK, ecode.ERROR_CATEGORY_NOT_FOUND, nil)
-		return
-	} else if err != nil {
+	// 记录必然找到
+	if err != nil {
 		app.ResponseInternalError(c, err)
 		return
 	}

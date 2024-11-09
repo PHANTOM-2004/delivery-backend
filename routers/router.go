@@ -122,6 +122,7 @@ func InitRouter() *gin.Engine {
 
 				merchant_restaurant.PUT(
 					"/category/:category_id/dish/:dish_id/update",
+					merchant_service.CategoryAuth(),
 					v1.UpdateDish,
 				)
 
