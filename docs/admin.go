@@ -29,21 +29,6 @@ type SuperToken struct {
 	SuperToken string `json:"super_token"`
 }
 
-// swagger:parameters admin_change_password merchant_create merchant_delete merchant_change_password get_merchant_application admin_get_merchant_license
-type AccessToken struct {
-	// 通过cookie发送,client不必手动handle
-	// in: cookie
-	// required: true
-	AccessToken string `json:"access_token"`
-}
-
-// swagger:parameters admin_auth admin_logout admin_login_status  merchant_login_status merchant_auth merchant_logout
-type RefreshToken struct {
-	// 通过cookie发送,client不必手动handle
-	// in: cookie
-	RefreshToken string `json:"refresh_token"`
-}
-
 // swagger:parameters  admin_create
 type AdminName struct {
 	// 管理员姓名, 最小长度2, 最大长度20
@@ -143,7 +128,7 @@ type MerchantLicenseRequest struct {
 type MerchantLicenseResponse struct {
 	// 执照图片
 	// Required:true
-	License runtime.File
+  License runtime.File
 }
 
 // =============================================================

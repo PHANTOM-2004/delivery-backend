@@ -89,7 +89,18 @@ func UpdateCategory(c *gin.Context) {
 		return
 	}
 
+	// NOTE:此处由于验证了商家必然更改自己的商铺，
+	// 但是也需要验证category对应的外键是否是restaurant_id
 	category, err := models.GetCategory(uint(category_id))
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+	if category.ID == 0 {
+		// 记录没有找到
+		app.Response(c, http.StatusOK, ecode.ERROR_CATEGORY_NOT_FOUND, nil)
+		return
+	}
 	if category.RestaurantID != restaurant_id {
 		// 商家修改的不是自己店铺的category
 		app.Response(c, http.StatusUnauthorized, ecode.ERROR_MERCHANT_UNAUTH, nil)
@@ -97,12 +108,11 @@ func UpdateCategory(c *gin.Context) {
 	}
 
 	err = models.UpdateCategory(uint(category_id), data)
+	// 记录必然找到
 	if err != nil {
 		app.ResponseInternalError(c, err)
 		return
 	}
 
-	// NOTE:此处由于验证了商家必然更改自己的商铺，
-	// 但是也需要验证category对应的外键是否是restaurant_id
 	app.ResponseSuccess(c)
 }

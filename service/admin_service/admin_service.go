@@ -112,7 +112,7 @@ func AccountValidate(account string, password string, c *gin.Context) (uint, boo
 		// 对于不存在的账户登陆，这时可能的，因为
 		// 你无法预料到用户会干什么
 		log.Debug(err, data)
-		app.Response(c, http.StatusOK, ecode.ERROR_ADMIN_NON_EXIST, nil)
+		app.Response(c, http.StatusOK, ecode.ERROR_ADMIN_NOT_FOUND, nil)
 		return 0, false
 
 	}

@@ -7,22 +7,26 @@ type Category struct {
 	// 分类类型，0代表菜品，1代表套餐;默认是菜品
 	Type uint8 `gorm:"default:0;not null" form:"type" validate:"gte=0,lte=1" json:"type"`
 	// 排序值，用于决定顺序；
-	Sort uint `gorm:"default:0;not null" form:"sort" validate:"gte=0" json:"sort"`
+	Sort uint16 `gorm:"default:0;not null" form:"sort" validate:"gte=0" json:"sort"`
 	// 0代表禁用，1代表启用，默认禁用
 	Status uint8 `gorm:"default:0;not null" form:"status" validate:"gte=0,lte=1" json:"status"`
 	// 考虑到每一家店铺大概率有一个独立的分类，因此每一个category对应一家店铺
-	RestaurantID uint `gorm:"index;not null" validate:"gte=0,lte=0" json:"restaurant_id"`
+	RestaurantID uint   `gorm:"index;not null" validate:"gte=0,lte=0" json:"restaurant_id"`
+	Dishes       []Dish `json:"dishes"`
 }
 
+// 同时会返回对应的dishes
 func GetCategoryByRestaurant(restaurant_id uint) ([]Category, error) {
 	c := []Category{}
-	err := tx.Find(&c, Category{RestaurantID: restaurant_id}).Error
+	err := tx.Preload("Dishes").
+		Find(&c, Category{RestaurantID: restaurant_id}).Error
 	return c, err
 }
 
+// 同时返回对应的dishes
 func GetCategory(category_id uint) (*Category, error) {
-	res := Category{Model: Model{ID: category_id}}
-	err := tx.Find(&res).Error
+	res := Category{}
+	err := tx.Preload("Dishes").Find(&res, category_id).Error
 	return &res, err
 }
 
@@ -31,7 +35,8 @@ func CreateCategory(data *Category) error {
 	return err
 }
 
-func UpdateCategory(category_id uint, data any) error {
+// 注意更新不存在的category的情况
+func UpdateCategory(category_id uint, data Category) error {
 	err := tx.Model(&Category{}).Where("id = ?", category_id).Updates(data).Error
 	return err
 }

@@ -21,7 +21,7 @@ func InitRouter() *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
-	r.MaxMultipartMemory = int64(setting.AppSetting.LicensePhotoSize << 20) // MiB
+	r.MaxMultipartMemory = int64(setting.AppSetting.MaxImageSize << 20) // MiB
 
 	gin.SetMode(setting.ServerSetting.RunMode)
 	// NOTE:注意更新文档
@@ -120,6 +120,22 @@ func InitRouter() *gin.Engine {
 					v1.CreateCategory,
 				)
 
+				merchant_restaurant.PUT(
+					"/category/:category_id/dish/:dish_id/update",
+					merchant_service.CategoryAuth(),
+					v1.UpdateDish,
+				)
+
+				merchant_restaurant.POST(
+					"/category/:category_id/dish/create",
+					merchant_service.CategoryAuth(),
+					v1.CreateDish,
+				)
+
+				// NOTE: license的图片静态文件路由
+				dish_image_path := setting.AppSetting.DishImageStorePath
+				log.Infof("Serving Static File: [%s]", dish_image_path)
+				merchant_jwt_ak.Static("/dish", dish_image_path)
 			}
 		}
 
