@@ -1,6 +1,11 @@
 package docs
 
-import "delivery-backend/models"
+import (
+	"bytes"
+	"delivery-backend/models"
+
+	"github.com/go-openapi/runtime"
+)
 
 // =============================================================
 // 用于登入与认证的参数，注意后端处理的最大范围, 否则会返回错误
@@ -118,7 +123,7 @@ type MerchantRestaurantsResponse struct {
 		// Required:true
 		Data struct {
 			// in:body
-			Restaurants []models.Restaurant `json:"Restaurants"`
+			Restaurants []models.Restaurant `json:"restaurants"`
 		} `json:"data"`
 	}
 }
@@ -140,7 +145,8 @@ type MerchantRestaurantStatusGetRequest struct {
 // swagger:route GET /api/v1/merchant/jwt/restuarant/{restaurant_id}/status v1-merchant merchant_get_restaurant_status
 //
 // 获取商家某个店铺的状态
-// 如果返回0, 代表商家手动关闭店铺；如果返回1, 店铺营业时间按照正常时间计算。
+// 如果返回0, 代表商家手动关闭店铺；如果返回1, 代表店铺开启。
+// PS:目前只支持商家手动设置店铺状态。
 // responses:
 // 200: COMMON
 
@@ -159,6 +165,206 @@ type MerchantRestaurantStatusSetRequest struct {
 // swagger:route PUT /api/v1/merchant/jwt/restuarant/{restaurant_id}/status/{status} v1-merchant merchant_set_restaurant_status
 //
 // 设置商家某个店铺的状态
-// 设置0, 代表商家手动关闭店铺；设置1, 店铺营业时间按照正常时间计算。
+// 设置0, 代表商家手动关闭店铺；设置1, 代表店铺开启。
+// PS:目前只支持商家手动设置店铺状态。
 // responses:
 // 200: COMMON
+
+// swagger:response merchant_get_categories_response
+type MerchantGetCategoriesResponse struct {
+	// in:body
+	Body struct {
+		// Required:true
+		// Example: 200
+		ECode int `json:"ecode"`
+		// Example: ok
+		// error message
+		// Required:true
+		Msg string `json:"msg"`
+		// Required:true
+		// data to get
+		// Required:true
+		Data struct {
+			// in:body
+			Categories []models.Category `json:"categories"`
+		} `json:"data"`
+	}
+}
+
+// swagger:parameters merchant_get_categories merchant_get_category merchant_update_category merchant_create_category merchant_update_dish merchant_create_dish
+type MerchantRestaurantRequest struct {
+	// in:path
+	// Required: true
+	RestaurantID uint `json:"restaurant_id"`
+}
+
+// =============================================================
+// swagger:route GET /api/v1/merchant/jwt/restuarant/{restaurant_id}/categories v1-merchant merchant_get_categories
+// 返回商家某个商店的所有分类
+// PS:分类中包含菜品项，所以实际上获得菜品的接口也是这个
+// responses:
+// 200: merchant_get_categories_response
+
+// swagger:parameters merchant_get_category merchant_update_category merchant_update_dish merchant_create_dish
+type MerchantGetCategoryRequest struct {
+	// in:path
+	// Required: true
+	CategoryID uint `json:"category_id"`
+}
+
+// swagger:response merchant_get_category_response
+type MerchantGetCategoryResponse struct {
+	// in:body
+	Body struct {
+		// Required:true
+		// Example: 200
+		ECode int `json:"ecode"`
+		// Example: ok
+		// error message
+		// Required:true
+		Msg string `json:"msg"`
+		// Required:true
+		// data to get
+		// Required:true
+		Data struct {
+			// in:body
+			Category models.Category `json:"categories"`
+		} `json:"data"`
+	}
+}
+
+// =============================================================
+// swagger:route GET /api/v1/merchant/jwt/restuarant/{restaurant_id}/category/{category_id} v1-merchant merchant_get_category
+// 返回商家某个商店的所有分类
+// PS:分类中包含菜品项，所以实际上获得菜品的接口也是这个
+// responses:
+// 200: merchant_get_category_response
+
+// swagger:parameters merchant_update_category
+type MerchantUpdateCategoryRequest struct {
+	//in:path
+	//required:true
+	ID uint `json:"category_id"`
+	//最大长度: 30bytes
+	//in:formData
+	Name string `json:"name"`
+	//0代表菜品，1代表套餐
+	//in:formData
+	Type uint8 `json:"type"`
+	//in:formData
+	Sort uint16 `json:"sort"`
+}
+
+// =============================================================
+// swagger:route PUT /api/v1/merchant/jwt/restuarant/{restaurant_id}/category/{category_id}/update v1-merchant merchant_update_category
+// 返回商家某个商店的所有分类
+// PS:分类中包含菜品项，所以实际上获得菜品的接口也是这个
+// responses:
+// 200: COMMON
+
+// swagger:parameters merchant_create_category
+type MerchantCreateCategoryRequest struct {
+	//最大长度: 30bytes
+	//in:formData
+	//required:true
+	Name string `json:"name"`
+	//0代表菜品，1代表套餐
+	//in:formData
+	//required:true
+	Type uint8 `json:"type"`
+	//in:formData
+	//required:true
+	Sort uint16 `json:"sort"`
+}
+
+// =============================================================
+// swagger:route POST /api/v1/merchant/jwt/restuarant/{restaurant_id}/category/{category_id}/create v1-merchant merchant_create_category
+// 返回商家某个商店的所有分类
+// PS:分类中包含菜品项，所以实际上获得菜品的接口也是这个
+// responses:
+// 200: COMMON
+
+// swagger:parameters merchant_update_dish
+type MerchantUpdateDishRequest struct {
+	//in:path
+	//required:true
+	ID uint `json:"dish_id"`
+	//最大长度: 30bytes
+	//in:formData
+	Name string `json:"name"`
+	//使用整数存储价格，精确到分
+	//in:formData
+	Price uint `json:"price"`
+	//in:formData
+	Sort uint16 `json:"sort"`
+	//最大长度: 50 bytes
+	//in:formData
+	Description string `json:"description"`
+	// 文件存在最大大小，参考配置文件
+	// multipart/form data, 上传一个文件; 接受格式.png,.jpeg,.jpg
+	// in: formData
+	// swagger:file
+	Image *bytes.Buffer `json:"image"`
+}
+
+// =============================================================
+// swagger:route PUT /api/v1/merchant/jwt/restuarant/{restaurant_id}/category/{category_id}/dish/{dish_id}/update v1-merchant merchant_update_dish
+// 返回商家某个商店的所有分类
+// PS:分类中包含菜品项，所以实际上获得菜品的接口也是这个
+// responses:
+// 200: COMMON
+
+// swagger:parameters merchant_create_dish
+type MerchantCreateDishRequest struct {
+	//in:path
+	//required:true
+	ID uint `json:"dish_id"`
+	//最大长度: 30bytes
+	//in:formData
+	// requires:true
+	Name string `json:"name"`
+	//使用整数存储价格，精确到分
+	// requires:true
+	//in:formData
+	Price uint `json:"price"`
+	//默认值是0
+	//in:formData
+	Sort uint16 `json:"sort"`
+	//最大长度: 50 bytes
+	// requires:true
+	//in:formData
+	Description string `json:"description"`
+	// 文件存在最大大小，参考配置文件
+	// multipart/form data, 上传一个文件; 接受格式.png,.jpeg,.jpg
+	// in: formData
+	// requires:true
+	// swagger:file
+	Image *bytes.Buffer `json:"image"`
+}
+
+// =============================================================
+// swagger:route POST /api/v1/merchant/jwt/restuarant/{restaurant_id}/category/{category_id}/dish/create v1-merchant merchant_create_dish
+// 返回商家某个商店的所有分类
+// PS:分类中包含菜品项，所以实际上获得菜品的接口也是这个
+// responses:
+// 200: COMMON
+
+// swagger:parameters merchant_get_dish_image
+type DishImageRequest struct {
+	// example: dish-02fd3ce1-fdcb-4a30-94a4-db3f9c241871.png
+	// in: path
+	ID string `json:"*filepath"`
+}
+
+// swagger:response dish_image
+type DishImageResponse struct {
+	// 执照图片
+	// Required:true
+	Image runtime.File
+}
+
+// =============================================================
+// swagger:route GET /api/v1/merchant/jwt/dish/{*filepath} v1-merchant merchant_get_dish_image
+// 请求得到菜品照片; 如果路径内容不存在则对应httpcode=404
+// responses:
+// 200: dish_image

@@ -132,6 +132,10 @@ func InitRouter() *gin.Engine {
 					v1.CreateDish,
 				)
 
+				// NOTE: license的图片静态文件路由
+				dish_image_path := setting.AppSetting.DishImageStorePath
+				log.Infof("Serving Static File: [%s]", dish_image_path)
+				merchant_jwt_ak.Static("/dish", dish_image_path)
 			}
 		}
 
