@@ -48,7 +48,7 @@ type CommonResponse struct {
 		// Required:true
 		// data to get
 		// Required:true
-    // Example: {}
+		// Example: {}
 		Data map[string]any `json:"data"`
 	}
 }

@@ -38,20 +38,17 @@ func Set(key string, data any, expiration time.Duration) error {
 	return nil
 }
 
-func Exists(key string) bool {
+func Exists(key string) (bool, error) {
 	ctx := context.Background()
 	res, err := Rdb.Exists(ctx, key).Result()
 	if err == redis.Nil {
 		// 不存在
-		return false
-	} else if err != nil {
-		log.Warn(err)
-		return false
+		return false, nil
 	}
-
-	return res != 0
+	return res != 0, err
 }
 
+// 找不到的时候返回nil nil
 func Get(key string) ([]byte, error) {
 	ctx := context.Background()
 	value, err := Rdb.Get(ctx, key).Result()
@@ -65,6 +62,7 @@ func Get(key string) ([]byte, error) {
 	return []byte(value), nil
 }
 
+// key不存在仍然delete成功, 返回nil
 func Delete(key string) error {
 	ctx := context.Background()
 	_, err := Rdb.Del(ctx, key).Result()

@@ -2,6 +2,7 @@ package docs
 
 import (
 	"bytes"
+	"delivery-backend/models"
 )
 
 // swagger:parameters get_merchant_application
@@ -37,17 +38,6 @@ type SendMerchantApplication struct {
 	Name string `json:"name"`
 }
 
-//{"data":{"Applications":[{"ID":1,"CreatedAt":"2024-11-03T08:14:55Z","UpdatedAt":"2024-11-03T08:14:55Z","DeletedAt":null,"Status":3,"Description":"ok","License":"runtime/merchant-license-c124fafc-8ecf-4e73-95e9-936a639baf5d","Email":"666@qq.com","PhoneNumber":"+8618537775175","Name":"szc"}]},"ecode":200,"msg":"ok"}⏎
-
-type ApplicationResponse struct {
-	DefaultModel
-	License     string
-	Email       string
-	PhoneNumber string
-	Description string
-	Name        string
-}
-
 // swagger:response merchant_application
 type MerchantApplicationResponse struct {
 	// in:body
@@ -64,7 +54,7 @@ type MerchantApplicationResponse struct {
 		// Required:true
 		Data struct {
 			// in:body
-			Application []ApplicationResponse
+			Applications []models.MerchantApplication `json:"applications"`
 		} `json:"data"`
 	}
 }

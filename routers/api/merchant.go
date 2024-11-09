@@ -8,12 +8,13 @@ import (
 	"delivery-backend/pkg/utils"
 	"delivery-backend/service/merchant_service"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
 
-func MerchantDelete(c *gin.Context) {
+func DeleteMerchant(c *gin.Context) {
 	account := c.PostForm("account")
 	err, rows := models.DeleteMerchant(account)
 	if err != nil {
@@ -35,7 +36,7 @@ func MerchantDelete(c *gin.Context) {
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
 }
 
-func MerchantCreate(c *gin.Context) {
+func CreateMerchant(c *gin.Context) {
 	if v := merchant_service.SignUpValidate(c); !v {
 		return
 	}
@@ -45,20 +46,34 @@ func MerchantCreate(c *gin.Context) {
 	encrypted_password := utils.Encrypt(c.PostForm("password"), setting.AppSetting.Salt)
 	merchant_name := c.PostForm("merchant_name")
 	phone_numer := c.PostForm("phone_number")
-
-	data := models.Merchant{
-		MerchantName: merchant_name,
-		Account:      account,
-		Password:     encrypted_password,
-		PhoneNumber:  phone_numer,
+	application_id, err := strconv.Atoi(c.PostForm("merchant_application_id"))
+	if err != nil {
+		app.ResponseInvalidParams(c)
+		return
 	}
 
-	err := models.CreateMerchant(&data)
+	data := models.Merchant{
+		MerchantName:          merchant_name,
+		Account:               account,
+		Password:              encrypted_password,
+		PhoneNumber:           phone_numer,
+		MerchantApplicationID: uint(application_id),
+	}
+
+	exist, err := models.ExistMerchant(account)
 	if err != nil {
-		res := map[string]string{
-			"error": err.Error(),
-		}
-		app.Response(c, http.StatusOK, ecode.ERROR, res)
+		app.ResponseInternalError(c, err)
+		return
+	}
+
+	if exist {
+		app.Response(c, http.StatusOK, ecode.ERROR_MERCHANT_ACCOUNT_EXIST, nil)
+		return
+	}
+
+	err = models.CreateMerchant(&data)
+	if err != nil {
+		app.ResponseInternalError(c, err)
 		return
 	}
 
@@ -70,9 +85,10 @@ func MerchantGetAuth(c *gin.Context) {
 	// 通过refresh_token, 获得access_token
 	//
 	account := c.GetString("jwt_account")
+	id, _ := strconv.Atoi(c.GetString("jwt_id"))
 
 	// 提供access_token
-	access_token := merchant_service.GetAccessToken(account)
+	access_token := merchant_service.GetAccessToken(uint(id), account)
 	merchant_service.SetAccessToken(c, access_token)
 
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
@@ -93,17 +109,20 @@ func MerchantLogout(c *gin.Context) {
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
 }
 
+// 认证成功时会在该函数中设置
+// c.Set("merchant_id", id)
 func MerchantLogin(c *gin.Context) {
 	account := c.PostForm("account")
 	password := c.PostForm("password")
 
-	if v := merchant_service.AccountValidate(account, password, c); !v {
+	id, v := merchant_service.AccountValidate(account, password, c)
+	if !v {
 		return
 	}
 
 	// return refresh_token, access_token
-	refresh_token := merchant_service.GetRefreshToken(account)
-	access_token := merchant_service.GetAccessToken(account)
+	refresh_token := merchant_service.GetRefreshToken(id, account)
+	access_token := merchant_service.GetAccessToken(id, account)
 
 	merchant_service.SetAccessToken(c, access_token)
 	merchant_service.SetRefreshToken(c, refresh_token)

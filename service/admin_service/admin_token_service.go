@@ -8,12 +8,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AuthAccessToken(access_token string) (string, ecode.Ecode) {
-	return jwt_token.AuthAccessToken("admin", access_token)
+func AuthAccessToken(access_token string) (uint, string, ecode.Ecode) {
+	c, ecode := jwt_token.AuthAccessToken("admin", access_token)
+	if c != nil {
+		return c.ID, c.Account, ecode
+	}
+	return 0, "", ecode
 }
 
-func AuthRefreshToken(refresh_token string) (string, ecode.Ecode) {
-	return jwt_token.AuthRefreshToken("admin", refresh_token)
+func AuthRefreshToken(refresh_token string) (uint, string, ecode.Ecode) {
+	c, ecode := jwt_token.AuthRefreshToken("admin", refresh_token)
+	if c != nil {
+		return c.ID, c.Account, ecode
+	}
+	return 0, "", ecode
 }
 
 // 将token加入黑名单，同时删除cookie中token
@@ -35,10 +43,10 @@ func SetAccessToken(c *gin.Context, access_token string) {
 	jwt_token.SetAccessToken(c, access_token, setting.AppSetting.AdminAKAge)
 }
 
-func GetAccessToken(account string) string {
-	return jwt_token.GetAccessToken("admin", account, setting.AppSetting.AdminAKAge)
+func GetAccessToken(id uint, account string) string {
+	return jwt_token.GetAccessToken("admin", id, account, setting.AppSetting.AdminAKAge)
 }
 
-func GetRefreshToken(account string) string {
-	return jwt_token.GetRefreshToken("admin", account, setting.AppSetting.AdminRKAge)
+func GetRefreshToken(id uint, account string) string {
+	return jwt_token.GetRefreshToken("admin", id, account, setting.AppSetting.AdminRKAge)
 }

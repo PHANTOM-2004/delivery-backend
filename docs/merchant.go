@@ -1,5 +1,7 @@
 package docs
 
+import "delivery-backend/models"
+
 // =============================================================
 // 用于登入与认证的参数，注意后端处理的最大范围, 否则会返回错误
 // swagger:parameters merchant_login merchant_create merchant_delete
@@ -32,6 +34,14 @@ type MerchantPhoneNumber struct {
 	// in: formData
 	// required: true
 	PhoneNumber string `json:"phone_number"`
+}
+
+// swagger:parameters merchant_create
+type MerchantCreateApplicationID struct {
+	// 商家对应的application_id
+	// in: formData
+	// required: true
+	ID string `json:"merchant_application_id"`
 }
 
 //=============================================================
@@ -91,3 +101,64 @@ type MerchantPhoneNumber struct {
 // PS: 通过postform形式传递密码, 不要使用url传参。
 // responses:
 // 200:COMMON
+
+// swagger:response merchant_get_restaurants
+type MerchantRestaurantsResponse struct {
+	// in:body
+	Body struct {
+		// Required:true
+		// Example: 200
+		ECode int `json:"ecode"`
+		// Example: ok
+		// error message
+		// Required:true
+		Msg string `json:"msg"`
+		// Required:true
+		// data to get
+		// Required:true
+		Data struct {
+			// in:body
+			Restaurants []models.Restaurant `json:"Restaurants"`
+		} `json:"data"`
+	}
+}
+
+// =============================================================
+// swagger:route GET /api/v1/merchant/jwt/restuarants v1-merchant merchant_get_restaurants
+// 商家GET名下的所有店铺
+// responses:
+// 200: merchant_get_restaurants
+
+// swagger:parameters merchant_get_restaurant_status
+type MerchantRestaurantStatusGetRequest struct {
+	// required: true
+	//in:path
+	RestaurantID uint `json:"restaurant_id"`
+}
+
+// =============================================================
+// swagger:route GET /api/v1/merchant/jwt/restuarant/{restaurant_id}/status v1-merchant merchant_get_restaurant_status
+//
+// 获取商家某个店铺的状态
+// 如果返回0, 代表商家手动关闭店铺；如果返回1, 店铺营业时间按照正常时间计算。
+// responses:
+// 200: COMMON
+
+// swagger:parameters merchant_set_restaurant_status
+type MerchantRestaurantStatusSetRequest struct {
+	// required: true
+	// in: path
+	Status uint `json:"status"`
+
+	// required: true
+	// in: path
+	RestaurantID uint8 `json:"restaurant_id"`
+}
+
+// =============================================================
+// swagger:route PUT /api/v1/merchant/jwt/restuarant/{restaurant_id}/status/{status} v1-merchant merchant_set_restaurant_status
+//
+// 设置商家某个店铺的状态
+// 设置0, 代表商家手动关闭店铺；设置1, 店铺营业时间按照正常时间计算。
+// responses:
+// 200: COMMON

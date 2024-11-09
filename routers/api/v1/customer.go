@@ -42,7 +42,7 @@ func MerchantApply(c *gin.Context) {
 	file, err := c.FormFile("license")
 	if err != nil || !checkLicenseType(file.Filename) {
 		log.Debug(err)
-		app.Response(c, http.StatusOK, ecode.INVALID_PARAMS, nil)
+		app.ResponseInvalidParams(c)
 		return
 	}
 
@@ -56,7 +56,7 @@ func MerchantApply(c *gin.Context) {
 	err = app.ValidateStruct(a)
 	if err != nil {
 		log.Debug(err)
-		app.Response(c, http.StatusOK, ecode.INVALID_PARAMS, nil)
+		app.ResponseInvalidParams(c)
 		return
 	}
 

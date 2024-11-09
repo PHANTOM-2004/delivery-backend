@@ -79,7 +79,19 @@ func AdminCreate(c *gin.Context) {
 		Account:   account,
 		Password:  encrypted_password,
 	}
-	err := models.CreateAdmin(&data)
+
+	exist, err := models.ExistAdmin(account)
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+
+	if exist {
+		app.Response(c, http.StatusOK, ecode.ERROR_ADMIN_ACCOUNT_EXIST, nil)
+		return
+	}
+
+	err = models.CreateAdmin(&data)
 	if err != nil {
 		res := map[string]string{
 			"error": err.Error(),

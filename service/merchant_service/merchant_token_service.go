@@ -8,12 +8,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AuthAccessToken(access_token string) (string, ecode.Ecode) {
-	return jwt_token.AuthAccessToken("merchant", access_token)
+func AuthAccessToken(access_token string) (uint, string, ecode.Ecode) {
+	c, ecode := jwt_token.AuthAccessToken("merchant", access_token)
+	if c != nil {
+		return c.ID, c.Account, ecode
+	}
+	return 0, "", ecode
 }
 
-func AuthRefreshToken(refresh_token string) (string, ecode.Ecode) {
-	return jwt_token.AuthRefreshToken("merchant", refresh_token)
+func AuthRefreshToken(refresh_token string) (uint, string, ecode.Ecode) {
+	c, ecode := jwt_token.AuthRefreshToken("merchant", refresh_token)
+	if c != nil {
+		return c.ID, c.Account, ecode
+	}
+	return 0, "", ecode
 }
 
 // 将token加入黑名单，同时删除cookie中token
@@ -35,10 +43,10 @@ func SetAccessToken(c *gin.Context, access_token string) {
 	jwt_token.SetAccessToken(c, access_token, setting.AppSetting.MerchantAKAge)
 }
 
-func GetAccessToken(account string) string {
-	return jwt_token.GetAccessToken("merchant", account, setting.AppSetting.MerchantAKAge)
+func GetAccessToken(id uint, account string) string {
+	return jwt_token.GetAccessToken("merchant", id, account, setting.AppSetting.MerchantAKAge)
 }
 
-func GetRefreshToken(account string) string {
-	return jwt_token.GetRefreshToken("merchant", account, setting.AppSetting.MerchantRKAge)
+func GetRefreshToken(id uint, account string) string {
+	return jwt_token.GetRefreshToken("merchant", id, account, setting.AppSetting.MerchantRKAge)
 }

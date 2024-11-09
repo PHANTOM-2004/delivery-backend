@@ -5,14 +5,26 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 )
 
-func ResponseInternalError(c *gin.Context) {
+func ResponseInternalError(c *gin.Context, err error) {
+	log.Warn(err)
 	c.JSON(http.StatusInternalServerError, gin.H{
 		"ecode": ecode.ERROR,
 		"msg":   ecode.StatusText(ecode.ERROR),
 		"data":  nil,
 	})
+	c.Abort()
+}
+
+func ResponseInvalidParams(c *gin.Context) {
+	c.JSON(http.StatusBadRequest, gin.H{
+		"ecode": ecode.INVALID_PARAMS,
+		"msg":   ecode.StatusText(ecode.INVALID_PARAMS),
+		"data":  nil,
+	})
+	c.Abort()
 }
 
 func ResponseSuccess(c *gin.Context) {

@@ -3,29 +3,12 @@ package filter
 import (
 	"delivery-backend/internal/app"
 	"delivery-backend/internal/ecode"
-	"delivery-backend/service/merchant_service"
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
-
-// 过滤商家黑名单
-func MerchantBlacklistFilter() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		account := c.GetString("jwt_account")
-		in_blacklist := merchant_service.AccountInBlacklist(account)
-		if in_blacklist {
-			app.Response(c, http.StatusUnauthorized,
-				ecode.ERROR_MERCHANT_ACCOUNT_BANNED, nil)
-			c.Abort()
-			return
-		}
-		log.Debug("pass: merchant account not in blacklist")
-		c.Next()
-	}
-}
 
 // UNUSED
 func LoginFilter() gin.HandlerFunc {

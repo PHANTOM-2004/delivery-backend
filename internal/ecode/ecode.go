@@ -29,8 +29,12 @@ const (
 	ERROR_MERCHANT_NOT_LOGIN      Ecode = 11004
 	ERROR_MERCHANT_ROLE           Ecode = 11005
 	ERROR_MERCHANT_ACCOUNT_BANNED Ecode = 11006
+	ERROR_MERCHANT_UNAUTH         Ecode = 11007
 
 	ERROR_MERCHANT_APPLICATION_NOT_FOUND Ecode = 12000
+
+	ERROR_RESTAURANT_EXIST     Ecode = 13000
+	ERROR_RESTAURANT_NOT_EXIST Ecode = 13001
 
 	ERROR_AUTH_NO_ACCESS_TOKEN       Ecode = 20000
 	ERROR_AUTH_ACCESS_TOKEN_EXPIRED  Ecode = 20001
@@ -82,9 +86,16 @@ func StatusText(e Ecode) (res string) {
 		res = "商家身份错误"
 	case ERROR_MERCHANT_ACCOUNT_BANNED:
 		res = "商家账号被禁用"
+	case ERROR_MERCHANT_UNAUTH:
+		res = "商家对请求数据没有权限"
 
 	case ERROR_MERCHANT_APPLICATION_NOT_FOUND:
 		res = "商家申请表记录不存在"
+
+	case ERROR_RESTAURANT_EXIST:
+		res = "该商铺名已经存在"
+	case ERROR_RESTAURANT_NOT_EXIST:
+		res = "商铺不存在"
 
 		// refresh_token and access_token
 	case ERROR_AUTH_NO_REFRESH_TOKEN:

@@ -39,18 +39,18 @@ func init() {
 			"Password": "min=15,max=30",
 		}
 
-		app.RegisterValidation(Password{}, password_rules)
+		app.RegisterMapValidation(Password{}, password_rules)
 
 		// 登录validation
 		login_rules := password_rules
 		login_rules["Account"] = "min=10,max=30"
 
-		app.RegisterValidation(Login{}, login_rules)
+		app.RegisterMapValidation(Login{}, login_rules)
 
 		// 注册账号validation
 		signup_rules := login_rules
 		signup_rules["AdminName"] = "min=2,max=20"
-		app.RegisterValidation(SignUp{}, signup_rules)
+		app.RegisterMapValidation(SignUp{}, signup_rules)
 	}
 }
 
@@ -68,7 +68,7 @@ func SignUpValidate(c *gin.Context) bool {
 	}
 	err := app.ValidateStruct(data)
 	if err != nil {
-		app.Response(c, http.StatusOK, ecode.INVALID_PARAMS, nil)
+		app.ResponseInvalidParams(c)
 		log.Warn(err)
 		return false
 	}
@@ -80,14 +80,14 @@ func PasswordValidate(password string, c *gin.Context) bool {
 
 	err := app.ValidateStruct(data)
 	if err != nil {
-		app.Response(c, http.StatusOK, ecode.INVALID_PARAMS, nil)
+		app.ResponseInvalidParams(c)
 		log.Warn(err)
 		return false
 	}
 	return true
 }
 
-func AccountValidate(account string, password string, c *gin.Context) bool {
+func AccountValidate(account string, password string, c *gin.Context) (uint, bool) {
 	data := Login{
 		Account:  account,
 		Password: password,
@@ -97,10 +97,9 @@ func AccountValidate(account string, password string, c *gin.Context) bool {
 	if err != nil {
 		// 通常来说前端不应当传递非法参数，对于非法参数的传递
 		// 通常是其他人所进行的
-		log.Warn("Login: invalid params")
-		log.Debug(err, data)
-		app.Response(c, http.StatusOK, ecode.INVALID_PARAMS, nil)
-		return false
+		log.Warn(err, data)
+		app.ResponseInvalidParams(c)
+		return 0, false
 	}
 
 	a, err := models.GetAdmin(data.Account)
@@ -108,13 +107,13 @@ func AccountValidate(account string, password string, c *gin.Context) bool {
 		// 其他未知错误
 		log.Warn(err)
 		app.Response(c, http.StatusInternalServerError, ecode.ERROR, nil)
-		return false
-	} else if a == nil {
+		return 0, false
+	} else if a.ID == 0 {
 		// 对于不存在的账户登陆，这时可能的，因为
 		// 你无法预料到用户会干什么
 		log.Debug(err, data)
 		app.Response(c, http.StatusOK, ecode.ERROR_ADMIN_NON_EXIST, nil)
-		return false
+		return 0, false
 
 	}
 
@@ -123,7 +122,7 @@ func AccountValidate(account string, password string, c *gin.Context) bool {
 		// 用户输错密码
 		log.Debug("incorrect password")
 		app.Response(c, http.StatusOK, ecode.ERROR_ADMIN_INCORRECT_PWD, nil)
-		return false
+		return 0, false
 	}
-	return true
+	return a.ID, true
 }

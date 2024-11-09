@@ -14,6 +14,25 @@ echo "finish: admin login"
 curl -b cookies.txt http://localhost:8000/api/v1/admin/jwt/auth --request GET -w "\n"
 echo "finish: admin auth"
 
+# 管理员修改密码
+curl -b cookies.txt http://localhost:8000/api/v1/admin/jwt/change-password \
+  -F "password=012345012345012345" --request PUT -w "\n"
+
+# 鉴权,这次鉴权应该会失败
+curl -b cookies.txt http://localhost:8000/api/v1/admin/jwt/auth --request GET -w "\n"
+echo "finish: admin auth"
+
+# 稍等2秒
+sleep 2
+
+#管理员登录
+curl -c cookies.txt -F "account=0123456789" -F "password=012345012345012345" http://localhost:8000/admin/login -w "\n"
+echo "finish: admin login"
+
+# 鉴权，这次可以成功
+curl -b cookies.txt http://localhost:8000/api/v1/admin/jwt/auth --request GET -w "\n"
+echo "finish: admin auth"
+
 # 上传申请表
 curl \
   -F "description=ok" \
@@ -29,6 +48,9 @@ echo "finish: admin auth"
 curl -b cookies.txt http://localhost:8000/api/v1/admin/jwt/merchant-application/1 -w "\n"
 echo "finish: admin get merchant-application"
 
+# 批准申请表
+curl -b cookies.txt http://localhost:8000/api/v1/admin/jwt/merchant-application/1/approve -w "\n" --request PUT
+
 # 获取证书
 curl -b cookies.txt http://localhost:8000/api/v1/admin/jwt/merchant-application/license/*filepath -w "\n"
 echo "finish: admin get merchant license"
@@ -39,4 +61,3 @@ echo "finish: admin get merchant license"
 #
 
 set +x
-

@@ -12,6 +12,7 @@ import (
 	"delivery-backend/internal/app"
 	"delivery-backend/internal/ecode"
 	"delivery-backend/internal/setting"
+	"delivery-backend/middleware/jwt"
 	"delivery-backend/models"
 	"delivery-backend/pkg/utils"
 	"delivery-backend/service/admin_service"
@@ -26,9 +27,10 @@ func AdminGetAuth(c *gin.Context) {
 	// 通过refresh_token, 获得access_token
 	//
 	account := c.GetString("jwt_account")
+	id := c.GetUint("jwt_id")
 
 	// 提供access_token
-	access_token := admin_service.GetAccessToken(account)
+	access_token := admin_service.GetAccessToken(uint(id), account)
 	admin_service.SetAccessToken(c, access_token)
 
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
@@ -52,23 +54,24 @@ func AdminLogout(c *gin.Context) {
 func AdminLogin(c *gin.Context) {
 	account := c.PostForm("account")
 	password := c.PostForm("password")
-
-	if v := admin_service.AccountValidate(account, password, c); !v {
+	id, v := admin_service.AccountValidate(account, password, c)
+	if !v {
 		return
 	}
 
 	// return refresh_token, access_token
-	refresh_token := admin_service.GetRefreshToken(account)
-	access_token := admin_service.GetAccessToken(account)
+	refresh_token := admin_service.GetRefreshToken(id, account)
+	access_token := admin_service.GetAccessToken(id, account)
 
 	admin_service.SetAccessToken(c, access_token)
 	admin_service.SetRefreshToken(c, refresh_token)
+	log.Trace("admin tokens set")
 
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
 }
 
 func AdminChangePassword(c *gin.Context) {
-	account := c.GetString("jwt_account")
+	id := jwt.NewJwtInfo(c).GetID()
 
 	new_pwd := c.PostForm("password")
 	// 新密码, 首先进行校验
@@ -82,11 +85,12 @@ func AdminChangePassword(c *gin.Context) {
 		"password": new_password,
 	}
 
-	err := models.EditAdmin(account, data)
+	err := models.EditAdmin(id, data)
 	if err != nil {
 		// 在这里edit， 应当保证成功；因为数据库是存在的
-		app.Response(c, http.StatusInternalServerError, ecode.ERROR, nil)
 		log.Warn("Password Update Failure[internal]")
+		log.Warn(err)
+		app.Response(c, http.StatusInternalServerError, ecode.ERROR, nil)
 		return
 	}
 
