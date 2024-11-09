@@ -16,8 +16,8 @@ var (
 func TestGetAdminAccessToken(t *testing.T) {
 	log.SetLevel(log.DebugLevel)
 
-	tks := jwt_token.GetAccessToken("admin", account, 10)
+	tks := jwt_token.GetAccessToken("admin", 10, account, 10)
 	fmt.Println(tks)
-	account, code := AuthAccessToken(tks)
-	fmt.Println(account, code)
+	id, account, code := AuthAccessToken(tks)
+	fmt.Println(id, account, code)
 }

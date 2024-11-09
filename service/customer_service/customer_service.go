@@ -16,5 +16,5 @@ func init() {
 		"PhoneNumber": "required,e164",
 		"Name":        "min=2,max=20",
 	}
-	app.RegisterValidation(Application{}, application_rules)
+	app.RegisterMapValidation(Application{}, application_rules)
 }

@@ -2,7 +2,6 @@ package routers
 
 import (
 	"delivery-backend/internal/setting"
-	"delivery-backend/middleware/filter"
 	"delivery-backend/middleware/jwt"
 	"delivery-backend/routers/api"
 	v1 "delivery-backend/routers/api/v1"
@@ -72,10 +71,56 @@ func InitRouter() *gin.Engine {
 				merchant_service.AuthAccessToken,
 			)
 			// middleware: 过滤在黑名单中的商家
-			merchant_jwt_ak.Use(ak_hanlder, filter.MerchantBlacklistFilter())
+			merchant_jwt_ak.Use(ak_hanlder,
+				merchant_service.MerchantBlacklistFilter())
 
 			merchant_jwt_ak.PUT("/change-password",
 				api.MerchantChangePassword)
+
+			merchant_jwt_ak.GET("/restaurants",
+				v1.GetRestaurants)
+
+			merchant_jwt_ak.POST("/restaurant/create", v1.CreateRestaurant)
+
+			{
+				// NOTE: 鉴权，商家必须对自己的restaurant操作
+				merchant_restaurant := merchant_jwt_ak.Group("/restaurant/:restaurant_id")
+
+				merchant_restaurant.Use(
+					merchant_service.RestaurantAuth(),
+				)
+
+				merchant_restaurant.PUT(
+					"/update",
+					v1.UpdateRestaurant,
+				)
+
+				merchant_restaurant.PUT(
+					"/status/:status",
+					v1.SetRestaurantStatus,
+				)
+
+				merchant_restaurant.GET(
+					"/status",
+					v1.GetRestaurantStatus,
+				)
+
+				merchant_restaurant.GET(
+					"/categories",
+					v1.GetCategories,
+				)
+
+				merchant_restaurant.PUT(
+					"/category/:category_id/update",
+					v1.UpdateCategory,
+				)
+
+				merchant_restaurant.POST(
+					"/category/create",
+					v1.CreateCategory,
+				)
+
+			}
 		}
 
 		{
@@ -85,7 +130,8 @@ func InitRouter() *gin.Engine {
 				merchant_service.AuthRefreshToken,
 			)
 			// middleware: 过滤在黑名单中的商家
-			merchant_jwt_rk.Use(rk_hanlder, filter.MerchantBlacklistFilter())
+			merchant_jwt_rk.Use(rk_hanlder,
+				merchant_service.MerchantBlacklistFilter())
 			merchant_jwt_rk.GET("/auth",
 				api.MerchantGetAuth)
 			merchant_jwt_rk.GET("/login-status",
@@ -105,17 +151,17 @@ func InitRouter() *gin.Engine {
 			admin_jwt_ak.Use(ak_hanlder)
 			admin_jwt_ak.PUT("/change-password", api.AdminChangePassword)
 			admin_jwt_ak.POST("/merchant-create",
-				api.MerchantCreate)
+				api.CreateMerchant)
 			admin_jwt_ak.POST("/merchant-delete",
-				api.MerchantDelete)
+				api.DeleteMerchant)
 			admin_jwt_ak.GET("/merchant-application/:page",
 				v1.GetMerchantApplication)
-			admin_jwt_ak.PUT("/merchant-application/:id/approve",
+			admin_jwt_ak.PUT("/merchant-application/:application_id/approve",
 				v1.ApproveMerchantApplication)
-			admin_jwt_ak.PUT("/merchant-application/:id/disapprove",
+			admin_jwt_ak.PUT("/merchant-application/:application_id/disapprove",
 				v1.DisapproveMerchantApplication)
 
-      //NOTE: license的图片静态文件路由
+			// NOTE: license的图片静态文件路由
 			license_path := setting.AppSetting.LicenseStorePath
 			log.Infof("Serving Static File: [%s]", license_path)
 			admin_jwt_ak.Static("/merchant-application/license", license_path)

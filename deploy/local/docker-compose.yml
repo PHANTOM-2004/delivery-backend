@@ -18,10 +18,10 @@ services:
       MYSQL_USER: scarlet
       # 默认密码2252707
       MYSQL_PASSWORD: 2252707
-    volumes:
-      # - test_mariadb_data:/var/lib/mysql
-      # 初始化db, 创建需要的表
-      - ../../scripts/db:/docker-entrypoint-initdb.d
+    # volumes:
+    # - test_mariadb_data:/var/lib/mysql
+    # 初始化db, 创建需要的表
+    # - ../../scripts/db:/docker-entrypoint-initdb.d
 
   redis:
     image: redis:alpine
@@ -87,7 +87,7 @@ services:
 
     # 默认工作区为项目目录
     working_dir: /home/Projects
-    command: sh -c "make"
+    command: ["sh", "-c", "chmod +x /home/Projects/scripts/*.sh && make"]
     volumes:
       #这里默认直接把项目根目录挂载
       - ../../:/home/Projects

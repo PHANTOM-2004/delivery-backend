@@ -7,22 +7,31 @@ import (
 	"gorm.io/gorm"
 )
 
+// 在告诉gorm默认值的时候gorm才知道默认值，否则这里会插入一个0
+
 type Merchant struct {
-	gorm.Model
-	MerchantName string
-	PhoneNumber  string
-	Account      string
-	Password     string
-	// 在告诉gorm默认值的时候gorm才知道默认值，否则这里会插入一个0
-	Status                int8 `gorm:"default:1"`
-	MerchantApplicationID int
-	MerchantApplication   MerchantApplication
+	Model
+	MerchantName string `gorm:"size:50;not null" json:"merchant_name"`
+	PhoneNumber  string `gorm:"size:30;not null" json:"phone_number"`
+	Account      string `gorm:"size:50;uniqueIndex;not null" json:"account"`
+	Password     string `gorm:"size:100;not null" json:"password"`
+	//  1启用，0禁用;默认启用
+	Status uint8 `gorm:"default:1;not null" json:"status"`
+	// 每个商家账号对应的申请表，这个申请表是唯一的
+	MerchantApplicationID uint `gorm:"uniqueIndex" json:"merchant_application_id"`
+	// 用于preload对应reference model
+	MerchantApplication MerchantApplication // 关联的对应的MerchantApplication
 }
+
+const (
+	MerchantAccountEnabled  = 1
+	MerchantAccountDisabled = 0
+)
 
 // 优先判断其他错误， 找不到时id返回为0,
 func GetMerchantID(account string) (uint, error) {
 	var m Merchant
-	err := db.Model(&Merchant{}).Where("account = ?", account).First(&m).Error
+	err := tx.Model(&Merchant{}).Where("account = ?", account).First(&m).Error
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return 0, nil
@@ -32,7 +41,7 @@ func GetMerchantID(account string) (uint, error) {
 
 func GetMerchant(account string) (*Merchant, error) {
 	var m Merchant
-	err := db.Model(&Merchant{}).Where("account = ?", account).First(&m).Error
+	err := tx.Model(&Merchant{}).Where("account = ?", account).First(&m).Error
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
@@ -41,13 +50,19 @@ func GetMerchant(account string) (*Merchant, error) {
 }
 
 func CreateMerchant(m *Merchant) error {
-	err := db.Model(&Merchant{}).Create(m).Error
+	err := tx.Model(&Merchant{}).Create(m).Error
 	return err
+}
+
+func ExistMerchant(account string) (bool, error) {
+	m := Merchant{}
+	err := tx.Find(&m, Merchant{Account: account}).Error
+	return m.ID != 0, err
 }
 
 func GetMerchantByID(id uint) (*Merchant, error) {
 	m := &Merchant{}
-	err := db.Model(&Merchant{}).Where("id = ?", id).First(m).Error
+	err := tx.Model(&Merchant{}).Where("id = ?", id).First(m).Error
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
@@ -57,31 +72,31 @@ func GetMerchantByID(id uint) (*Merchant, error) {
 }
 
 func EnableMerchant(id uint) error {
-	err := db.Model(&Merchant{}).Where("id = ?", id).Update("status", 1).Error
+	err := tx.Model(&Merchant{}).Where("id = ?", id).Update("status", 1).Error
 	return err
 }
 
 // 禁用merchant账号
 func DisableMerchant(id uint) error {
-	err := db.Model(&Merchant{}).Where("id = ?", id).Update("status", 0).Error
+	err := tx.Model(&Merchant{}).Where("id = ?", id).Update("status", 0).Error
 	return err
 }
 
 func EditMerchant(id uint, data any) error {
-	err := db.Model(&Merchant{}).Where("id = ?", id).Updates(data).Error
+	err := tx.Model(&Merchant{}).Where("id = ?", id).Updates(data).Error
 	return err
 }
 
 func CleanAllMerchants() error {
 	log.Info("running merchant cleaning")
 	defer log.Info("Deleted merchant have been cleaned")
-	res := db.Unscoped().Where("deleted_at IS NOT NULL").Delete(&Merchant{})
+	res := tx.Unscoped().Where("deleted_at IS NOT NULL").Delete(&Merchant{})
 	err := res.Error
 	log.Infof("rows affected: [%d]", res.RowsAffected)
 	return err
 }
 
 func DeleteMerchant(account string) (error, int64) {
-	res := db.Where("account = ?", account).Delete(&Merchant{})
+	res := tx.Where("account = ?", account).Delete(&Merchant{})
 	return res.Error, res.RowsAffected
 }

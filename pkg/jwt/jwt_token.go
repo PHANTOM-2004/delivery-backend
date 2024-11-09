@@ -22,14 +22,16 @@ func GenerateToken(claims jwt.Claims, secretKey string) (string, error) {
 }
 
 type RoleClaims struct {
+	ID      uint   `json:"id"`
 	Account string `json:"account"`
 	jwt.RegisteredClaims
 }
 
-func GetAccessToken(issuer string, account string, expires_minute int) string {
+func GetAccessToken(issuer string, ID uint, account string, expires_minute int) string {
 	expires := time.Now().Add(time.Duration(expires_minute) * time.Minute)
 
 	claims := RoleClaims{
+		ID,
 		account,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expires),
@@ -46,10 +48,11 @@ func GetAccessToken(issuer string, account string, expires_minute int) string {
 	return tks
 }
 
-func GetRefreshToken(issuer string, account string, expires_minute int) string {
+func GetRefreshToken(issuer string, ID uint, account string, expires_minute int) string {
 	expires := time.Now().Add(time.Duration(expires_minute) * time.Minute)
 
 	claims := RoleClaims{
+		ID,
 		account,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expires),

@@ -13,61 +13,59 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func AuthAccessToken(issuer string, access_token string) (string, ecode.Ecode) {
+func AuthAccessToken(issuer string, access_token string) (*RoleClaims, ecode.Ecode) {
 	res_claims, err := ParseToken(access_token, setting.AppSetting.JWTSecretKey)
 	if errors.Is(err, jwt.ErrTokenExpired) {
 		log.Debug("fail: access_token expired")
-		return "", ecode.ERROR_AUTH_ACCESS_TOKEN_EXPIRED
+		return nil, ecode.ERROR_AUTH_ACCESS_TOKEN_EXPIRED
 	}
 
 	log.Debug("pass: access_token not expired")
 
 	if err != nil {
 		log.Debug(err)
-		return "", ecode.ERROR_AUTH_CHECK_ACCESS_TOKEN
+		return nil, ecode.ERROR_AUTH_CHECK_ACCESS_TOKEN
 	}
 
 	claims, _ := res_claims.(*RoleClaims)
 
-	account := claims.Account
 	iss := claims.Issuer
 	sub := claims.Subject
 
 	if iss != issuer || sub != "access_token" {
-		return "", ecode.ERROR_AUTH_CHECK_ACCESS_TOKEN
+		return nil, ecode.ERROR_AUTH_CHECK_ACCESS_TOKEN
 	}
 
-	return account, ecode.SUCCESS
+	return claims, ecode.SUCCESS
 }
 
-func AuthRefreshToken(issuer string, refresh_token string) (string, ecode.Ecode) {
+func AuthRefreshToken(issuer string, refresh_token string) (*RoleClaims, ecode.Ecode) {
 	res_claims, err := ParseToken(refresh_token, setting.AppSetting.JWTSecretKey)
 
 	if errors.Is(err, jwt.ErrTokenExpired) {
 		log.Debug("refresh_token expired")
-		return "", ecode.ERROR_AUTH_ACCESS_TOKEN_EXPIRED
+		return nil, ecode.ERROR_AUTH_ACCESS_TOKEN_EXPIRED
 	}
 
 	log.Debug("pass: refresh_token not expired")
 
 	if err != nil {
 		log.Debug(err)
-		return "", ecode.ERROR_AUTH_CHECK_REFRESH_TOKEN
+		return nil, ecode.ERROR_AUTH_CHECK_REFRESH_TOKEN
 	}
 
 	claims, ok := res_claims.(*RoleClaims)
 	if !ok {
 	}
 
-	account := claims.Account
 	iss := claims.Issuer
 	sub := claims.Subject
 
 	if iss != issuer || sub != "refresh_token" {
-		return "", ecode.ERROR_AUTH_CHECK_REFRESH_TOKEN
+		return nil, ecode.ERROR_AUTH_CHECK_REFRESH_TOKEN
 	}
 
-	return account, ecode.SUCCESS
+	return nil, ecode.SUCCESS
 }
 
 func deleteTokens(c *gin.Context) {
@@ -101,7 +99,12 @@ func disableToken(prefix string, token string, expire_minute int) error {
 // 当token在黑名单中返回true，否则返回false
 func TokenInBlacklist(prefix string, token string) bool {
 	key := prefix + token
-	return gredis.Exists(key)
+	exist, err := gredis.Exists(key)
+	if err != nil {
+		log.Panic(err)
+		return false
+	}
+	return exist
 }
 
 func DisableTokens(prefix string, c *gin.Context) {

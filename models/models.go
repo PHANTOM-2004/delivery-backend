@@ -9,9 +9,20 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
+	"gorm.io/plugin/soft_delete"
 )
 
-var db *gorm.DB
+type Model struct {
+	// 不使用uint64, 我们也用不到那么多数据
+	ID        uint   `gorm:"primaryKey" json:"id"`
+	CreatedAt uint64 `gorm:"autoCreateTime" json:"created_at"`
+	UpdatedAt uint64 `gorm:"autoUpdateTime" json:"updated_at"`
+	// 仿照gorm模型添加索引
+	DeletedAt soft_delete.DeletedAt `gorm:"index" json:"deleted_at"`
+}
+
+// 用于复用的transaction
+var tx *gorm.DB
 
 func SetUp() {
 	defer log.Info("DB connection initialized")
@@ -27,7 +38,7 @@ func SetUp() {
 
 	var err error
 
-	db, err = gorm.Open(
+	db, err := gorm.Open(
 		mysql.Open(dsn),
 		&gorm.Config{
 			// 设置默认的db table handler
@@ -43,10 +54,31 @@ func SetUp() {
 		log.Fatal(err)
 	}
 
+	db = db.Set("gorm:table_options", "ENGINE=InnoDB CHARSET=utf8mb4 COLLATE=utf8mb4_bin")
+
+	err = db.AutoMigrate(
+		&Admin{},
+		&MerchantApplication{},
+		&Merchant{},
+		&Restaurant{},
+		&RestaurantTime{},
+		&Category{},
+		&Dish{},
+	)
+
+	log.Info("tables created")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	sqldb, err := db.DB()
 	if err != nil {
 		log.Fatal(err)
 	}
 	sqldb.SetMaxIdleConns(10)
 	sqldb.SetMaxOpenConns(100)
+
+	// NOTE:一定要注意如何reuse
+	// https://gorm.io/zh_CN/docs/method_chaining.html
+	tx = db.Session(&gorm.Session{})
 }
