@@ -15,6 +15,12 @@ func CreateDish(d *Dish) error {
 	return err
 }
 
+func GetDish(dish_id uint) (*Dish, error) {
+	d := Dish{}
+	err := tx.Find(&d, dish_id).Error
+	return &d, err
+}
+
 // 注意更新不存在的dish的情况
 func UpdateDish(id uint, d Dish) error {
 	err := tx.Model(&Dish{}).Where("id = ?", id).Updates(d).Error

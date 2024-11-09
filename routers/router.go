@@ -128,6 +128,7 @@ func InitRouter() *gin.Engine {
 
 				merchant_restaurant.POST(
 					"/category/:category_id/dish/create",
+					merchant_service.CategoryAuth(),
 					v1.CreateDish,
 				)
 

@@ -37,6 +37,7 @@ const (
 	ERROR_RESTAURANT_NOT_FOUND Ecode = 13001
 
 	ERROR_CATEGORY_NOT_FOUND Ecode = 14000
+	ERROR_DISH_NOT_FOUND     Ecode = 15000
 
 	ERROR_AUTH_NO_ACCESS_TOKEN       Ecode = 20000
 	ERROR_AUTH_ACCESS_TOKEN_EXPIRED  Ecode = 20001
@@ -100,7 +101,10 @@ func StatusText(e Ecode) (res string) {
 		res = "商铺不存在"
 
 	case ERROR_CATEGORY_NOT_FOUND:
-		res = "类别不存在"
+		res = "菜品分类不存在"
+
+	case ERROR_DISH_NOT_FOUND:
+		res = "菜品不存在"
 
 		// refresh_token and access_token
 	case ERROR_AUTH_NO_REFRESH_TOKEN:

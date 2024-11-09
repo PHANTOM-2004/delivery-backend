@@ -122,6 +122,30 @@ curl -b cookies.txt \
   --request POST
 
 # 向餐厅1插入dish 2
+curl -b cookies.txt \
+  -F "name=西瓜炖土豆" \
+  -F "price=1999" \
+  -F "image=@Makefile.png" \
+  -F "description=你知道我要说什么" \
+  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/category/1/dish/create \
+  --request POST
+
+# 获得餐厅1所有category
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/categories
+
+# 修改dish 1
+curl -b cookies.txt \
+  -F "name=现在不叫雪豹了" \
+  -F "price=19990" \
+  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/category/1/dish/1/update \
+  --request PUT
+
+# 修改dish 1图片
+curl -b cookies.txt \
+  -F "image=@Makefile.png" \
+  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/category/1/dish/1/update \
+  --request PUT
 
 # 获得餐厅1所有category
 curl -b cookies.txt \
