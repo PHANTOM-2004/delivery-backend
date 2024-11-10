@@ -46,7 +46,7 @@ type AdminName struct {
 // 200: COMMON
 
 //=============================================================
-// swagger:route POST /admin/login admin admin_login
+// swagger:route POST /api/admin/login admin admin_login
 // 登入的身份认证
 // (1) 返回access_token, refresh_token
 // (2) 其中access_token是短期的有效token, refresh_token是长期有效token, 后者用于刷新acess_token
@@ -65,21 +65,21 @@ type AdminName struct {
 // 200: COMMON
 
 //=============================================================
-// swagger:route POST /admin/create admin admin_create
+// swagger:route POST /api/admin/create admin admin_create
 // 创建管理员账户，该api只允许测试时以及部署时运维调用
 // PS: 通过url发送参数
 // responses:
 // 200: COMMON
 
 // =============================================================
-// swagger:route DELETE /admin/delete admin admin_delete
+// swagger:route DELETE /api/admin/delete admin admin_delete
 // 删除管理员账户，该api只允许测试时以及部署时运维调用
 // PS: 通过url发送参数，删除账户不存在时也会删除成功，但是会返回信息提示不存在
 // responses:
 // 200: COMMON
 
 // =============================================================
-// swagger:route POST /admin/logout admin admin_logout
+// swagger:route POST /api/admin/logout admin admin_logout
 // 注销管理员账户
 // 在非法请求发出时（管理员不处于登入状态）会返回错误信息。
 // responses:

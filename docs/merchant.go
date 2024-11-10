@@ -51,7 +51,7 @@ type MerchantCreateApplicationID struct {
 // 200: COMMON
 
 //=============================================================
-// swagger:route POST /merchant/login merchant merchant_login
+// swagger:route POST /api/merchant/login merchant merchant_login
 // 登入的身份认证
 // (1) 返回access_token, refresh_token
 // (2) 其中access_token是短期的有效token, refresh_token是长期有效token, 后者用于刷新acess_token
@@ -86,7 +86,7 @@ type MerchantCreateApplicationID struct {
 // 200: COMMON
 
 // =============================================================
-// swagger:route POST /merchant/logout merchant merchant_logout
+// swagger:route POST /api/merchant/logout merchant merchant_logout
 // 注销商家账户
 // 在非法请求发出时（商家不处于登入状态）会返回错误信息。
 // responses:
