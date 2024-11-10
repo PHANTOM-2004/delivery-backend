@@ -38,7 +38,6 @@ mkcert -key-file ./localhost-key.pem -cert-file ./localhost-cert.pem localhost
 
 同时服务端会启动一个监听`localhost`的服务用于排查，这一服务会在部署时关闭。
 
-
 ### Docker
 
 为了方便环境的一致性，采用`docker`运行服务。
@@ -58,25 +57,26 @@ docker login
 
 注意进入`deploy/local`目录执行：
 
+> PS:现在同样支持`deploy/hybrid`目录执行(前提是本地，注意是本地启动了`npm`服务监听`5173`端口):
+> PS:这么做是因为在`Windows`下面`docker`中的`npm`速度过于逆天，因此考虑直接让`npm`运行在宿主机中。
+
 ```shell
 docker-compose up -d
 ```
 
-
-- 追踪日志(可以替换后面的`test_go_service`为你希望追踪的容器名)： 
+- 追踪日志(可以替换后面的`test_go_service`为你希望追踪的容器名)：
 
 ```shell
 docker logs -f test_go_service
 ```
 
-- 通过脚本插入数据: 
+- 通过脚本插入数据:
 
 最后的文件名就是使用的对应脚本，存放在`scripts`文件夹中，注意发送域名是`http://localhost:8000`，这是在容器内部发送，注意看清楚内容。至于插入了什么数据，请自行阅读；前端也可以根据需要添加新的`example`欢迎提出`MR` .
 
 ```shell
 docker exec test_go_service /bin/sh -c scripts/admin_example.sh
 ```
-
 
 #### 启动全部服务
 
@@ -234,5 +234,3 @@ make
 ```shell
 go install github.com/go-swagger/go-swagger/cmd/swagger@latest
 ```
-
-
