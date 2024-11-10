@@ -42,13 +42,13 @@ func InitRouter() *gin.Engine {
 	log.Debug("Currently session not used", admin_session_handler)
 
 	// admin group
-	admin := r.Group("/admin")
+	admin := r.Group("/api/admin")
 	admin.POST("/create", api.AdminCreate)
 	admin.DELETE("/delete", api.AdminDelete)
 	admin.POST("/login", api.AdminLogin)
 	admin.POST("/logout", api.AdminLogout)
 	// merchant
-	merchant := r.Group("/merchant")
+	merchant := r.Group("/api/merchant")
 	merchant.POST("/login", api.MerchantLogin)
 	merchant.POST("/logout", api.MerchantLogout)
 
