@@ -3,11 +3,11 @@
 set -x
 
 # 创建一个管理员
-curl "http://localhost:8000/admin/create?super_token=LTDZ&admin_name=cjq&password=123451234512345&account=9876543210" --request POST -w "\n"
+curl "http://localhost:8000/api/admin/create?super_token=LTDZ&admin_name=cjq&password=123451234512345&account=9876543210" --request POST -w "\n"
 echo "finish: admin create"
 
 # 管理员登录
-curl -c cookies.txt -F "account=9876543210" -F "password=123451234512345" http://localhost:8000/admin/login -w "\n"
+curl -c cookies.txt -F "account=9876543210" -F "password=123451234512345" http://localhost:8000/api/admin/login -w "\n"
 echo "finish: admin login"
 
 # 添加application作为第一条
@@ -34,7 +34,7 @@ curl -b cookies.txt \
 curl -c cookies.txt \
   -F "account=merchant_test" \
   -F "password=12345678" \
-  http://localhost:8000/merchant/login -w "\n"
+  http://localhost:8000/api/merchant/login -w "\n"
 
 # 商家鉴权
 curl -b cookies.txt http://localhost:8000/api/v1/merchant/jwt/auth --request GET -w "\n"

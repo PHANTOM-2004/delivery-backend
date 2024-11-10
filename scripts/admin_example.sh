@@ -3,11 +3,11 @@
 set -x
 
 # 创建一个管理员
-curl "http://localhost:8000/admin/create?super_token=LTDZ&admin_name=cjq&password=123451234512345&account=0123456789" --request POST -w "\n"
+curl "http://localhost:8000/api/admin/create?super_token=LTDZ&admin_name=cjq&password=123451234512345&account=0123456789" --request POST -w "\n"
 echo "finish: admin create"
 
 # 管理员登录
-curl -c cookies.txt -F "account=0123456789" -F "password=123451234512345" http://localhost:8000/admin/login -w "\n"
+curl -c cookies.txt -F "account=0123456789" -F "password=123451234512345" http://localhost:8000/api/admin/login -w "\n"
 echo "finish: admin login"
 
 # 鉴权
@@ -26,7 +26,7 @@ echo "finish: admin auth"
 sleep 2
 
 #管理员登录
-curl -c cookies.txt -F "account=0123456789" -F "password=012345012345012345" http://localhost:8000/admin/login -w "\n"
+curl -c cookies.txt -F "account=0123456789" -F "password=012345012345012345" http://localhost:8000/api/admin/login -w "\n"
 echo "finish: admin login"
 
 # 鉴权，这次可以成功
