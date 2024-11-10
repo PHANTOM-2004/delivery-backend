@@ -9,7 +9,33 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 )
+
+func DishAuth() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		dish_id, err := strconv.Atoi(c.Param("dish_id"))
+		if err != nil {
+			app.ResponseInvalidParams(c)
+			return
+		}
+		merchant_id := jwt.NewJwtInfo(c).GetID()
+		d_merchant, err := models.GetMerchantByDish(uint(dish_id))
+		if err != nil {
+			app.ResponseInternalError(c, err)
+			return
+		}
+		if d_merchant.ID != merchant_id {
+			// 无权修改不是自己的
+			log.Debugf("current merchant_id[%v]", merchant_id)
+			log.Debugf("dish[%v] belongs to[%v]", dish_id, d_merchant.ID)
+			app.Response(c, http.StatusUnauthorized, ecode.ERROR_MERCHANT_UNAUTH, nil)
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
+}
 
 // 根据参数category_id, restaurant_id, 校验修改的category是否是商家自己的
 // 避免api被滥用于越权修改
@@ -20,20 +46,18 @@ func CategoryAuth() gin.HandlerFunc {
 			app.ResponseInvalidParams(c)
 			return
 		}
-
-		//////////////////// 校验是否是自己的dish
-		restaurant_id := c.GetUint("restaurant_id")
-		category, err := models.GetCategory(uint(category_id))
+		merchant_id := jwt.NewJwtInfo(c).GetID()
+		c_merchant, err := models.GetMerchantByCategory(uint(category_id))
 		if err != nil {
 			app.ResponseInternalError(c, err)
 			return
-		} else if category.ID == 0 {
-			// 找不到category
-			app.Response(c, http.StatusOK, ecode.ERROR_CATEGORY_NOT_FOUND, nil)
-			return
-		} else if category.RestaurantID != restaurant_id {
-			// 不是自己的category
-			app.Response(c, http.StatusOK, ecode.ERROR_MERCHANT_UNAUTH, nil)
+		}
+		if merchant_id != c_merchant.ID {
+			// 无权修改不是自己的
+			log.Debugf("current merchant_id[%v]", merchant_id)
+			log.Debugf("category[%v] belongs to[%v]", category_id, c_merchant.ID)
+			app.Response(c, http.StatusUnauthorized, ecode.ERROR_MERCHANT_UNAUTH, nil)
+			c.Abort()
 			return
 		}
 		c.Next()

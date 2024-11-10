@@ -108,7 +108,7 @@ func CreateRestaurant(c *gin.Context) {
 		app.ResponseInvalidParams(c)
 		return
 	}
-  //注意添加外键
+	//注意添加外键
 	data.MerchantID = merchant_id
 	err = app.ValidateStruct(data)
 	if err != nil {

@@ -8,7 +8,7 @@ type Restaurant struct {
 	// 商铺简介
 	Description string `gorm:"size:300;not null" form:"description" validate:"max=300" json:"description"`
 	// 最小起送金额,使用整数存储,默认存储到分
-  MinimumDeliveryAmount uint `gorm:"default:0;not null" form:"minimum_delivery_amount" json:"minimum_delivery_amount"`
+	MinimumDeliveryAmount uint `gorm:"default:0;not null" form:"minimum_delivery_amount" json:"minimum_delivery_amount"`
 	// 商铺评分
 	Rating float32 `gorm:"default:0;not null" json:"rating"`
 	// 所属的商家ID

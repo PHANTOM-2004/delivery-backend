@@ -110,33 +110,35 @@ func InitRouter() *gin.Engine {
 					v1.GetCategories,
 				)
 
-				merchant_restaurant.PUT(
-					"/category/:category_id/update",
-					v1.UpdateCategory,
-				)
-
 				merchant_restaurant.POST(
 					"/category/create",
 					v1.CreateCategory,
 				)
-
-				merchant_restaurant.PUT(
-					"/category/:category_id/dish/:dish_id/update",
-					merchant_service.CategoryAuth(),
-					v1.UpdateDish,
-				)
-
-				merchant_restaurant.POST(
-					"/category/:category_id/dish/create",
-					merchant_service.CategoryAuth(),
-					v1.CreateDish,
-				)
-
-				// NOTE: license的图片静态文件路由
-				dish_image_path := setting.AppSetting.DishImageStorePath
-				log.Infof("Serving Static File: [%s]", dish_image_path)
-				merchant_jwt_ak.Static("/dish", dish_image_path)
 			}
+
+			// NOTE:这里需要鉴定设置的category是否是商家自己的店铺的
+			merchant_jwt_ak.POST(
+				"/category/:category_id/dish/create",
+				merchant_service.CategoryAuth(),
+				v1.CreateDish,
+			)
+			// NOTE:这里需要验证更新的category是否是商家自己的店铺的
+			merchant_jwt_ak.PUT(
+				"/category/:category_id/update",
+				merchant_service.CategoryAuth(),
+				v1.UpdateCategory,
+			)
+			// NOTE:这里需要验证更新的dish是否属于商家
+			merchant_jwt_ak.PUT(
+				"/dish/:dish_id/update",
+				merchant_service.DishAuth(),
+				v1.UpdateDish,
+			)
+			// NOTE: license的图片静态文件路由, 对餐品图片的访问不进行鉴权
+			dish_image_path := setting.AppSetting.DishImageStorePath
+			log.Infof("Serving Static File: [%s]", dish_image_path)
+			merchant_jwt_ak.Static("/dish", dish_image_path)
+
 		}
 
 		{
