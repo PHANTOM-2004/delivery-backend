@@ -23,7 +23,7 @@ func GetDish(dish_id uint) (*Dish, error) {
 }
 
 // 注意更新不存在的dish的情况
-func UpdateDish(id uint, d Dish) error {
-	err := tx.Model(&Dish{}).Where("id = ?", id).Updates(d).Error
+func UpdateDish(id uint, d *Dish) error {
+	err := tx.Model(&Dish{}).Where("id = ?", id).Updates(*d).Error
 	return err
 }

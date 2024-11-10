@@ -103,7 +103,7 @@ func UpdateCategory(c *gin.Context) {
 	}
 
 	category := data.GetCategoryModel()
-	err = models.UpdateCategory(uint(category_id), *category)
+	err = models.UpdateCategory(uint(category_id), category)
 	// 记录必然找到
 	if err != nil {
 		app.ResponseInternalError(c, err)

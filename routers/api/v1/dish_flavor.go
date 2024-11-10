@@ -129,7 +129,7 @@ func UpdateDish(c *gin.Context) {
 		return
 	}
 
-  dish := dish_r.GetDishModel()
+	dish := dish_r.GetDishModel()
 	//////////////////// 校验文件
 	_, err = c.FormFile("image")
 	if !errors.Is(err, http.ErrMissingFile) {
@@ -142,7 +142,7 @@ func UpdateDish(c *gin.Context) {
 	}
 
 	/////更新dish, 此时记录必然存在
-	err = models.UpdateDish(uint(dish_id), *dish)
+	err = models.UpdateDish(uint(dish_id), dish)
 	if err != nil {
 		app.ResponseInternalError(c, err)
 		return

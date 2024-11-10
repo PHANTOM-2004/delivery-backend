@@ -37,7 +37,7 @@ func CreateCategory(data *Category) error {
 }
 
 // 注意更新不存在的category的情况
-func UpdateCategory(category_id uint, data Category) error {
+func UpdateCategory(category_id uint, data *Category) error {
 	err := tx.Model(&Category{}).Where("id = ?", category_id).Updates(data).Error
 	return err
 }

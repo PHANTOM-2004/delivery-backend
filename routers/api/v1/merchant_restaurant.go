@@ -69,10 +69,30 @@ func GetRestaurantStatus(c *gin.Context) {
 	app.Response(c, http.StatusOK, ecode.SUCCESS, data)
 }
 
+type restaurantRequest struct {
+	RestaurantName string `form:"restaurant_name" validate:"max=50"`
+	// 店铺的地址
+	Address string `validate:"max=50"`
+	// 商铺简介
+	Description string `form:"description" validate:"max=300"`
+	// 最小起送金额,使用整数存储,默认存储到分
+	MinimumDeliveryAmount uint `form:"minimum_delivery_amount"`
+}
+
+func (r *restaurantRequest) GetRestaurantModel() *models.Restaurant {
+	res := models.Restaurant{
+		RestaurantName:        r.RestaurantName,
+		Address:               r.Address,
+		Description:           r.Description,
+		MinimumDeliveryAmount: r.MinimumDeliveryAmount,
+	}
+	return &res
+}
+
 // 应保证经过handler判定对应restaurant存在；
 func UpdateRestaurant(c *gin.Context) {
 	restaurant_id := c.GetUint("restaurant_id")
-	var data models.Restaurant
+	var data restaurantRequest
 	err := c.Bind(&data)
 	if err != nil {
 		log.Debug(err)
@@ -87,7 +107,8 @@ func UpdateRestaurant(c *gin.Context) {
 		return
 	}
 
-	err = models.UpdateRestaurant(restaurant_id, data)
+	r := data.GetRestaurantModel()
+	err = models.UpdateRestaurant(restaurant_id, r)
 	if err != nil {
 		app.ResponseInternalError(c, err)
 		return
@@ -101,24 +122,25 @@ func UpdateRestaurant(c *gin.Context) {
 func CreateRestaurant(c *gin.Context) {
 	merchant_id := jwt.NewJwtInfo(c).GetID()
 
-	var data models.Restaurant
+	var data restaurantRequest
 	err := c.Bind(&data)
 	if err != nil {
 		log.Debug(err)
 		app.ResponseInvalidParams(c)
 		return
 	}
-	//注意添加外键
-	data.MerchantID = merchant_id
+	// 注意添加外键
 	err = app.ValidateStruct(data)
 	if err != nil {
 		log.Debug(err)
 		app.ResponseInvalidParams(c)
 		return
 	}
+	r := data.GetRestaurantModel()
+	r.MerchantID = merchant_id
 
 	// 如果店铺存在那么就不应该再次创建
-	exist, err := models.ExistRestaurant(data.RestaurantName)
+	exist, err := models.ExistRestaurant(r.RestaurantName)
 	if err != nil {
 		app.ResponseInternalError(c, err)
 		return
@@ -128,7 +150,7 @@ func CreateRestaurant(c *gin.Context) {
 		return
 	}
 
-	err = models.CreateRestaurant(&data)
+	err = models.CreateRestaurant(r)
 	if err != nil {
 		app.ResponseInternalError(c, err)
 		return
