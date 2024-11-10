@@ -1,5 +1,10 @@
 package models
 
+import (
+	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
+)
+
 type Category struct {
 	Model
 	// 分类名称，比如素菜，荤菜，小吃，套餐
@@ -14,6 +19,26 @@ type Category struct {
 	Restaurant   Restaurant `json:"-"`
 	RestaurantID uint       `gorm:"index;not null" json:"restaurant_id"`
 	Dishes       []Dish     `json:"dishes"`
+}
+
+func (c *Category) AfterDelete(tx *gorm.DB) error {
+	log.Trace("running category after delete hook")
+
+	// 删除关联的所有dishes
+	err := tx.Where("category_id = ?", c.ID).Delete(&Dish{}).Error
+	if err != nil {
+		return err
+	}
+	defer log.Tracef("dishes related to category[%v] are deleted", c.ID)
+	defer log.Trace(*c)
+	return nil
+}
+
+// NOTE:注意为什么得到空结构体
+// https://github.com/go-gorm/gorm/issues/3686
+func DeleteCategory(category_id uint) error {
+	err := tx.Delete(&Category{Model: Model{ID: category_id}}).Error
+	return err
 }
 
 // 同时会返回对应的dishes

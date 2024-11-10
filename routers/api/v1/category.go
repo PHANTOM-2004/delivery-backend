@@ -111,3 +111,15 @@ func UpdateCategory(c *gin.Context) {
 	}
 	app.ResponseSuccess(c)
 }
+
+// category_id作为url参数
+func DeleteCategory(c *gin.Context) {
+	category_id, _ := strconv.Atoi(c.Param("category_id"))
+
+	err := models.DeleteCategory(uint(category_id))
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+	app.ResponseSuccess(c)
+}

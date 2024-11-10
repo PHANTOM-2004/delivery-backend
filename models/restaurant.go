@@ -1,5 +1,10 @@
 package models
 
+import (
+	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
+)
+
 type Restaurant struct {
 	Model
 	RestaurantName string `gorm:"size:50;uniqueIndex;not null" json:"restaurant_name"`
@@ -26,6 +31,21 @@ type RestaurantTime struct {
 	OpenDays string `gorm:"type:char(3);not null" json:"open_days"`
 	// 所属的餐馆ID, 因为一个商家可能存在多个营业时间
 	RestaurantID uint `gorm:"index;not null" json:"restaurant_id"`
+}
+
+func (r *Restaurant) AfterDelete(tx *gorm.DB) error {
+	log.Trace("running restaurant after delete hook")
+	err := tx.Where("restaurant_id = ?", r.ID).Delete(&Category{}).Error
+	if err != nil {
+		return err
+	}
+	defer log.Tracef("categories related to restaurant[%v] are deleted", r.ID)
+	return nil
+}
+
+func DeleteRestaurant(restaurant_id uint) error {
+	err := tx.Delete(&Restaurant{Model: Model{ID: restaurant_id}}).Error
+	return err
 }
 
 func GetRestaurantByMerchant(merchant_id uint) ([]Restaurant, error) {

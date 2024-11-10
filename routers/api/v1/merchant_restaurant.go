@@ -158,3 +158,15 @@ func CreateRestaurant(c *gin.Context) {
 
 	app.ResponseSuccess(c)
 }
+
+func DeleteRestaurant(c *gin.Context) {
+	// 因为已经提前设置在上下文中
+	restaurant_id := c.GetUint("restaurant_id")
+
+	err := models.DeleteRestaurant(restaurant_id)
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+	app.ResponseSuccess(c)
+}

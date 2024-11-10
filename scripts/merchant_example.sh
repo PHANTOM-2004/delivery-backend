@@ -151,4 +151,22 @@ curl -b cookies.txt \
 curl -b cookies.txt \
   http://localhost:8000/api/v1/merchant/jwt/restaurant/1/categories
 
+# 删除1号category, 理论上此时应当没有菜品
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/category/1/delete \
+  --request DELETE
+
+# 获得餐厅1所有category
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/categories
+
+# 删除餐厅1号, 此时数据库应当不存在任何东西
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/delete \
+  --request DELETE
+
+# 再次获得餐厅1所有category
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/categories
+
 set +x
