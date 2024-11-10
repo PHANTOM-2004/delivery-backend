@@ -4,6 +4,7 @@ import (
 	"delivery-backend/internal/app"
 	"delivery-backend/internal/ecode"
 	"delivery-backend/internal/setting"
+	"delivery-backend/middleware/jwt"
 	"delivery-backend/models"
 	"errors"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 // 如果中间有校验失败，会返回false
@@ -113,6 +115,21 @@ func CreateDish(c *gin.Context) {
 	app.ResponseSuccess(c)
 }
 
+func DeleteDish(c *gin.Context) {
+	dish_id, _ := strconv.Atoi(c.Param("dish_id"))
+	err := models.DeleteDish(uint(dish_id))
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		app.Response(c, http.StatusOK, ecode.ERROR_DISH_NOT_FOUND, nil)
+		return
+	}
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+
+	app.ResponseSuccess(c)
+}
+
 // 注意校验dish是否属于对应的category
 // 在中间件中已经校验过restaurant的所属
 // 传递参数
@@ -155,6 +172,10 @@ func UpdateDish(c *gin.Context) {
 // 通过url path传参即可，传递name
 func CreateFlavor(c *gin.Context) {
 	restaurant_id := c.GetUint("restaurant_id")
+	if restaurant_id == 0 {
+		log.Warn("restaurant id could not be 0")
+	}
+
 	name := c.Param("name")
 	if name == "" {
 		log.Debug("name could not be empty")
@@ -174,10 +195,45 @@ func CreateFlavor(c *gin.Context) {
 	app.ResponseSuccess(c)
 }
 
+func DeleteFlavor(c *gin.Context) {
+	flavor_id, err := strconv.Atoi(c.Param("flavor_id"))
+	if err != nil {
+		app.ResponseInvalidParams(c)
+		return
+	}
+	// 验证修改的是不是自己的
+	merchant_id, err := models.GetMerchantIDByFlavor(uint(flavor_id))
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+	if merchant_id != jwt.NewJwtInfo(c).GetID() {
+		app.Response(c, http.StatusUnauthorized, ecode.ERROR_MERCHANT_UNAUTH, nil)
+		return
+	}
+
+	err = models.DeleteFlavor(uint(flavor_id))
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+	app.ResponseSuccess(c)
+}
+
 func UpdateFlavor(c *gin.Context) {
 	flavor_id, err := strconv.Atoi(c.Param("flavor_id"))
 	if err != nil {
 		app.ResponseInvalidParams(c)
+		return
+	}
+	// 验证修改的是不是自己的
+	merchant_id, err := models.GetMerchantIDByFlavor(uint(flavor_id))
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+	if merchant_id != jwt.NewJwtInfo(c).GetID() {
+		app.Response(c, http.StatusUnauthorized, ecode.ERROR_MERCHANT_UNAUTH, nil)
 		return
 	}
 
@@ -216,34 +272,52 @@ func GetDishFlavor(c *gin.Context) {
 	app.Response(c, http.StatusOK, ecode.SUCCESS, res)
 }
 
-// 传入flavors作为flavor数组
-func AddDishFlavor(c *gin.Context) {
-	dish_id, err := strconv.Atoi(c.Param("dish_id"))
+func DeleteDishFlavor(c *gin.Context) {
+	dish_id, err := strconv.ParseUint(c.Param("dish_id"), 10, 0)
 	if err != nil {
 		log.Debug(err)
 		app.ResponseInvalidParams(c)
 		return
 	}
-	flavors := c.PostFormArray("flavors")
-	flavors_append := make([]models.Flavor, len(flavors))
-	for i := range flavors {
-		id, err := strconv.Atoi(flavors[i])
-		if err != nil {
-			log.Debug(err)
-			app.ResponseInvalidParams(c)
-			return
-		}
-		flavors_append[i] = models.Flavor{Model: models.Model{ID: uint(id)}}
+	flavors_id := app.NewIDArrayParser("flavors", c).Parse()
+	if len(flavors_id) == 0 {
+		log.Debug(" flavors参数有误")
+		app.ResponseInvalidParams(c)
+		return
 	}
 
-	log.Debugf("add flavors to dish[%v]", dish_id)
-	log.Debug("add flavors:", flavors)
-	err = models.AddDishFlavor(uint(dish_id), flavors_append)
+	log.Debugf("delete flavors from dish[%v]", dish_id)
+	log.Debug("delete flavors:", flavors_id)
+	err = models.DeleteDishFlavor(uint(dish_id), flavors_id)
 	if err != nil {
 		app.ResponseInternalError(c, err)
 		return
 	}
+	app.ResponseSuccess(c)
+}
 
+// 传入flavors作为flavor数组
+func AddDishFlavor(c *gin.Context) {
+	dish_id, err := strconv.ParseUint(c.Param("dish_id"), 10, 0)
+	if err != nil {
+		log.Debug(err)
+		app.ResponseInvalidParams(c)
+		return
+	}
+
+	flavors_id := app.NewIDArrayParser("flavors", c).Parse()
+	if len(flavors_id) == 0 {
+		app.ResponseInvalidParams(c)
+		return
+	}
+
+	log.Debugf("add flavors to dish[%v]", dish_id)
+	log.Debug("add flavors:", flavors_id)
+	err = models.AddDishFlavor(uint(dish_id), flavors_id)
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
 	app.ResponseSuccess(c)
 }
 

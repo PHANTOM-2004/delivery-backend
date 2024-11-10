@@ -153,12 +153,17 @@ curl -b cookies.txt \
 
 # 插入flavors 1
 curl -b cookies.txt \
-  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/flavor/create/蒜香干拌 \
+  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/flavor/蒜香干拌 \
   --request POST
 
 # 插入flavors 2
 curl -b cookies.txt \
-  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/flavor/create/红油干拌 \
+  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/flavor/红油干拌 \
+  --request POST
+
+# 插入flavors 3
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/flavor/别干拌了 \
   --request POST
 
 # 获得所有flavors
@@ -173,10 +178,64 @@ curl -b cookies.txt \
 curl -b cookies.txt \
   -d "flavors=1" \
   -d "flavors=2" \
+  -d "flavors=3" \
   http://localhost:8000/api/v1/merchant/jwt/dish/1/flavors \
   --request POST
 
 # 获得dish 1的 flavors
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/dish/1/flavors
+
+# 修改flavor1号
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/flavor/1/update/改名厚乳 --request PUT
+
+# 获得dish 1的 flavors, 此时flavor应当改变
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/dish/1/flavors
+
+# 去掉flavor 2, 3
+curl -b cookies.txt \
+  -d "flavors=2" \
+  -d "flavors=3" \
+  http://localhost:8000/api/v1/merchant/jwt/dish/1/flavors/delete \
+  --request POST
+
+# 获得dish 1的 flavors, 此时flavor应当改变
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/dish/1/flavors
+
+# 为菜品1再次加入2, 3 dish flavors
+curl -b cookies.txt \
+  -d "flavors=2" \
+  -d "flavors=3" \
+  http://localhost:8000/api/v1/merchant/jwt/dish/1/flavors \
+  --request POST
+
+# 获得dish 1的 flavors, 此时flavor应当改变
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/dish/1/flavors
+
+# 此时删除1号flavor, 这个时候dish 1的flavor应当改变
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/flavor/1 --request DELETE
+
+# 获得所有flavors, 应当改变
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/flavors
+
+
+# 获得dish 1的 flavors, 此时flavor应当改变
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/dish/1/flavors
+
+
+# 直接删除1号dish
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/dish/1 \
+  --request DELETE
+
+# 1号dish删除之后，再次获得dish 1的 flavors, 注意去数据库中观测flavor
 curl -b cookies.txt \
   http://localhost:8000/api/v1/merchant/jwt/dish/1/flavors
 

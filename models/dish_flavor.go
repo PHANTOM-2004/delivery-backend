@@ -1,5 +1,10 @@
 package models
 
+import (
+	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
+)
+
 type Dish struct {
 	Model
 	Name        string   `gorm:"size:30;not null" json:"name"`
@@ -19,9 +24,53 @@ type Flavor struct {
 	RestaurantID uint `gorm:"index"`
 }
 
+// 从口味得到商家
+func GetMerchantIDByFlavor(flavor_id uint) (uint, error) {
+	var ID uint
+
+	err := tx.Transaction(func(ftx *gorm.DB) error {
+		f := Flavor{Model: Model{ID: flavor_id}}
+		err := ftx.First(&f, Flavor{}).Error
+		if err != nil {
+			return err
+		}
+		log.Trace(f)
+		log.Tracef("flavor[%v] belongs to restaurant[%v]", flavor_id, f.RestaurantID)
+
+		r := Restaurant{}
+		err = ftx.Find(&r, f.RestaurantID).Error
+		if err != nil {
+			return err
+		}
+		log.Trace(r)
+		log.Tracef("restaurnt[%v] belongs to merchant[%v]", f.RestaurantID, r.MerchantID)
+
+		ID = r.MerchantID
+		return nil
+	})
+
+	if err == nil {
+		defer log.Tracef("transaction get merchant[%v] by flavor[%v]", ID, flavor_id)
+	}
+
+	return ID, err
+}
+
+// 删除一个口味
+func DeleteFlavor(flavor_id uint) error {
+	err := tx.Delete(&Flavor{Model: Model{ID: flavor_id}}).Error
+	return err
+}
+
 // 创建一个新菜品
 func CreateDish(d *Dish) error {
 	err := tx.Create(d).Error
+	return err
+}
+
+// 删除一个菜品
+func DeleteDish(dish_id uint) error {
+	err := tx.Delete(&Dish{Model: Model{ID: dish_id}}).Error
 	return err
 }
 
@@ -51,7 +100,7 @@ func CreateFlavor(f *Flavor) error {
 }
 
 func UpdateFlavor(flavor_id uint, name string) error {
-	err := tx.Model(&Dish{}).Where("id = ?", flavor_id).Update("name", name).Error
+	err := tx.Model(&Flavor{}).Where("id = ?", flavor_id).Update("name", name).Error
 	return err
 }
 
@@ -63,7 +112,22 @@ func GetFlavors(restaurant_id uint) ([]Flavor, error) {
 }
 
 // 一个菜品可以添加多种口味
-func AddDishFlavor(dish_id uint, flavors []Flavor) error {
+func AddDishFlavor(dish_id uint, flavors_id []uint) error {
+	flavors := make([]Flavor, len(flavors_id))
+	for i := range flavors {
+		id := flavors_id[i]
+		flavors[i] = Flavor{Model: Model{ID: id}}
+	}
 	err := tx.Model(&Dish{Model: Model{ID: dish_id}}).Association("Flavors").Append(flavors)
+	return err
+}
+
+func DeleteDishFlavor(dish_id uint, flavors_id []uint) error {
+	flavors := make([]Flavor, len(flavors_id))
+	for i := range flavors {
+		id := flavors_id[i]
+		flavors[i] = Flavor{Model: Model{ID: id}}
+	}
+	err := tx.Model(&Dish{Model: Model{ID: dish_id}}).Association("Flavors").Delete(flavors)
 	return err
 }

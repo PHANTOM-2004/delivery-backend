@@ -40,6 +40,11 @@ func (r *Restaurant) AfterDelete(tx *gorm.DB) error {
 		return err
 	}
 	defer log.Tracef("categories related to restaurant[%v] are deleted", r.ID)
+	err = tx.Where("restaurant_id = ?", r.ID).Delete(&Flavor{}).Error
+	if err != nil {
+		return err
+	}
+	defer log.Tracef("flavors related to restaurant[%v] are deleted", r.ID)
 	return nil
 }
 

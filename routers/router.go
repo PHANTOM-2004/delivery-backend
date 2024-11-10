@@ -124,7 +124,7 @@ func InitRouter() *gin.Engine {
 				)
 
 				merchant_restaurant.POST(
-					"/flavor/create/:name",
+					"/flavor/:name",
 					v1.CreateFlavor,
 				)
 
@@ -135,9 +135,10 @@ func InitRouter() *gin.Engine {
 
 			}
 
-			// TODO:这里没有做flavor的鉴权，
-			// 也就是说这个接口实际上商家可以更改任意flavor
-			// 不过暂时就这样吧,后面工作还有很多
+			merchant_jwt_ak.DELETE(
+				"/flavor/:flavor_id",
+				v1.DeleteFlavor,
+			)
 			merchant_jwt_ak.PUT(
 				"/flavor/:flavor_id/update/:name",
 				v1.UpdateFlavor,
@@ -147,6 +148,16 @@ func InitRouter() *gin.Engine {
 				"/dish/:dish_id/flavors",
 				merchant_service.DishAuth(),
 				v1.AddDishFlavor,
+			)
+			merchant_jwt_ak.POST(
+				"/dish/:dish_id/flavors/delete",
+				merchant_service.DishAuth(),
+				v1.DeleteDishFlavor,
+			)
+			merchant_jwt_ak.DELETE(
+				"/dish/:dish_id",
+				merchant_service.DishAuth(),
+				v1.DeleteDish,
 			)
 			merchant_jwt_ak.GET(
 				"/dish/:dish_id/flavors",

@@ -4,11 +4,13 @@ import (
 	"delivery-backend/internal/app"
 	"delivery-backend/internal/ecode"
 	"delivery-backend/models"
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 // TODO:设置一个恰当的脚本进行整个流程的参数验证
@@ -117,6 +119,10 @@ func DeleteCategory(c *gin.Context) {
 	category_id, _ := strconv.Atoi(c.Param("category_id"))
 
 	err := models.DeleteCategory(uint(category_id))
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		app.Response(c, http.StatusOK, ecode.ERROR_CATEGORY_NOT_FOUND, nil)
+		return
+	}
 	if err != nil {
 		app.ResponseInternalError(c, err)
 		return
