@@ -49,7 +49,7 @@ func SetUp() {
 				// use singular table name, table for `User` would be `user` with this option enabled
 				SingularTable: true,
 			},
-			Logger: logger.Default.LogMode(logger.Info),
+			Logger: logger.Default.LogMode(setting.DatabaseSetting.GetLogLevel()),
 		},
 	)
 	if err != nil {
