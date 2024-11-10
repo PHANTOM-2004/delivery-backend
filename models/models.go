@@ -8,6 +8,7 @@ import (
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 	"gorm.io/plugin/soft_delete"
 )
@@ -48,6 +49,7 @@ func SetUp() {
 				// use singular table name, table for `User` would be `user` with this option enabled
 				SingularTable: true,
 			},
+			Logger: logger.Default.LogMode(logger.Info),
 		},
 	)
 	if err != nil {
@@ -63,6 +65,7 @@ func SetUp() {
 		&Restaurant{},
 		&RestaurantTime{},
 		&Category{},
+		&Flavor{},
 		&Dish{},
 	)
 

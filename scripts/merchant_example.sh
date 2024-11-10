@@ -151,6 +151,35 @@ curl -b cookies.txt \
 curl -b cookies.txt \
   http://localhost:8000/api/v1/merchant/jwt/restaurant/1/categories
 
+# 插入flavors 1
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/flavor/create/蒜香干拌 \
+  --request POST
+
+# 插入flavors 2
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/flavor/create/红油干拌 \
+  --request POST
+
+# 获得所有flavors
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/flavors
+
+# 获得dish 1 的 flavors
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/dish/1/flavors
+
+# 为菜品1加入dish flavors
+curl -b cookies.txt \
+  -d "flavors=1" \
+  -d "flavors=2" \
+  http://localhost:8000/api/v1/merchant/jwt/dish/1/flavors \
+  --request POST
+
+# 获得dish 1的 flavors
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/dish/1/flavors
+
 # 删除1号category, 理论上此时应当没有菜品
 curl -b cookies.txt \
   http://localhost:8000/api/v1/merchant/jwt/category/1/delete \

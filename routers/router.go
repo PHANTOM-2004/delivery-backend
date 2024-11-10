@@ -122,8 +122,43 @@ func InitRouter() *gin.Engine {
 					"/category/create",
 					v1.CreateCategory,
 				)
+
+				merchant_restaurant.POST(
+					"/flavor/create/:name",
+					v1.CreateFlavor,
+				)
+
+				merchant_restaurant.GET(
+					"/flavors",
+					v1.GetRestaurantFlavors,
+				)
+
 			}
 
+			// TODO:这里没有做flavor的鉴权，
+			// 也就是说这个接口实际上商家可以更改任意flavor
+			// 不过暂时就这样吧,后面工作还有很多
+			merchant_jwt_ak.PUT(
+				"/flavor/:flavor_id/update/:name",
+				v1.UpdateFlavor,
+			)
+			// form中发送需要加入的
+			merchant_jwt_ak.POST(
+				"/dish/:dish_id/flavors",
+				merchant_service.DishAuth(),
+				v1.AddDishFlavor,
+			)
+			merchant_jwt_ak.GET(
+				"/dish/:dish_id/flavors",
+				merchant_service.DishAuth(),
+				v1.GetDishFlavor,
+			)
+			// NOTE:这里需要验证更新的dish是否属于商家
+			merchant_jwt_ak.PUT(
+				"/dish/:dish_id/update",
+				merchant_service.DishAuth(),
+				v1.UpdateDish,
+			)
 			// NOTE:这里需要鉴定设置的category是否是商家自己的店铺的
 			merchant_jwt_ak.POST(
 				"/category/:category_id/dish/create",
@@ -143,17 +178,10 @@ func InitRouter() *gin.Engine {
 				v1.DeleteCategory,
 			)
 
-			// NOTE:这里需要验证更新的dish是否属于商家
-			merchant_jwt_ak.PUT(
-				"/dish/:dish_id/update",
-				merchant_service.DishAuth(),
-				v1.UpdateDish,
-			)
-
 			// NOTE: license的图片静态文件路由, 对餐品图片的访问不进行鉴权
 			dish_image_path := setting.AppSetting.DishImageStorePath
 			log.Infof("Serving Static File: [%s]", dish_image_path)
-			merchant_jwt_ak.Static("/dish", dish_image_path)
+			merchant_jwt_ak.Static("/dish/image", dish_image_path)
 		}
 
 		{

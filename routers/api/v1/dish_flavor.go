@@ -2,6 +2,7 @@ package v1
 
 import (
 	"delivery-backend/internal/app"
+	"delivery-backend/internal/ecode"
 	"delivery-backend/internal/setting"
 	"delivery-backend/models"
 	"errors"
@@ -149,4 +150,113 @@ func UpdateDish(c *gin.Context) {
 	}
 
 	app.ResponseSuccess(c)
+}
+
+// 通过url path传参即可，传递name
+func CreateFlavor(c *gin.Context) {
+	restaurant_id := c.GetUint("restaurant_id")
+	name := c.Param("name")
+	if name == "" {
+		log.Debug("name could not be empty")
+		app.ResponseInvalidParams(c)
+		return
+	}
+
+	f := models.Flavor{
+		Name:         name,
+		RestaurantID: restaurant_id,
+	}
+	err := models.CreateFlavor(&f)
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+	app.ResponseSuccess(c)
+}
+
+func UpdateFlavor(c *gin.Context) {
+	flavor_id, err := strconv.Atoi(c.Param("flavor_id"))
+	if err != nil {
+		app.ResponseInvalidParams(c)
+		return
+	}
+
+	name := c.Param("name")
+	if name == "" {
+		log.Debug("name could not be empty")
+		app.ResponseInvalidParams(c)
+		return
+	}
+
+	err = models.UpdateFlavor(uint(flavor_id), name)
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+	app.ResponseSuccess(c)
+}
+
+func GetDishFlavor(c *gin.Context) {
+	dish_id, err := strconv.Atoi(c.Param("dish_id"))
+	if err != nil {
+		log.Debug(err)
+		app.ResponseInvalidParams(c)
+		return
+	}
+	d, err := models.GetDishFlavors(uint(dish_id))
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+
+	res := map[string]any{
+		"flavors": d.Flavors,
+	}
+
+	app.Response(c, http.StatusOK, ecode.SUCCESS, res)
+}
+
+// 传入flavors作为flavor数组
+func AddDishFlavor(c *gin.Context) {
+	dish_id, err := strconv.Atoi(c.Param("dish_id"))
+	if err != nil {
+		log.Debug(err)
+		app.ResponseInvalidParams(c)
+		return
+	}
+	flavors := c.PostFormArray("flavors")
+	flavors_append := make([]models.Flavor, len(flavors))
+	for i := range flavors {
+		id, err := strconv.Atoi(flavors[i])
+		if err != nil {
+			log.Debug(err)
+			app.ResponseInvalidParams(c)
+			return
+		}
+		flavors_append[i] = models.Flavor{Model: models.Model{ID: uint(id)}}
+	}
+
+	log.Debugf("add flavors to dish[%v]", dish_id)
+	log.Debug("add flavors:", flavors)
+	err = models.AddDishFlavor(uint(dish_id), flavors_append)
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+
+	app.ResponseSuccess(c)
+}
+
+func GetRestaurantFlavors(c *gin.Context) {
+	restaurant_id := c.GetUint("restaurant_id")
+	flavors, err := models.GetFlavors(restaurant_id)
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+
+	res := map[string]any{
+		"flavors": flavors,
+	}
+	app.Response(c, http.StatusOK, ecode.SUCCESS, res)
 }
