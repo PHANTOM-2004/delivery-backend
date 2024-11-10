@@ -119,7 +119,7 @@ func InitRouter() *gin.Engine {
 				)
 
 				merchant_restaurant.POST(
-					"/category/create",
+					"/category",
 					v1.CreateCategory,
 				)
 
@@ -140,12 +140,12 @@ func InitRouter() *gin.Engine {
 				v1.DeleteFlavor,
 			)
 			merchant_jwt_ak.PUT(
-				"/flavor/:flavor_id/update/:name",
+				"/flavor/:flavor_id/name/:name",
 				v1.UpdateFlavor,
 			)
 			// form中发送需要加入的
 			merchant_jwt_ak.POST(
-				"/dish/:dish_id/flavors",
+				"/dish/:dish_id/flavors/add",
 				merchant_service.DishAuth(),
 				v1.AddDishFlavor,
 			)
@@ -166,25 +166,25 @@ func InitRouter() *gin.Engine {
 			)
 			// NOTE:这里需要验证更新的dish是否属于商家
 			merchant_jwt_ak.PUT(
-				"/dish/:dish_id/update",
+				"/dish/:dish_id",
 				merchant_service.DishAuth(),
 				v1.UpdateDish,
 			)
 			// NOTE:这里需要鉴定设置的category是否是商家自己的店铺的
 			merchant_jwt_ak.POST(
-				"/category/:category_id/dish/create",
+				"/category/:category_id/dish",
 				merchant_service.CategoryAuth(),
 				v1.CreateDish,
 			)
 			// NOTE:这里需要验证更新的category是否是商家自己的店铺的
 			merchant_jwt_ak.PUT(
-				"/category/:category_id/update",
+				"/category/:category_id",
 				merchant_service.CategoryAuth(),
 				v1.UpdateCategory,
 			)
 
 			merchant_jwt_ak.DELETE(
-				"/category/:category_id/delete",
+				"/category/:category_id",
 				merchant_service.CategoryAuth(),
 				v1.DeleteCategory,
 			)
@@ -222,9 +222,9 @@ func InitRouter() *gin.Engine {
 			)
 			admin_jwt_ak.Use(ak_hanlder)
 			admin_jwt_ak.PUT("/change-password", api.AdminChangePassword)
-			admin_jwt_ak.POST("/merchant-create",
+			admin_jwt_ak.POST("/merchant/create",
 				api.CreateMerchant)
-			admin_jwt_ak.POST("/merchant-delete",
+			admin_jwt_ak.POST("/merchant/delete",
 				api.DeleteMerchant)
 			admin_jwt_ak.GET("/merchant-application/:page",
 				v1.GetMerchantApplication)

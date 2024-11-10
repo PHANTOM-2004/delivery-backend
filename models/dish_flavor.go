@@ -21,7 +21,7 @@ type Flavor struct {
 	Model
 	Name string `gorm:"size:30;not null" json:"name"`
 	// 关联的商店
-	RestaurantID uint `gorm:"index"`
+  RestaurantID uint `gorm:"index" json:"restaurant_id"`
 }
 
 // 从口味得到商家
@@ -43,7 +43,7 @@ func GetMerchantIDByFlavor(flavor_id uint) (uint, error) {
 			return err
 		}
 		log.Trace(r)
-		log.Tracef("restaurnt[%v] belongs to merchant[%v]", f.RestaurantID, r.MerchantID)
+		log.Tracef("restaurant[%v] belongs to merchant[%v]", f.RestaurantID, r.MerchantID)
 
 		ID = r.MerchantID
 		return nil
