@@ -28,7 +28,7 @@ curl -b cookies.txt \
   -F "merchant_name=孙智城" \
   -F "phone_number=+8618520192763" \
   -F "merchant_application_id=1" \
-  http://localhost:8000/api/v1/admin/jwt/merchant-create --request POST
+  http://localhost:8000/api/v1/admin/jwt/merchant/create --request POST
 
 # 商家登录
 curl -c cookies.txt \
@@ -88,14 +88,14 @@ curl -b cookies.txt \
   -F "name=雪豹" \
   -F "type=1" \
   -F "sort=9" \
-  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/category/create \
+  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/category \
   --request POST
 
 # 向餐厅插入category2
 curl -b cookies.txt \
   -F "name=桌饺" \
   -F "sort=9" \
-  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/category/create \
+  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/category \
   --request POST
 
 # 获得餐厅所有category
@@ -105,29 +105,29 @@ curl -b cookies.txt \
 # 修改餐厅的category1
 curl -b cookies.txt \
   -F "sort=337" \
-  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/category/1/update \
+  http://localhost:8000/api/v1/merchant/jwt/category/1 \
   --request PUT
 
 # 获得餐厅所有category
 curl -b cookies.txt \
   http://localhost:8000/api/v1/merchant/jwt/restaurant/1/categories
 
-# 向餐厅1插入dish 1
+# 向category 1插入dish 1
 curl -b cookies.txt \
   -F "name=雪豹炒鸡扒" \
   -F "price=2089" \
   -F "image=@Makefile.png" \
   -F "description=好的" \
-  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/category/1/dish/create \
+  http://localhost:8000/api/v1/merchant/jwt/category/1/dish \
   --request POST
 
-# 向餐厅1插入dish 2
+# 向category 1插入dish 2
 curl -b cookies.txt \
   -F "name=西瓜炖土豆" \
   -F "price=1999" \
   -F "image=@Makefile.png" \
   -F "description=你知道我要说什么" \
-  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/category/1/dish/create \
+  http://localhost:8000/api/v1/merchant/jwt/category/1/dish \
   --request POST
 
 # 获得餐厅1所有category
@@ -138,16 +138,122 @@ curl -b cookies.txt \
 curl -b cookies.txt \
   -F "name=现在不叫雪豹了" \
   -F "price=19990" \
-  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/category/1/dish/1/update \
+  http://localhost:8000/api/v1/merchant/jwt/dish/1 \
   --request PUT
 
 # 修改dish 1图片
 curl -b cookies.txt \
   -F "image=@Makefile.png" \
-  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/category/1/dish/1/update \
+  http://localhost:8000/api/v1/merchant/jwt/dish/1 \
   --request PUT
 
 # 获得餐厅1所有category
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/categories
+
+# 插入flavors 1
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/flavor/蒜香干拌 \
+  --request POST
+
+# 插入flavors 2
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/flavor/红油干拌 \
+  --request POST
+
+# 插入flavors 3
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/flavor/别干拌了 \
+  --request POST
+
+# 获得所有flavors
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/flavors
+
+# 获得dish 1 的 flavors
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/dish/1/flavors
+
+# 为菜品1加入dish flavors
+curl -b cookies.txt \
+  -d "flavors=1" \
+  -d "flavors=2" \
+  -d "flavors=3" \
+  http://localhost:8000/api/v1/merchant/jwt/dish/1/flavors/add \
+  --request POST
+
+# 获得dish 1的 flavors
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/dish/1/flavors
+
+# 修改flavor1号
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/flavor/1/name/改名厚乳 --request PUT
+
+# 获得dish 1的 flavors, 此时flavor应当改变
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/dish/1/flavors
+
+# 去掉flavor 2, 3
+curl -b cookies.txt \
+  -d "flavors=2" \
+  -d "flavors=3" \
+  http://localhost:8000/api/v1/merchant/jwt/dish/1/flavors/delete \
+  --request POST
+
+# 获得dish 1的 flavors, 此时flavor应当改变
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/dish/1/flavors
+
+# 为菜品1再次加入2, 3 dish flavors
+curl -b cookies.txt \
+  -d "flavors=2" \
+  -d "flavors=3" \
+  http://localhost:8000/api/v1/merchant/jwt/dish/1/flavors/add \
+  --request POST
+
+# 获得dish 1的 flavors, 此时flavor应当改变
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/dish/1/flavors
+
+# 此时删除1号flavor, 这个时候dish 1的flavor应当改变
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/flavor/1 --request DELETE
+
+# 获得所有flavors, 应当改变
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/flavors
+
+
+# 获得dish 1的 flavors, 此时flavor应当改变
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/dish/1/flavors
+
+
+# 直接删除1号dish
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/dish/1 \
+  --request DELETE
+
+# 1号dish删除之后，再次获得dish 1的 flavors, 注意去数据库中观测flavor
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/dish/1/flavors
+
+# 删除1号category, 理论上此时应当没有菜品
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/category/1 \
+  --request DELETE
+
+# 获得餐厅1所有category
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/categories
+
+# 删除餐厅1号, 此时数据库应当不存在任何东西
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/jwt/restaurant/1/delete \
+  --request DELETE
+
+# 再次获得餐厅1所有category
 curl -b cookies.txt \
   http://localhost:8000/api/v1/merchant/jwt/restaurant/1/categories
 

@@ -8,6 +8,7 @@ import (
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 	"gorm.io/plugin/soft_delete"
 )
@@ -18,7 +19,7 @@ type Model struct {
 	CreatedAt uint64 `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt uint64 `gorm:"autoUpdateTime" json:"updated_at"`
 	// 仿照gorm模型添加索引
-	DeletedAt soft_delete.DeletedAt `gorm:"index" json:"deleted_at"`
+	DeletedAt soft_delete.DeletedAt `gorm:"index" json:"-"`
 }
 
 // 用于复用的transaction
@@ -48,6 +49,7 @@ func SetUp() {
 				// use singular table name, table for `User` would be `user` with this option enabled
 				SingularTable: true,
 			},
+			Logger: logger.Default.LogMode(setting.DatabaseSetting.GetLogLevel()),
 		},
 	)
 	if err != nil {
@@ -63,6 +65,7 @@ func SetUp() {
 		&Restaurant{},
 		&RestaurantTime{},
 		&Category{},
+		&Flavor{},
 		&Dish{},
 	)
 

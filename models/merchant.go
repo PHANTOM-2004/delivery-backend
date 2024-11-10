@@ -28,6 +28,19 @@ const (
 	MerchantAccountDisabled = 0
 )
 
+// reference: https://gorm.io/docs/preload.html#nested_preloading
+func GetMerchantByCategory(category_id uint) (*Merchant, error) {
+	c := Category{}
+	err := tx.Preload("Restaurant.Merchant").Find(&c, category_id).Error
+	return &c.Restaurant.Merchant, err
+}
+
+func GetMerchantByDish(dish_id uint) (*Merchant, error) {
+	d := Dish{}
+	err := tx.Preload("Category.Restaurant.Merchant").Find(&d, dish_id).Error
+	return &d.Category.Restaurant.Merchant, err
+}
+
 // 优先判断其他错误， 找不到时id返回为0,
 func GetMerchantID(account string) (uint, error) {
 	var m Merchant

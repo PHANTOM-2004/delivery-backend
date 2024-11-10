@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm/logger"
 
 	"github.com/go-ini/ini"
 )
@@ -104,6 +105,23 @@ type Database struct {
 	TablePrefix  string
 	MaxIdleConns int
 	MaxOpenConns int
+	LogLevel     string
+}
+
+func (d *Database) GetLogLevel() logger.LogLevel {
+	l := strings.ToLower(d.LogLevel)
+	switch l {
+	case "silent":
+		return logger.Silent
+	case "error":
+		return logger.Error
+	case "warn":
+		return logger.Warn
+	case "info":
+		return logger.Info
+	default:
+		return logger.Warn
+	}
 }
 
 type Redis struct {

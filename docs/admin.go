@@ -128,7 +128,7 @@ type MerchantLicenseRequest struct {
 type MerchantLicenseResponse struct {
 	// 执照图片
 	// Required:true
-  License runtime.File
+	License runtime.File
 }
 
 // =============================================================
