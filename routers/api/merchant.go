@@ -38,7 +38,7 @@ func DeleteMerchant(c *gin.Context) {
 }
 
 func CreateMerchant(c *gin.Context) {
-	if v := merchant_service.SignUpValidate(c); !v {
+	if v := merchant_service.SignUpRequestValidate(c); !v {
 		return
 	}
 
@@ -105,7 +105,7 @@ func MerchantLogin(c *gin.Context) {
 	account := c.PostForm("account")
 	password := c.PostForm("password")
 
-	id, v := merchant_service.AccountValidate(account, password, c)
+	id, v := merchant_service.AccountAuth(account, password, c)
 	if !v {
 		return
 	}
@@ -127,7 +127,7 @@ func MerchantChangePassword(c *gin.Context) {
 	id := h.GetID()
 	new_pwd := c.PostForm("password")
 	// 新密码, 首先进行校验
-	if v := merchant_service.PasswordValidate(new_pwd, c); !v {
+	if v := merchant_service.PasswordRequestValidate(new_pwd, c); !v {
 		return
 	}
 

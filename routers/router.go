@@ -68,6 +68,7 @@ func InitRouter() *gin.Engine {
 			// merchant group
 			merchant_session := apiv1.Group("/merchant")
 			merchant_session.Use(merchant_session_handler)
+			merchant_session.Use(merchant_service.MerchantBlacklistFilter())
 
 			///////////////商家账户相关
 			merchant_session.GET("/login-status",

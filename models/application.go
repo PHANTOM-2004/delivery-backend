@@ -4,7 +4,6 @@ import (
 	"delivery-backend/internal/setting"
 
 	log "github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 )
 
 type MerchantApplication struct {
@@ -28,16 +27,14 @@ const (
 func CreateMerchantApplication(a *MerchantApplication) error {
 	// NOTE:这里如果加上model就会出错，非常奇怪。
 	log.Tracef("creating merchant application [%v]", *a)
-	err := tx.Create(a).Session(&gorm.Session{}).Error
+	err := tx.Create(a).Error
 	return err
 }
 
 // 找到关联申请表的商家账号
 func GetRelatedMerchant(application_id uint) (*Merchant, error) {
 	res := Merchant{}
-	// NOTE:直接使用Find竟然出现bug;;实际上不知道为什么带上了上一次查询的条件；
-	// 并且选择了错误的table
-	err := tx.Session(&gorm.Session{}).Find(&res, Merchant{MerchantApplicationID: application_id}).Error
+	err := tx.Find(&res, Merchant{MerchantApplicationID: application_id}).Error
 	return &res, err
 }
 

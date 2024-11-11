@@ -3,8 +3,8 @@ package merchant_service
 import (
 	"delivery-backend/internal/app"
 	"delivery-backend/internal/ecode"
-	"delivery-backend/middleware/jwt"
 	"delivery-backend/models"
+	handler "delivery-backend/service"
 	"delivery-backend/service/cache"
 	"net/http"
 
@@ -15,9 +15,8 @@ import (
 // 过滤商家黑名单
 func MerchantBlacklistFilter() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		j := jwt.NewJwtInfo(c)
-		merchant_id := j.GetID()
-		in_blacklist, err := MerchantInBlacklist(uint(merchant_id))
+		merchant_id := handler.NewMerchInfoHanlder(c).GetID()
+		in_blacklist, err := MerchantInBlacklist(merchant_id)
 		if err != nil {
 			app.ResponseInternalError(c, err)
 			return
@@ -36,7 +35,7 @@ func MerchantBlacklistFilter() gin.HandlerFunc {
 }
 
 func EnableMerchant(merchant_id uint) error {
-	b := cache.NewRedisMerchantBlacklist(merchant_id)
+	b := cache.NewMerchantBlacklist(merchant_id)
 	err := b.Remove()
 	if err != nil {
 		return err
@@ -48,7 +47,7 @@ func EnableMerchant(merchant_id uint) error {
 }
 
 func DisableMerchant(merchant_id uint) error {
-	b := cache.NewRedisMerchantBlacklist(merchant_id)
+	b := cache.NewMerchantBlacklist(merchant_id)
 	err := b.Add()
 	if err != nil {
 		return err
@@ -61,7 +60,7 @@ func DisableMerchant(merchant_id uint) error {
 
 // 只从redis中查询状态
 func MerchantInBlacklist(merchant_id uint) (bool, error) {
-	b := cache.NewRedisMerchantBlacklist(merchant_id)
+	b := cache.NewMerchantBlacklist(merchant_id)
 	exist, err := b.Exists()
 	return exist, err
 }
