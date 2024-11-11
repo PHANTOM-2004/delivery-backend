@@ -44,7 +44,7 @@ func GetMerchantByDish(dish_id uint) (*Merchant, error) {
 // 优先判断其他错误， 找不到时id返回为0,
 func GetMerchantID(account string) (uint, error) {
 	var m Merchant
-	err := tx.Model(&Merchant{}).Where("account = ?", account).First(&m).Error
+	err := tx.Where("account = ?", account).First(&m).Error
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return 0, nil
@@ -54,8 +54,7 @@ func GetMerchantID(account string) (uint, error) {
 
 func GetMerchant(account string) (*Merchant, error) {
 	var m Merchant
-	err := tx.Model(&Merchant{}).Where("account = ?", account).First(&m).Error
-
+	err := tx.Where("account = ?", account).First(&m).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
@@ -63,7 +62,7 @@ func GetMerchant(account string) (*Merchant, error) {
 }
 
 func CreateMerchant(m *Merchant) error {
-	err := tx.Model(&Merchant{}).Create(m).Error
+	err := tx.Create(m).Error
 	return err
 }
 
@@ -74,14 +73,14 @@ func ExistMerchant(account string) (bool, error) {
 }
 
 func GetMerchantByID(id uint) (*Merchant, error) {
-	m := &Merchant{}
-	err := tx.Model(&Merchant{}).Where("id = ?", id).First(m).Error
+	m := Merchant{}
+	err := tx.First(&m, id).Error
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
 
-	return m, err
+	return &m, err
 }
 
 func EnableMerchant(id uint) error {
@@ -95,7 +94,7 @@ func DisableMerchant(id uint) error {
 	return err
 }
 
-func EditMerchant(id uint, data any) error {
+func UpdateMerchant(id uint, data map[string]any) error {
 	err := tx.Model(&Merchant{}).Where("id = ?", id).Updates(data).Error
 	return err
 }

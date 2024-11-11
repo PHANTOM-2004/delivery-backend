@@ -56,7 +56,7 @@ func init() {
 }
 
 // 如果认证成功，会返回id
-func AccountValidate(account string, password string, c *gin.Context) (uint, bool) {
+func AccountAuth(account string, password string, c *gin.Context) (uint, bool) {
 	data := Login{
 		Account:  account,
 		Password: password,
@@ -76,14 +76,18 @@ func AccountValidate(account string, password string, c *gin.Context) (uint, boo
 	if err != nil {
 		// 其他未知错误
 		log.Warn(err)
-		app.Response(c, http.StatusInternalServerError, ecode.ERROR, nil)
+		app.ResponseInternalError(c, err)
 		return 0, false
 	}
-
 	if m == nil {
 		// 商家不存在
 		log.Debug(err, data)
 		app.Response(c, http.StatusOK, ecode.ERROR_MERCHANT_NON_FOUND, nil)
+		return 0, false
+	}
+	if m.Status == models.MerchantAccountDisabled {
+		// 商家账号被禁用
+		app.Response(c, http.StatusUnauthorized, ecode.ERROR_MERCHANT_ACCOUNT_BANNED, nil)
 		return 0, false
 	}
 
@@ -91,13 +95,13 @@ func AccountValidate(account string, password string, c *gin.Context) (uint, boo
 	if en_pwd != m.Password {
 		// 用户输错密码
 		log.Debug("incorrect password")
-		app.Response(c, http.StatusOK, ecode.ERROR_MERCHANT_INCORRECT_PWD, nil)
+		app.Response(c, http.StatusUnauthorized, ecode.ERROR_MERCHANT_INCORRECT_PWD, nil)
 		return 0, false
 	}
 	return m.ID, true
 }
 
-func SignUpValidate(c *gin.Context) bool {
+func SignUpRequestValidate(c *gin.Context) bool {
 	method := c.Request.Method
 	if method != "POST" {
 		log.Fatal("invalid usage")
@@ -120,7 +124,7 @@ func SignUpValidate(c *gin.Context) bool {
 	return true
 }
 
-func PasswordValidate(password string, c *gin.Context) bool {
+func PasswordRequestValidate(password string, c *gin.Context) bool {
 	data := Password{password}
 
 	err := app.ValidateStruct(data)
@@ -160,7 +164,7 @@ func CreateMerchantFromApplication(application_id uint) error {
 		return err
 	}
 
-	log.Debugf("created merchant:account[%s],password[%s]",
+	log.Debugf("created merchant: ACCOUNT[%s],PWD[%s]",
 		account, password)
 	return nil
 }

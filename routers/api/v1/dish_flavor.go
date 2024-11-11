@@ -4,8 +4,8 @@ import (
 	"delivery-backend/internal/app"
 	"delivery-backend/internal/ecode"
 	"delivery-backend/internal/setting"
-	"delivery-backend/middleware/jwt"
 	"delivery-backend/models"
+	handler "delivery-backend/service"
 	"errors"
 	"net/http"
 	"strconv"
@@ -207,7 +207,7 @@ func DeleteFlavor(c *gin.Context) {
 		app.ResponseInternalError(c, err)
 		return
 	}
-	if merchant_id != jwt.NewJwtInfo(c).GetID() {
+	if merchant_id != handler.NewMerchInfoHanlder(c).GetID() {
 		app.Response(c, http.StatusUnauthorized, ecode.ERROR_MERCHANT_UNAUTH, nil)
 		return
 	}
@@ -232,7 +232,7 @@ func UpdateFlavor(c *gin.Context) {
 		app.ResponseInternalError(c, err)
 		return
 	}
-	if merchant_id != jwt.NewJwtInfo(c).GetID() {
+	if merchant_id != handler.NewMerchInfoHanlder(c).GetID() {
 		app.Response(c, http.StatusUnauthorized, ecode.ERROR_MERCHANT_UNAUTH, nil)
 		return
 	}

@@ -21,7 +21,7 @@ type Flavor struct {
 	Model
 	Name string `gorm:"size:30;not null" json:"name"`
 	// 关联的商店
-  RestaurantID uint `gorm:"index" json:"restaurant_id"`
+	RestaurantID uint `gorm:"index" json:"restaurant_id"`
 }
 
 // 从口味得到商家

@@ -61,7 +61,7 @@ func ApproveMerchantApplication(c *gin.Context) {
 	}
 
 	// 2. 存在商家账号
-	if m != nil {
+	if m.ID != 0 {
 		// 说明商家有账号，所以需要检查是否解冻这个账号
 		log.Debugf("related account[%s] found", m.Account)
 		err = merchant_service.EnableMerchant(m.ID)
@@ -84,7 +84,8 @@ func ApproveMerchantApplication(c *gin.Context) {
 		return
 	}
 
-	if m != nil {
+	// 商家已经存在，那么不需要考虑创建账号
+	if m.ID != 0 {
 		app.ResponseSuccess(c)
 		log.Debugf("application form id[%d] approved", id)
 		return
@@ -97,8 +98,8 @@ func ApproveMerchantApplication(c *gin.Context) {
 		return
 	}
 
-	app.ResponseSuccess(c)
 	log.Debugf("application form id[%d] approved; account created", id)
+	app.ResponseSuccess(c)
 }
 
 func DisapproveMerchantApplication(c *gin.Context) {
@@ -114,10 +115,10 @@ func DisapproveMerchantApplication(c *gin.Context) {
 		return
 	}
 
-	if m == nil {
+	if m.ID == 0 {
 		// 没有关联的商家账号，那么那么无需冻结和解冻操作
 		log.Debug("No related merchant account")
-		app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
+		app.ResponseSuccess(c)
 		return
 	}
 

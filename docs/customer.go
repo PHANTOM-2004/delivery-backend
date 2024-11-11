@@ -60,7 +60,7 @@ type MerchantApplicationResponse struct {
 }
 
 //=============================================================
-// swagger:route GET /api/v1/admin/jwt/merchant-application/{page} v1-admin get_merchant_application
+// swagger:route GET /api/v1/admin/merchant-application/{page} v1-admin get_merchant_application
 // 管理员请求获得申请表, 每一页返回10个条目
 // responses:
 // 200: merchant_application

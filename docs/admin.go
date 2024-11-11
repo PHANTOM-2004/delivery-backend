@@ -38,25 +38,16 @@ type AdminName struct {
 }
 
 //=============================================================
-// swagger:route GET /api/v1/admin/jwt/auth v1-admin admin_auth
-// 请求获得access_token
-// (1) 通过refresh_token获取access_token
-// (2) 注意错误码，如果出现refresh_token过期说明需要重新登录
-// responses:
-// 200: COMMON
-
-//=============================================================
-// swagger:route POST /api/admin/login admin admin_login
+// swagger:route POST /api/v1/admin/login v1-admin admin_login
 // 登入的身份认证
-// (1) 返回access_token, refresh_token
-// (2) 其中access_token是短期的有效token, refresh_token是长期有效token, 后者用于刷新acess_token
+// (*) 在cookie中设置session_id
 // PS: 通过postform发送参数, 否则会认证错误.
 // responses:
 // 200: COMMON
 //
 
 //=============================================================
-// swagger:route GET /api/v1/admin/jwt/login-status v1-admin admin_login_status
+// swagger:route GET /api/v1/admin/login-status v1-admin admin_login_status
 // 请求管理员的登陆状态
 // (1) 如果登陆，同时会返回已登录的account，data字段中有一个key为account
 // (2) 在判断httpcode的基础上(httpcode != 401)，只需要判断业务逻辑码是否是SUCCESS即可,不存在error时意味着处于登录状态
@@ -65,28 +56,28 @@ type AdminName struct {
 // 200: COMMON
 
 //=============================================================
-// swagger:route POST /api/admin/create admin admin_create
+// swagger:route POST /api/v1/admin/create v1-admin admin_create
 // 创建管理员账户，该api只允许测试时以及部署时运维调用
 // PS: 通过url发送参数
 // responses:
 // 200: COMMON
 
 // =============================================================
-// swagger:route DELETE /api/admin/delete admin admin_delete
+// swagger:route DELETE /api/v1/admin/delete v1-admin admin_delete
 // 删除管理员账户，该api只允许测试时以及部署时运维调用
 // PS: 通过url发送参数，删除账户不存在时也会删除成功，但是会返回信息提示不存在
 // responses:
 // 200: COMMON
 
 // =============================================================
-// swagger:route POST /api/admin/logout admin admin_logout
+// swagger:route POST /api/v1/admin/logout v1-admin admin_logout
 // 注销管理员账户
 // 在非法请求发出时（管理员不处于登入状态）会返回错误信息。
 // responses:
 // 200: COMMON
 
 // =============================================================
-// swagger:route PUT /api/v1/admin/jwt/change-password v1-admin admin_change_password
+// swagger:route PUT /api/v1/admin/change-password v1-admin admin_change_password
 // 管理员修改密码
 // 在非法请求发出时（管理员不处于登入状态）会返回错误信息。
 // PS: 通过postform形式传递密码, 不要使用url传参。
@@ -101,7 +92,7 @@ type MerchantApplicationID struct {
 }
 
 // =============================================================
-// swagger:route PUT /api/v1/admin/jwt/merchant-application/{application_id}/approve v1-admin admin_approve_application
+// swagger:route PUT /api/v1/admin/merchant-application/{application_id}/approve v1-admin admin_approve_application
 // 管理员通过商家发起的申请
 // 如果同意，会判断是否存在关联的商家账号，如果存在必然是封禁状态，那么会对状态进行解禁; 如果不存在关联的商家账号，那么会为该申请创建一个新账号。
 // PS: 目前新账号会放在日志中，后续新账号会发送到申请邮箱中。
@@ -109,7 +100,7 @@ type MerchantApplicationID struct {
 // 200: COMMON
 
 // =============================================================
-// swagger:route PUT /api/v1/admin/jwt/merchant-application/{application_id}/disapprove v1-admin admin_disapprove_application
+// swagger:route PUT /api/v1/admin/merchant-application/{application_id}/disapprove v1-admin admin_disapprove_application
 // 管理员拒绝商家发起的申请
 // 如果拒绝, 仍然会判断是否有关联的商家账号，如果没有关联的商家账号，那么仅拒绝申请。
 // 如果有关联的商家账号，还会把这个关联的商家账号进行冻结。
@@ -132,7 +123,7 @@ type MerchantLicenseResponse struct {
 }
 
 // =============================================================
-// swagger:route GET /api/v1/admin/jwt/merchant-application/license/{*file_path} v1-admin admin_get_merchant_license
+// swagger:route GET /api/v1/admin/merchant-application/license/{*file_path} v1-admin admin_get_merchant_license
 // 请求得到商家执照; 如果路径内容不存在则对应httpcode=404
 // responses:
 // 200: merchant_license

@@ -35,19 +35,21 @@ type Log struct {
 }
 
 type App struct {
-	Salt               string
-	JWTSecretKey       string
-	AdminToken         string
-	AdminAKAge         int
-	AdminRKAge         int
-	MerchantAKAge      int
-	MerchantRKAge      int
-	MaxImageSize       int
-	LicenseStorePath   string
-	LicenseAllowExts   []string
-	LicensePageSize    int
-	DishImageAllowExts []string
-	DishImageStorePath string
+	Salt                string
+	JWTSecretKey        string
+	AdminAliveMinute    int
+	MerchantAliveMinute int
+	AdminToken          string
+	AdminAKAge          int
+	AdminRKAge          int
+	MerchantAKAge       int
+	MerchantRKAge       int
+	MaxImageSize        int
+	LicenseStorePath    string
+	LicenseAllowExts    []string
+	LicensePageSize     int
+	DishImageAllowExts  []string
+	DishImageStorePath  string
 }
 
 func (a *App) GetLicenseStorePath(name string) string {

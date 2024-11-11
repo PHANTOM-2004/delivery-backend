@@ -5,26 +5,27 @@ import (
 	"strconv"
 )
 
-type RedisMerchantBlacklist struct {
+// store in redis
+type MerchantBlacklist struct {
 	key string
 }
 
-func NewRedisMerchantBlacklist(merchant_id uint) *RedisMerchantBlacklist {
+func NewMerchantBlacklist(merchant_id uint) *MerchantBlacklist {
 	key := "MERCH_BLACKLIST_" + strconv.Itoa(int(merchant_id))
-	return &RedisMerchantBlacklist{key: key}
+	return &MerchantBlacklist{key: key}
 }
 
-func (m *RedisMerchantBlacklist) Add() error {
+func (m *MerchantBlacklist) Add() error {
 	err := gredis.Set(m.key, "", 0)
 	return err
 }
 
-func (m *RedisMerchantBlacklist) Exists() (bool, error) {
+func (m *MerchantBlacklist) Exists() (bool, error) {
 	exist, err := gredis.Exists(m.key)
 	return exist, err
 }
 
-func (m *RedisMerchantBlacklist) Remove() error {
+func (m *MerchantBlacklist) Remove() error {
 	err := gredis.Delete(m.key)
 	return err
 }
