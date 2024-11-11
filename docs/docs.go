@@ -54,7 +54,7 @@ type CommonResponse struct {
 
 // https://github.com/go-swagger/go-swagger/blob/master/fixtures/goparsing/classification/operations/noparams.go#L28-L33
 
-// swagger:parameters admin_change_password merchant_create merchant_delete merchant_change_password get_merchant_application admin_get_merchant_license  admin_approve_application admin_disapprove_application merchant_get_restaurants merchant_set_restaurant_status merchant_get_restaurant_status merchant_get_restaurant_flavors merchant_get_categories merchant_get_category merchant_update_category merchant_delete_category merchant_create_dish merchant_update_dish merchant_delete_dish merchant_get_dish_image merchant_get_flavors merchant_create_flavor merchant_delete_flavor merchant_update_flavor merchant_add_dish_flavor merchant_delete_dish_flavor merchant_get_dish_flavor
+// [UNUSED]swagger[UNUSED]:parameters admin_change_password merchant_create merchant_delete merchant_change_password get_merchant_application admin_get_merchant_license  admin_approve_application admin_disapprove_application merchant_get_restaurants merchant_set_restaurant_status merchant_get_restaurant_status merchant_get_restaurant_flavors merchant_get_categories merchant_get_category merchant_update_category merchant_delete_category merchant_create_dish merchant_update_dish merchant_delete_dish merchant_get_dish_image merchant_get_flavors merchant_create_flavor merchant_delete_flavor merchant_update_flavor merchant_add_dish_flavor merchant_delete_dish_flavor merchant_get_dish_flavor
 type AccessToken struct {
 	// 通过cookie发送,client不必手动handle
 	// in: cookie
@@ -62,7 +62,7 @@ type AccessToken struct {
 	AccessToken string `json:"access_token"`
 }
 
-// swagger:parameters admin_auth admin_logout admin_login_status  merchant_login_status merchant_auth merchant_logout
+// [UNUSED]swagger[UNUSED] :parameters admin_auth admin_logout admin_login_status  merchant_login_status merchant_auth merchant_logout
 type RefreshToken struct {
 	// 通过cookie发送,client不必手动handle
 	// in: cookie

@@ -19,19 +19,19 @@ type FlavorIDRequest struct {
 }
 
 // =============================================================
-// swagger:route POST /api/v1/merchant/jwt/restaurant/{restaurant_id}/flavor/{name} v1-merchant merchant_create_flavor
+// swagger:route POST /api/v1/merchant/restaurant/{restaurant_id}/flavor/{name} v1-merchant merchant_create_flavor
 // 创建某一个口味
 // responses:
 // 200: COMMON
 
 // =============================================================
-// swagger:route DELETE /api/v1/merchant/jwt/flavor/{flavor_id} v1-merchant merchant_delete_flavor
+// swagger:route DELETE /api/v1/merchant/flavor/{flavor_id} v1-merchant merchant_delete_flavor
 // 删除某一个口味
 // responses:
 // 200: COMMON
 
 // =============================================================
-// swagger:route PUT /api/v1/merchant/jwt/flavor/{flavor_id}/name/{name} v1-merchant merchant_update_flavor
+// swagger:route PUT /api/v1/merchant/flavor/{flavor_id}/name/{name} v1-merchant merchant_update_flavor
 // 更新某一个口味
 // responses:
 // 200: COMMON

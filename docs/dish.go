@@ -58,14 +58,14 @@ type MerchantUpdateDishRequest struct {
 }
 
 // =============================================================
-// swagger:route PUT /api/v1/merchant/jwt/dish/{dish_id} v1-merchant merchant_update_dish
+// swagger:route PUT /api/v1/merchant/dish/{dish_id} v1-merchant merchant_update_dish
 // 更新某一个菜品
 // PS:分类中包含菜品项，所以实际上获得菜品的接口也是这个
 // responses:
 // 200: COMMON
 
 // =============================================================
-// swagger:route POST /api/v1/merchant/jwt/category/{category_id}/dish v1-merchant merchant_create_dish
+// swagger:route POST /api/v1/merchant/category/{category_id}/dish v1-merchant merchant_create_dish
 // 创建某一个分类下的菜品
 // responses:
 // 200: COMMON
@@ -77,7 +77,7 @@ type DeleteDish struct {
 }
 
 // =============================================================
-// swagger:route DELETE /api/v1/merchant/jwt/dish/{dish_id} v1-merchant merchant_delete_dish
+// swagger:route DELETE /api/v1/merchant/dish/{dish_id} v1-merchant merchant_delete_dish
 // 删除某一个菜品
 // responses:
 // 200: COMMON
@@ -97,7 +97,7 @@ type DishImageResponse struct {
 }
 
 // =============================================================
-// swagger:route GET /api/v1/merchant/jwt/dish/image/{*filepath} v1-merchant merchant_get_dish_image
+// swagger:route GET /api/v1/merchant/dish/image/{*filepath} v1-merchant merchant_get_dish_image
 // 请求得到菜品照片; 如果路径内容不存在则对应httpcode=404
 // responses:
 // 200: dish_image
