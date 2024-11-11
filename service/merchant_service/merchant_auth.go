@@ -3,8 +3,8 @@ package merchant_service
 import (
 	"delivery-backend/internal/app"
 	"delivery-backend/internal/ecode"
-	"delivery-backend/middleware/jwt"
 	"delivery-backend/models"
+	handler "delivery-backend/service"
 	"net/http"
 	"strconv"
 
@@ -19,7 +19,7 @@ func DishAuth() gin.HandlerFunc {
 			app.ResponseInvalidParams(c)
 			return
 		}
-		merchant_id := jwt.NewJwtInfo(c).GetID()
+		merchant_id := handler.NewMerchInfoHanlder(c).GetID()
 		d_merchant, err := models.GetMerchantByDish(uint(dish_id))
 		if err != nil {
 			app.ResponseInternalError(c, err)
@@ -46,7 +46,7 @@ func CategoryAuth() gin.HandlerFunc {
 			app.ResponseInvalidParams(c)
 			return
 		}
-		merchant_id := jwt.NewJwtInfo(c).GetID()
+		merchant_id := handler.NewMerchInfoHanlder(c).GetID()
 		c_merchant, err := models.GetMerchantByCategory(uint(category_id))
 		if err != nil {
 			app.ResponseInternalError(c, err)
@@ -70,7 +70,7 @@ func CategoryAuth() gin.HandlerFunc {
 func RestaurantAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 首先商家鉴权，
-		merchant_id := jwt.NewJwtInfo(c).GetID()
+		merchant_id := handler.NewMerchInfoHanlder(c).GetID()
 		restaurant_id, err := strconv.Atoi(c.Param("restaurant_id"))
 		if err != nil {
 			app.ResponseInvalidParams(c)

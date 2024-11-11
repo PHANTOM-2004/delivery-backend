@@ -3,8 +3,8 @@ package v1
 import (
 	"delivery-backend/internal/app"
 	"delivery-backend/internal/ecode"
-	"delivery-backend/middleware/jwt"
 	"delivery-backend/models"
+	handler "delivery-backend/service"
 	"delivery-backend/service/cache"
 	"net/http"
 
@@ -14,7 +14,7 @@ import (
 
 // merchant获得商家对应商店的信息, 返回所有的商铺
 func GetRestaurants(c *gin.Context) {
-	merchant_id := jwt.NewJwtInfo(c).GetID()
+	merchant_id := handler.NewMerchInfoHanlder(c).GetID()
 	res, err := models.GetRestaurantByMerchant(merchant_id)
 	if err != nil {
 		app.ResponseInternalError(c, err)
@@ -120,7 +120,7 @@ func UpdateRestaurant(c *gin.Context) {
 // 该函数判定店铺名是否重复，如果重复则不允许创建
 // 创建时后端只校验最大长度；前端负责校验其他
 func CreateRestaurant(c *gin.Context) {
-	merchant_id := jwt.NewJwtInfo(c).GetID()
+	merchant_id := handler.NewMerchInfoHanlder(c).GetID()
 
 	var data restaurantRequest
 	err := c.Bind(&data)

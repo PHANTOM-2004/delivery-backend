@@ -71,7 +71,7 @@ func StatusText(e Ecode) (res string) {
 	case ERROR_ADMIN_LOGOUT:
 		res = "管理员非法登出请求/已登出"
 	case ERROR_ADMIN_NOT_LOGIN:
-		res = "管理员未登陆"
+		res = "管理员未登录"
 	case ERROR_ADMIN_ROLE:
 		res = "管理员身份错误"
 
@@ -84,7 +84,7 @@ func StatusText(e Ecode) (res string) {
 	case ERROR_MERCHANT_LOGOUT:
 		res = "商家非法登出请求/已登出"
 	case ERROR_MERCHANT_NOT_LOGIN:
-		res = "商家未登陆"
+		res = "商家未登录"
 	case ERROR_MERCHANT_ROLE:
 		res = "商家身份错误"
 	case ERROR_MERCHANT_ACCOUNT_BANNED:

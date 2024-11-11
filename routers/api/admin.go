@@ -12,9 +12,9 @@ import (
 	"delivery-backend/internal/app"
 	"delivery-backend/internal/ecode"
 	"delivery-backend/internal/setting"
-	"delivery-backend/middleware/jwt"
 	"delivery-backend/models"
 	"delivery-backend/pkg/utils"
+	handler "delivery-backend/service"
 	"delivery-backend/service/admin_service"
 	"net/http"
 
@@ -23,23 +23,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AdminGetAuth(c *gin.Context) {
-	// 通过refresh_token, 获得access_token
-	//
-	account := c.GetString("jwt_account")
-	id := c.GetUint("jwt_id")
-
-	// 提供access_token
-	access_token := admin_service.GetAccessToken(uint(id), account)
-	admin_service.SetAccessToken(c, access_token)
-
-	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
-
-	log.Debug("pass: response access_token")
-}
-
 func AdminLoginStatus(c *gin.Context) {
-	account := c.GetString("jwt_account")
+	h := handler.NewAdminInfoHanlder(c)
+	account := h.GetAccount()
 	res := map[string]string{
 		"account": account,
 	}
@@ -47,7 +33,13 @@ func AdminLoginStatus(c *gin.Context) {
 }
 
 func AdminLogout(c *gin.Context) {
-	admin_service.DisbleTokens(c)
+	h := handler.NewAdminInfoHanlder(c)
+	err := h.Delete()
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
 }
 
@@ -59,20 +51,21 @@ func AdminLogin(c *gin.Context) {
 		return
 	}
 
-	// return refresh_token, access_token
-	refresh_token := admin_service.GetRefreshToken(id, account)
-	access_token := admin_service.GetAccessToken(id, account)
-
-	admin_service.SetAccessToken(c, access_token)
-	admin_service.SetRefreshToken(c, refresh_token)
-	log.Trace("admin tokens set")
+	h := handler.NewAdminInfoHanlder(c)
+	h.SetAccount(account)
+	h.SetID(id)
+	err := h.Save()
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
 
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
 }
 
 func AdminChangePassword(c *gin.Context) {
-	id := jwt.NewJwtInfo(c).GetID()
-
+	h := handler.NewAdminInfoHanlder(c)
+	id := h.GetID()
 	new_pwd := c.PostForm("password")
 	// 新密码, 首先进行校验
 	if v := admin_service.PasswordValidate(new_pwd, c); !v {
@@ -89,13 +82,12 @@ func AdminChangePassword(c *gin.Context) {
 	if err != nil {
 		// 在这里edit， 应当保证成功；因为数据库是存在的
 		log.Warn("Password Update Failure[internal]")
-		log.Warn(err)
-		app.Response(c, http.StatusInternalServerError, ecode.ERROR, nil)
+		app.ResponseInternalError(c, err)
 		return
 	}
 
-	// 应当删除tokens
-	admin_service.DisbleTokens(c)
+	// 删除当前session
+	h.Delete()
 
 	// 返回响应
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)

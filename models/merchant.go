@@ -95,7 +95,7 @@ func DisableMerchant(id uint) error {
 	return err
 }
 
-func EditMerchant(id uint, data any) error {
+func UpdateMerchant(id uint, data map[string]any) error {
 	err := tx.Model(&Merchant{}).Where("id = ?", id).Updates(data).Error
 	return err
 }
