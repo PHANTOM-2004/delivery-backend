@@ -24,7 +24,7 @@ type MerchantRestaurantsResponse struct {
 }
 
 // =============================================================
-// swagger:route GET /api/v1/merchant/jwt/restuarants v1-merchant merchant_get_restaurants
+// swagger:route GET /api/v1/merchant/restuarants v1-merchant merchant_get_restaurants
 // 商家GET名下的所有店铺
 // responses:
 // 200: merchant_get_restaurants
@@ -37,7 +37,7 @@ type MerchantRestaurantStatusGetRequest struct {
 }
 
 // =============================================================
-// swagger:route GET /api/v1/merchant/jwt/restuarant/{restaurant_id}/status v1-merchant merchant_get_restaurant_status
+// swagger:route GET /api/v1/merchant/restuarant/{restaurant_id}/status v1-merchant merchant_get_restaurant_status
 //
 // 获取商家某个店铺的状态
 // 如果返回0, 代表商家手动关闭店铺；如果返回1, 代表店铺开启。
@@ -57,7 +57,7 @@ type MerchantRestaurantStatusSetRequest struct {
 }
 
 // =============================================================
-// swagger:route PUT /api/v1/merchant/jwt/restuarant/{restaurant_id}/status/{status} v1-merchant merchant_set_restaurant_status
+// swagger:route PUT /api/v1/merchant/restuarant/{restaurant_id}/status/{status} v1-merchant merchant_set_restaurant_status
 //
 // 设置商家某个店铺的状态
 // 设置0, 代表商家手动关闭店铺；设置1, 代表店铺开启。
@@ -87,7 +87,7 @@ type RestaurnatDishesResponse struct {
 }
 
 // =============================================================
-// swagger:route GET /api/v1/merchant/jwt/restaurant/{restaurant_id}/flavors v1-merchant merchant_get_restaurant_flavors
+// swagger:route GET /api/v1/merchant/restaurant/{restaurant_id}/flavors v1-merchant merchant_get_restaurant_flavors
 // 获得一个餐馆的所有口味
 // responses:
 // 200: merchant_get_restaurant_flavors_response
