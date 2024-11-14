@@ -3,7 +3,9 @@ package v1
 import (
 	"delivery-backend/internal/app"
 	"delivery-backend/internal/ecode"
+	"delivery-backend/internal/setting"
 	"delivery-backend/models"
+	"delivery-backend/pkg/utils"
 	"delivery-backend/service/merchant_service"
 	"errors"
 	"net/http"
@@ -131,4 +133,70 @@ func DisapproveMerchantApplication(c *gin.Context) {
 	}
 	log.Debugf("Disable merchant account: %s", m.Account)
 	app.ResponseSuccess(c)
+}
+
+func DeleteMerchant(c *gin.Context) {
+	account := c.PostForm("account")
+	err, rows := models.DeleteMerchant(account)
+	if err != nil {
+		res := map[string]string{
+			"error": err.Error(),
+		}
+		app.Response(c, http.StatusOK, ecode.ERROR, res)
+		return
+	}
+
+	if rows <= 0 {
+		res := map[string]string{
+			"warn": "delete nothing",
+		}
+		app.Response(c, http.StatusOK, ecode.SUCCESS, res)
+		return
+	}
+
+	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
+}
+
+func CreateMerchant(c *gin.Context) {
+	if v := merchant_service.SignUpRequestValidate(c); !v {
+		return
+	}
+
+	// create account
+	account := c.PostForm("account")
+	encrypted_password := utils.Encrypt(c.PostForm("password"), setting.AppSetting.Salt)
+	merchant_name := c.PostForm("merchant_name")
+	phone_numer := c.PostForm("phone_number")
+	application_id, err := strconv.Atoi(c.PostForm("merchant_application_id"))
+	if err != nil {
+		app.ResponseInvalidParams(c)
+		return
+	}
+
+	data := models.Merchant{
+		MerchantName:          merchant_name,
+		Account:               account,
+		Password:              encrypted_password,
+		PhoneNumber:           phone_numer,
+		MerchantApplicationID: uint(application_id),
+	}
+
+	exist, err := models.ExistMerchant(account)
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+
+	if exist {
+		app.Response(c, http.StatusOK, ecode.ERROR_MERCHANT_ACCOUNT_EXIST, nil)
+		return
+	}
+
+	err = models.CreateMerchant(&data)
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+
+	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
 }
