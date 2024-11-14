@@ -72,9 +72,11 @@ func InitRouter() *gin.Engine {
 
 			///////////////商家账户相关
 			merchant_session.GET("/login-status",
-				api.MerchantLoginStatus)
+				v1.MerchantLoginStatus)
 			merchant_session.PUT("/change-password",
-				api.MerchantChangePassword)
+				v1.MerchantChangePassword)
+			merchant_session.GET("/info",
+				v1.GetMerchantInfo)
 
 			// NOTE: 鉴权，商家必须对自己的restaurant操作
 			merchant_restaurant := merchant_session.Group("/restaurant/:restaurant_id")
@@ -84,15 +86,15 @@ func InitRouter() *gin.Engine {
 			merchant_session.GET("/restaurants",
 				v1.GetRestaurants)
 			merchant_session.POST(
-				"/restaurant/create",
+				"restaurant",
 				v1.CreateRestaurant,
 			)
 			merchant_restaurant.DELETE(
-				"/delete",
+				"",
 				v1.DeleteRestaurant,
 			)
 			merchant_restaurant.PUT(
-				"/update",
+				"",
 				v1.UpdateRestaurant,
 			)
 
@@ -225,9 +227,9 @@ func InitRouter() *gin.Engine {
 			admin_session_v1.GET("/login-status", api.AdminLoginStatus)
 			admin_session_v1.PUT("/change-password", api.AdminChangePassword)
 			admin_session_v1.POST("/merchant/create",
-				api.CreateMerchant)
+				v1.CreateMerchant)
 			admin_session_v1.POST("/merchant/delete",
-				api.DeleteMerchant)
+				v1.DeleteMerchant)
 			admin_session_v1.GET("/merchant-application/:page",
 				v1.GetMerchantApplication)
 			admin_session_v1.PUT("/merchant-application/:application_id/approve",
