@@ -3,6 +3,7 @@ package cache
 import (
 	"delivery-backend/internal/gredis"
 	"strconv"
+	"time"
 )
 
 // store in redis
@@ -16,7 +17,7 @@ func NewMerchantBlacklist(merchant_id uint) *MerchantBlacklist {
 }
 
 func (m *MerchantBlacklist) Add() error {
-	err := gredis.Set(m.key, "", 0)
+	err := gredis.Set(m.key, "", time.Duration(0))
 	return err
 }
 

@@ -3,6 +3,9 @@ package cache
 import (
 	"delivery-backend/internal/gredis"
 	"strconv"
+	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // NOTE:餐馆营业时缓存，暂时支持营业时间的缓存;营业状态只依赖于商家的手动设定。
@@ -25,7 +28,7 @@ func (r *RedisRestaurantStatus) GetKeyName() string {
 
 // 设置不会过期的缓存
 func (r *RedisRestaurantStatus) Set(status string) error {
-	err := gredis.Set(r.key, status, 0)
+	err := gredis.SetStr(r.key, status, time.Duration(0))
 	return err
 }
 
@@ -39,6 +42,10 @@ func (r *RedisRestaurantStatus) Get() (uint8, error) {
 		// 如果找不到返回关门状态
 		return 0, nil
 	}
-	status, _ := strconv.Atoi(string(res))
+	status, err := strconv.Atoi(string(res))
+	if err != nil {
+		log.Fatal(err)
+		return 0, nil
+	}
 	return uint8(status), nil
 }
