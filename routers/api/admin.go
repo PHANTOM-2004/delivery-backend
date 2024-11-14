@@ -46,7 +46,7 @@ func AdminLogout(c *gin.Context) {
 func AdminLogin(c *gin.Context) {
 	account := c.PostForm("account")
 	password := c.PostForm("password")
-	id, v := admin_service.AccountValidate(account, password, c)
+	id, v := admin_service.AdminLoginValidate(account, password, c)
 	if !v {
 		return
 	}
@@ -68,7 +68,7 @@ func AdminChangePassword(c *gin.Context) {
 	id := h.GetID()
 	new_pwd := c.PostForm("password")
 	// 新密码, 首先进行校验
-	if v := admin_service.PasswordValidate(new_pwd, c); !v {
+	if v := admin_service.PasswordRequestValidate(new_pwd, c); !v {
 		return
 	}
 

@@ -54,7 +54,7 @@ func init() {
 	}
 }
 
-func SignUpValidate(c *gin.Context) bool {
+func SignUpRequestValidate(c *gin.Context) bool {
 	method := c.Request.Method
 	if method != "POST" {
 		log.Fatal("invalid usage")
@@ -75,7 +75,7 @@ func SignUpValidate(c *gin.Context) bool {
 	return true
 }
 
-func PasswordValidate(password string, c *gin.Context) bool {
+func PasswordRequestValidate(password string, c *gin.Context) bool {
 	data := Password{password}
 
 	err := app.ValidateStruct(data)
@@ -87,7 +87,8 @@ func PasswordValidate(password string, c *gin.Context) bool {
 	return true
 }
 
-func AccountValidate(account string, password string, c *gin.Context) (uint, bool) {
+// 账号登陆验证
+func AdminLoginValidate(account string, password string, c *gin.Context) (uint, bool) {
 	data := Login{
 		Account:  account,
 		Password: password,
@@ -105,8 +106,7 @@ func AccountValidate(account string, password string, c *gin.Context) (uint, boo
 	a, err := models.GetAdmin(data.Account)
 	if err != nil {
 		// 其他未知错误
-		log.Warn(err)
-		app.Response(c, http.StatusInternalServerError, ecode.ERROR, nil)
+		app.ResponseInternalError(c, err)
 		return 0, false
 	} else if a.ID == 0 {
 		// 对于不存在的账户登陆，这时可能的，因为

@@ -56,7 +56,7 @@ func init() {
 }
 
 // 如果认证成功，会返回id
-func AccountAuth(account string, password string, c *gin.Context) (uint, bool) {
+func MerchantLoginValidate(account string, password string, c *gin.Context) (uint, bool) {
 	data := Login{
 		Account:  account,
 		Password: password,
@@ -87,7 +87,7 @@ func AccountAuth(account string, password string, c *gin.Context) (uint, bool) {
 	}
 	if m.Status == models.MerchantAccountDisabled {
 		// 商家账号被禁用
-		app.Response(c, http.StatusUnauthorized, ecode.ERROR_MERCHANT_ACCOUNT_BANNED, nil)
+		app.Response(c, http.StatusOK, ecode.ERROR_MERCHANT_ACCOUNT_BANNED, nil)
 		return 0, false
 	}
 
@@ -95,7 +95,7 @@ func AccountAuth(account string, password string, c *gin.Context) (uint, bool) {
 	if en_pwd != m.Password {
 		// 用户输错密码
 		log.Debug("incorrect password")
-		app.Response(c, http.StatusUnauthorized, ecode.ERROR_MERCHANT_INCORRECT_PWD, nil)
+		app.Response(c, http.StatusOK, ecode.ERROR_MERCHANT_INCORRECT_PWD, nil)
 		return 0, false
 	}
 	return m.ID, true

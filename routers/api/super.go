@@ -65,7 +65,7 @@ func AdminCreate(c *gin.Context) {
 	if v := superTokenCheck(c); !v {
 		return
 	}
-	if v := admin_service.SignUpValidate(c); !v {
+	if v := admin_service.SignUpRequestValidate(c); !v {
 		return
 	}
 
