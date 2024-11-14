@@ -24,7 +24,7 @@ type MerchantRestaurantsResponse struct {
 }
 
 // =============================================================
-// swagger:route GET /api/v1/merchant/restuarants v1-merchant merchant_get_restaurants
+// swagger:route GET /api/v1/merchant/restaurants v1-merchant merchant_get_restaurants
 // 商家GET名下的所有店铺
 // responses:
 // 200: merchant_get_restaurants
