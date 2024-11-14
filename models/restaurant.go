@@ -7,7 +7,7 @@ import (
 
 type Restaurant struct {
 	Model
-	RestaurantName string `gorm:"size:50;uniqueIndex;not null" json:"restaurant_name"`
+	RestaurantName string `gorm:"size:50;index;not null" json:"restaurant_name"`
 	// 店铺的地址
 	Address string `gorm:"size:50;not null" json:"address"`
 	// 商铺简介
@@ -69,21 +69,67 @@ func GetRestaurantByID(restaurant_id uint) (*Restaurant, error) {
 	return &r, err
 }
 
-func CreateRestaurant(data *Restaurant) error {
-	err := tx.Create(data).Error
-	return err
+// 如果重名就会返回失败
+func CreateRestaurant(data *Restaurant) (bool, error) {
+	var err error
+	success := false
+
+	err = tx.Transaction(
+		func(ftx *gorm.DB) error {
+			var err error
+			name := data.RestaurantName
+			if name != "" {
+				// 检测是否存在重名
+				r := Restaurant{}
+				err = ftx.Find(&r,
+					Restaurant{RestaurantName: name}).Error
+				if err != nil {
+					return err
+				}
+				if r.ID != 0 {
+					success = false
+					return nil
+				}
+			}
+			// 不存在重名那么就可以创建
+			err = ftx.Create(data).Error
+			success = true
+			return err
+		},
+	)
+
+	return success, err
 }
 
-func UpdateRestaurant(restaurant_id uint, data *Restaurant) error {
-	err := tx.
-		Model(Restaurant{Model: Model{ID: restaurant_id}}).
-		Updates(*data).Error
-	return err
-}
+// 如果重名就会返回失败
+func UpdateRestaurant(restaurant_id uint, data *Restaurant) (bool, error) {
+	var err error
+	success := false
 
-func ExistRestaurant(name string) (bool, error) {
-	r := Restaurant{}
-	err := tx.Find(&r,
-		Restaurant{RestaurantName: name}).Error
-	return r.ID != 0, err
+	err = tx.Transaction(
+		func(ftx *gorm.DB) error {
+			var err error
+			name := data.RestaurantName
+			if name != "" {
+				// 检测是否存在重名
+				r := Restaurant{}
+				err = ftx.Find(&r,
+					Restaurant{RestaurantName: name}).Error
+				if err != nil {
+					return err
+				}
+				if r.ID != 0 {
+					success = false
+					return nil
+				}
+			}
+			// 不存在重名那么就可以插入
+			err = ftx.Model(Restaurant{Model: Model{ID: restaurant_id}}).
+				Updates(*data).Error
+			success = true
+			return err
+		},
+	)
+
+	return success, err
 }

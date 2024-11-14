@@ -111,9 +111,14 @@ func UpdateRestaurant(c *gin.Context) {
 	}
 
 	r := data.GetRestaurantModel()
-	err = models.UpdateRestaurant(restaurant_id, r)
+	success, err := models.UpdateRestaurant(restaurant_id, r)
 	if err != nil {
 		app.ResponseInternalError(c, err)
+		return
+	}
+	if !success {
+		log.Tracef("restaurant name[%v] exists", r.RestaurantName)
+		app.Response(c, http.StatusOK, ecode.ERROR_RESTAURANT_EXIST, nil)
 		return
 	}
 
@@ -139,23 +144,17 @@ func CreateRestaurant(c *gin.Context) {
 		app.ResponseInvalidParams(c)
 		return
 	}
+
 	r := data.GetRestaurantModel()
 	r.MerchantID = merchant_id
-
-	// 如果店铺存在那么就不应该再次创建
-	exist, err := models.ExistRestaurant(r.RestaurantName)
+	success, err := models.CreateRestaurant(r)
 	if err != nil {
 		app.ResponseInternalError(c, err)
 		return
 	}
-	if exist {
+	if !success {
+		log.Tracef("restaurant name[%v] exists", r.RestaurantName)
 		app.Response(c, http.StatusOK, ecode.ERROR_RESTAURANT_EXIST, nil)
-		return
-	}
-
-	err = models.CreateRestaurant(r)
-	if err != nil {
-		app.ResponseInternalError(c, err)
 		return
 	}
 
