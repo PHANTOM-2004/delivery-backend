@@ -29,7 +29,7 @@ type MerchantRestaurantsResponse struct {
 // responses:
 // 200: merchant_get_restaurants
 
-// swagger:parameters merchant_get_restaurant_status merchant_get_restaurant_flavors
+// swagger:parameters merchant_get_restaurant_status merchant_get_restaurant_flavors merchant_delete_restaurant merchant_update_restaurant
 type MerchantRestaurantStatusGetRequest struct {
 	// required: true
 	//in:path
@@ -66,7 +66,7 @@ type MerchantRestaurantStatusSetRequest struct {
 // 200: COMMON
 
 // swagger:response merchant_get_restaurant_flavors_response
-type RestaurnatDishesResponse struct {
+type RestaurantDishesResponse struct {
 	// in:body
 	Body struct {
 		// Required:true
@@ -91,3 +91,55 @@ type RestaurnatDishesResponse struct {
 // 获得一个餐馆的所有口味
 // responses:
 // 200: merchant_get_restaurant_flavors_response
+
+//swagger:parameters merchant_create_restaurant
+type RestaurantCreateRequest struct {
+	// in: formData
+	// Required: true
+	RestaurantName string `json:"restaurant_name"`
+	// 店铺的地址
+	// in: formData
+	// Required: true
+	Address string `json:"address"`
+	// 商铺简介
+	// in: formData
+	// Required: true
+	Description string `json:"description"`
+	// 最小起送金额,使用整数存储,默认存储到分
+	// in: formData
+	// Required: true
+	MinimumDeliveryAmount uint `json:"minimum_delivery_amount"`
+}
+
+// =============================================================
+// swagger:route POST /api/v1/merchant/restaurant/create v1-merchant merchant_create_restaurant
+// 创建一个餐厅
+// responses:
+// 200: COMMON
+
+//swagger:parameters merchant_update_restaurant
+type RestaurantUpdateRequest struct {
+	// in: formData
+	RestaurantName string `json:"restaurant_name"`
+	// 店铺的地址
+	// in: formData
+	Address string `json:"address"`
+	// 商铺简介
+	// in: formData
+	Description string `json:"description"`
+	// 最小起送金额,使用整数存储,默认存储到分
+	// in: formData
+	MinimumDeliveryAmount uint `json:"minimum_delivery_amount"`
+}
+
+// =============================================================
+// swagger:route PUT /api/v1/merchant/restaurant/{restaurant_id}/update v1-merchant merchant_update_restaurant
+// 更新一个餐厅
+// responses:
+// 200: COMMON
+
+// =============================================================
+// swagger:route DELETE /api/v1/merchant/restaurant/{restaurant_id}/delete v1-merchant merchant_delete_restaurant
+// 删除一个餐厅
+// responses:
+// 200: COMMON
