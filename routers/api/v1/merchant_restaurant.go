@@ -51,6 +51,8 @@ func SetRestaurantStatus(c *gin.Context) {
 		return
 	}
 
+	log.Tracef("set restaurant[%v] status[%v]", restaurant_id, status)
+
 	app.ResponseSuccess(c)
 }
 
@@ -65,6 +67,7 @@ func GetRestaurantStatus(c *gin.Context) {
 		app.ResponseInternalError(c, err)
 		return
 	}
+	log.Tracef("get restaurant[%v] status[%v]", restaurant_id, status)
 	data := map[string]any{"status": status}
 	app.Response(c, http.StatusOK, ecode.SUCCESS, data)
 }
