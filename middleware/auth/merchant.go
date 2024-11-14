@@ -18,7 +18,7 @@ func MerchantAuth() gin.HandlerFunc {
 		log.Trace(account, id)
 
 		if id == 0 || account == "" {
-			app.Response(c, http.StatusUnauthorized, ecode.ERROR_ADMIN_NOT_LOGIN, nil)
+			app.Response(c, http.StatusUnauthorized, ecode.ERROR_MERCHANT_NOT_LOGIN, nil)
 			c.Abort()
 			return
 		}

@@ -105,7 +105,7 @@ func MerchantLogin(c *gin.Context) {
 	account := c.PostForm("account")
 	password := c.PostForm("password")
 
-	id, v := merchant_service.AccountAuth(account, password, c)
+	id, v := merchant_service.MerchantLoginValidate(account, password, c)
 	if !v {
 		return
 	}
