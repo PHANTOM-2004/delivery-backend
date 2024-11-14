@@ -45,7 +45,7 @@ curl -b cookies.txt \
   -F "address=礼堂" \
   -F "description=悦刻五代" \
   -F "minimum_delivery_amount=100" \
-  http://localhost:8000/api/v1/merchant/restaurant/create --request POST
+  http://localhost:8000/api/v1/merchant/restaurant --request POST
 
 # 新建餐厅2 --失败
 curl -b cookies.txt \
@@ -53,7 +53,7 @@ curl -b cookies.txt \
   -F "address=礼堂" \
   -F "description=悦刻五代" \
   -F "minimum_delivery_amount=100" \
-  http://localhost:8000/api/v1/merchant/restaurant/create --request POST
+  http://localhost:8000/api/v1/merchant/restaurant --request POST
 
 # 新建餐厅3
 curl -b cookies.txt \
@@ -61,7 +61,7 @@ curl -b cookies.txt \
   -F "address=同济大学" \
   -F "description=好的" \
   -F "minimum_delivery_amount=600" \
-  http://localhost:8000/api/v1/merchant/restaurant/create --request POST
+  http://localhost:8000/api/v1/merchant/restaurant --request POST
 
 # 获得餐厅
 curl -b cookies.txt http://localhost:8000/api/v1/merchant/restaurants
@@ -69,12 +69,12 @@ curl -b cookies.txt http://localhost:8000/api/v1/merchant/restaurants
 #修改餐厅顶真帧主 id = 1
 curl -b cookies.txt \
   -F "restaurant_name=能大爷水饺" \
-  http://localhost:8000/api/v1/merchant/restaurant/1/update \
+  http://localhost:8000/api/v1/merchant/restaurant/1 \
   --request PUT
 
 curl -b cookies.txt \
   -F "address=满天星广场" \
-  http://localhost:8000/api/v1/merchant/restaurant/1/update \
+  http://localhost:8000/api/v1/merchant/restaurant/1 \
   --request PUT
 
 # 获得餐厅
@@ -245,7 +245,7 @@ curl -b cookies.txt \
 
 # 删除餐厅1号, 此时数据库应当不存在任何东西
 curl -b cookies.txt \
-  http://localhost:8000/api/v1/merchant/restaurant/1/delete \
+  http://localhost:8000/api/v1/merchant/restaurant/1 \
   --request DELETE
 
 # 再次获得餐厅1所有category

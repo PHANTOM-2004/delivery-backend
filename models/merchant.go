@@ -20,7 +20,7 @@ type Merchant struct {
 	// 每个商家账号对应的申请表，这个申请表是唯一的
 	MerchantApplicationID uint `gorm:"uniqueIndex" json:"merchant_application_id"`
 	// 用于preload对应reference model
-	MerchantApplication MerchantApplication // 关联的对应的MerchantApplication
+	MerchantApplication MerchantApplication `json:"-"` // 关联的对应的MerchantApplication
 }
 
 const (
@@ -52,6 +52,7 @@ func GetMerchantID(account string) (uint, error) {
 	return m.ID, err
 }
 
+// 不存在的时候返回nil
 func GetMerchant(account string) (*Merchant, error) {
 	var m Merchant
 	err := tx.Where("account = ?", account).First(&m).Error

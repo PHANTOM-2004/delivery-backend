@@ -1,5 +1,7 @@
 package docs
 
+import "delivery-backend/models"
+
 // =============================================================
 // 用于登入与认证的参数，注意后端处理的最大范围, 否则会返回错误
 // swagger:parameters merchant_login merchant_create merchant_delete
@@ -90,3 +92,30 @@ type MerchantCreateApplicationID struct {
 // PS: 通过postform形式传递密码, 不要使用url传参。
 // responses:
 // 200:COMMON
+
+// swagger:response merchant_information
+type MerchantInfoResponse struct {
+	// in:body
+	Body struct {
+		// Required:true
+		// Example: 200
+		ECode int `json:"ecode"`
+		// Example: ok
+		// error message
+		// Required:true
+		Msg string `json:"msg"`
+		// Required:true
+		// data to get
+		// Required:true
+		// In:body
+		Data struct {
+			Merchant models.Merchant `json:"merchant"`
+		} `json:"data"`
+	}
+}
+
+// =============================================================
+// swagger:route GET /api/v1/merchant/info v1-merchant merchant_information
+// 商家获得个人信息
+// responses:
+// 200:merchant_information

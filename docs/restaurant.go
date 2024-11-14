@@ -112,7 +112,7 @@ type RestaurantCreateRequest struct {
 }
 
 // =============================================================
-// swagger:route POST /api/v1/merchant/restaurant/create v1-merchant merchant_create_restaurant
+// swagger:route POST /api/v1/merchant/restaurant v1-merchant merchant_create_restaurant
 // 创建一个餐厅
 // responses:
 // 200: COMMON
@@ -133,13 +133,13 @@ type RestaurantUpdateRequest struct {
 }
 
 // =============================================================
-// swagger:route PUT /api/v1/merchant/restaurant/{restaurant_id}/update v1-merchant merchant_update_restaurant
+// swagger:route PUT /api/v1/merchant/restaurant/{restaurant_id} v1-merchant merchant_update_restaurant
 // 更新一个餐厅
 // responses:
 // 200: COMMON
 
 // =============================================================
-// swagger:route DELETE /api/v1/merchant/restaurant/{restaurant_id}/delete v1-merchant merchant_delete_restaurant
+// swagger:route DELETE /api/v1/merchant/restaurant/{restaurant_id} v1-merchant merchant_delete_restaurant
 // 删除一个餐厅
 // responses:
 // 200: COMMON
