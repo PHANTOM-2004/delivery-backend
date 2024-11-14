@@ -252,4 +252,7 @@ curl -b cookies.txt \
 curl -b cookies.txt \
   http://localhost:8000/api/v1/merchant/restaurant/1/categories
 
+# 再次获得餐厅
+curl -b cookies.txt http://localhost:8000/api/v1/merchant/restaurants
+
 set +x
