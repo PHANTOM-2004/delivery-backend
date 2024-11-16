@@ -197,6 +197,11 @@ func CreateMerchant(c *gin.Context) {
 		app.ResponseInternalError(c, err)
 		return
 	}
-
+	// 更新申请表状态
+	err = models.DisapproveApplication(id)
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
 }
