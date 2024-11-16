@@ -123,6 +123,7 @@ func (a *EmailSender) ConsumeMsg() error {
 		log.Info("email sender waiting for message")
 
 		for d := range msgs {
+			log.Trace("Receive approve msg")
 			err := a.approveHandler(&d)
 			if err != nil {
 				// send NACK
@@ -131,13 +132,12 @@ func (a *EmailSender) ConsumeMsg() error {
 				if err != nil {
 					log.Panic("UACK error:", err)
 				}
-				continue
-			}
-
-			// 成功处理, send ACK
-			err = d.Ack(false)
-			if err != nil {
-				log.Panic("ACK error:", err)
+			} else {
+				// 成功处理, send ACK
+				err = d.Ack(false)
+				if err != nil {
+					log.Panic("ACK error:", err)
+				}
 			}
 		}
 	}()
@@ -156,13 +156,13 @@ func (a *EmailSender) approveHandler(d *amqp.Delivery) (err error) {
 	if err != nil {
 		return err
 	}
-	log.Tracef("Receive approve msg[%v]", data)
 
 	/////增添商家账户
 	// TODO: 暂定注册规则为随机字符串,后续按照需要更改
 	account := "M" + utils.RandString(10)
 	password := "P" + utils.RandString(11)
 	en_password := utils.Encrypt(password, setting.AppSetting.Salt)
+	log.Trace("Merchant Account/PWD generated")
 
 	m := models.Merchant{
 		Account:               account,

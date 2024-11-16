@@ -132,6 +132,13 @@ func DisapproveMerchantApplication(c *gin.Context) {
 		return
 	}
 	log.Debugf("Disable merchant account: %s", m.Account)
+
+	err = models.DisapproveApplication(id)
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+
 	app.ResponseSuccess(c)
 }
 
@@ -193,12 +200,6 @@ func CreateMerchant(c *gin.Context) {
 	}
 
 	err = models.CreateMerchant(&data)
-	if err != nil {
-		app.ResponseInternalError(c, err)
-		return
-	}
-	// 更新申请表状态
-	err = models.DisapproveApplication(id)
 	if err != nil {
 		app.ResponseInternalError(c, err)
 		return
