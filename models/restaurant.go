@@ -118,7 +118,8 @@ func UpdateRestaurant(restaurant_id uint, data *Restaurant) (bool, error) {
 				if err != nil {
 					return err
 				}
-				if r.ID != 0 {
+				// 注意重名的时候, 其实可以是自己
+				if r.ID != 0 && r.ID != restaurant_id {
 					success = false
 					return nil
 				}

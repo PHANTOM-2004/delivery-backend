@@ -75,7 +75,7 @@ func GetRestaurantStatus(c *gin.Context) {
 type restaurantRequest struct {
 	RestaurantName string `form:"restaurant_name" validate:"max=50"`
 	// 店铺的地址
-	Address string `validate:"max=50"`
+	Address string `form:"address" validate:"max=50"`
 	// 商铺简介
 	Description string `form:"description" validate:"max=300"`
 	// 最小起送金额,使用整数存储,默认存储到分
