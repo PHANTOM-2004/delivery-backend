@@ -3,6 +3,8 @@ package email
 import (
 	"bytes"
 	"delivery-backend/internal/setting"
+	"delivery-backend/models"
+	"delivery-backend/pkg/utils"
 	"delivery-backend/service/consumer"
 	"encoding/json"
 	"html/template"
@@ -15,8 +17,10 @@ import (
 )
 
 type MsgData struct {
-	PageData PageData
-	Email    string
+	ApplicationID uint
+	PhoneNumber   string
+	Email         string
+	Name          string
 }
 
 type PageData struct {
@@ -27,7 +31,7 @@ type PageData struct {
 }
 
 // singleton
-type ApprovalSender struct {
+type EmailSender struct {
 	tmpl *template.Template
 	from string
 	pwd  string
@@ -48,17 +52,17 @@ func Setup() {
 }
 
 // singleton
-var sender *ApprovalSender
+var sender *EmailSender
 
 // singleton
-func newApprovalSender() *ApprovalSender {
+func newApprovalSender() *EmailSender {
 	f := setting.EmailSetting.TemplatePath
 	tmpl, err := template.ParseFiles(f)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	res := ApprovalSender{
+	res := EmailSender{
 		tmpl:      tmpl,
 		from:      setting.EmailSetting.SenderEmail,
 		pwd:       setting.EmailSetting.SenderPassword,
@@ -71,18 +75,18 @@ func newApprovalSender() *ApprovalSender {
 	return &res
 }
 
-func (a *ApprovalSender) Connect() error {
+func (a *EmailSender) Connect() error {
 	var err error
-	a.conn, err = amqp.Dial("amqp://guest:guest@localhost:5672/")
+	a.conn, err = amqp.Dial(setting.RabitmqSetting.DialURL)
 	return err
 }
 
-func (a *ApprovalSender) Close() error {
+func (a *EmailSender) Close() error {
 	err := a.conn.Close()
 	return err
 }
 
-func (a *ApprovalSender) ConsumeMsg() error {
+func (a *EmailSender) ConsumeMsg() error {
 	ch, err := a.conn.Channel()
 	if err != nil {
 		return err
@@ -119,28 +123,18 @@ func (a *ApprovalSender) ConsumeMsg() error {
 		log.Info("email sender waiting for message")
 
 		for d := range msgs {
-
-			data := MsgData{}
-			err := json.Unmarshal(d.Body, &data)
+			err := a.approveHandler(&d)
 			if err != nil {
+				// send NACK
 				log.Warn(err)
 				err = d.Nack(false, false)
-				// 这一步是不应该出错的
-				log.Panic("UACK error:", err)
+				if err != nil {
+					log.Panic("UACK error:", err)
+				}
+				continue
 			}
 
-			// 发送email
-			log.Debugf("Receive email msg[%v]", data)
-			err = a.SendMsg(data.Email, &data.PageData)
-			if err != nil {
-				// 发送失败, NACK
-				err = d.Nack(false, false)
-				// 这一步是不应该出错的
-				log.Panic("UACK error:", err)
-				log.Warn(err)
-			}
-
-			// 发送成功, ack成功处理
+			// 成功处理, send ACK
 			err = d.Ack(false)
 			if err != nil {
 				log.Panic("ACK error:", err)
@@ -151,7 +145,67 @@ func (a *ApprovalSender) ConsumeMsg() error {
 	return nil
 }
 
-func (a *ApprovalSender) SendMsg(to string, data *PageData) error {
+// 1. 接收消息
+// 2. 创建商家账户
+// 3. 发送邮件
+// 4. 修改申请表发送邮件的状态
+func (a *EmailSender) approveHandler(d *amqp.Delivery) (err error) {
+	///////解析data
+	data := MsgData{}
+	err = json.Unmarshal(d.Body, &data)
+	if err != nil {
+		return err
+	}
+	log.Tracef("Receive approve msg[%v]", data)
+
+	/////增添商家账户
+	// TODO: 暂定注册规则为随机字符串,后续按照需要更改
+	account := "M" + utils.RandString(10)
+	password := "P" + utils.RandString(11)
+	en_password := utils.Encrypt(password, setting.AppSetting.Salt)
+
+	m := models.Merchant{
+		Account:               account,
+		Password:              en_password,
+		PhoneNumber:           data.PhoneNumber,
+		MerchantName:          data.Name,
+		MerchantApplicationID: data.ApplicationID,
+	}
+	err = models.CreateMerchant(&m)
+	if err != nil {
+		return err
+	}
+	log.Tracef("created merchant: ACCOUNT[%s],PWD[%s]", account, password)
+
+	/////最后才是发送邮件
+	pageData := PageData{
+		Account:     account,
+		Password:    password,
+		PhoneNumber: data.PhoneNumber,
+		Name:        data.Name,
+	}
+
+	err = a.sendEmail(data.Email, &pageData)
+	if err != nil {
+		m_err := models.UpdateEmailStatus(data.ApplicationID, models.EmailSentError)
+		if m_err != nil {
+			log.Warn(m_err)
+		}
+		return err
+	}
+
+	/////修改application中的邮件的状态
+	err = models.UpdateEmailStatus(data.ApplicationID, models.EmailSent)
+	if err != nil {
+		log.Warn(err)
+		return
+	}
+	log.Trace("Application email status set to EmailSent")
+
+	return nil
+}
+
+func (a *EmailSender) sendEmail(to string, data *PageData) error {
 	var mailbody bytes.Buffer
 	err := a.tmpl.Execute(&mailbody, data)
 	if err != nil {
@@ -197,8 +251,6 @@ func (a *ApprovalSender) SendMsg(to string, data *PageData) error {
 	if err != nil {
 		return err
 	}
-
-	/////修改application的状态
 
 	return err
 }

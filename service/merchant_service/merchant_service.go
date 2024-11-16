@@ -158,7 +158,7 @@ func NewEmailProducer() *EmailProducer {
 
 func (e *EmailProducer) Connect() error {
 	var err error
-	e.conn, err = amqp.Dial("amqp://guest:guest@localhost:5672/")
+	e.conn, err = amqp.Dial(setting.RabitmqSetting.DialURL)
 	return err
 }
 
@@ -221,24 +221,12 @@ func CreateMerchantFromApplication(application_id uint) error {
 		return fmt.Errorf("merchant application [%v] not found", application_id)
 	}
 
-	// TODO: 暂定注册规则为随机字符串,后续按照需要更改
-	account := "M" + utils.RandString(10)
-	password := "P" + utils.RandString(11)
-	en_password := utils.Encrypt(password, setting.AppSetting.Salt)
-
-	m := models.Merchant{
-		Account:               account,
-		Password:              en_password,
-		PhoneNumber:           a.PhoneNumber,
-		MerchantName:          a.Name,
-		MerchantApplicationID: application_id,
+	data := email.MsgData{
+		ApplicationID: application_id,
+		PhoneNumber:   a.PhoneNumber,
+		Email:         a.Email,
+		Name:          a.Name,
 	}
-
-	err = models.CreateMerchant(&m)
-	if err != nil {
-		return err
-	}
-	log.Debugf("created merchant: ACCOUNT[%s],PWD[%s]", account, password)
 
 	// 接下来发送email, 作为生产者推送给email 服务
 	p := NewEmailProducer()
@@ -252,19 +240,9 @@ func CreateMerchantFromApplication(application_id uint) error {
 			log.Warn(err)
 		}
 	}()
-
-	data := email.MsgData{
-		PageData: email.PageData{
-			Account:     m.Account,
-			Password:    password,
-			Name:        m.MerchantName,
-			PhoneNumber: m.PhoneNumber,
-		},
-		Email: a.Email,
-	}
 	err = p.PublishMsg(&data)
 	if err == nil {
-		log.Tracef("email to merchant[%v] sent", m.MerchantName)
+		log.Tracef("email to merchant[%v] sent", data.Name)
 	}
 	return err
 }

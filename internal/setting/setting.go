@@ -14,6 +14,10 @@ import (
 	"github.com/go-ini/ini"
 )
 
+type Rabbitmq struct {
+	DialURL string
+}
+
 type Server struct {
 	RunMode      string
 	HTTPPort     int
@@ -150,6 +154,7 @@ var cfg *ini.File
 var (
 	DatabaseSetting = &Database{}
 	RedisSetting    = &Redis{}
+	RabitmqSetting  = &Rabbitmq{}
 	ServerSetting   = &Server{}
 	TestSetting     = &Test{}
 	AppSetting      = &App{}
@@ -196,6 +201,7 @@ func Setup() {
 	parseLogSetting()
 	parseServerSetting()
 	parseDatabaseSetting()
+  parseRabbitmqSetting()
 	parseRedisSetting()
 	parseTestSetting()
 	parseAppSetting()
@@ -270,6 +276,15 @@ func parseRedisSetting() {
 	}
 
 	logCurrentConf(RedisSetting, "Redis")
+}
+
+func parseRabbitmqSetting() {
+	err := cfg.Section("rabbitmq").StrictMapTo(RabitmqSetting)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	logCurrentConf(RabitmqSetting, "rabbitmq")
 }
 
 func parseEmailSetting() {

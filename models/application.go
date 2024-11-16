@@ -15,13 +15,27 @@ type MerchantApplication struct {
 	Email       string `gorm:"size:50;not null" json:"email"`
 	PhoneNumber string `gorm:"size:30;not null" json:"phone_number"`
 	Name        string `gorm:"size:20;not null" json:"name"`
+	EmailStatus uint8  `gorm:default:0;not null json:"email_status"`
 }
+
+const (
+	EmailNotSent   = 0
+	EmailSent      = 1
+	EmailSentError = 2
+)
 
 const (
 	ApplicationDisapproved = 1
 	ApplicationToBeViewed  = 2
 	ApplicationApproved    = 3
 )
+
+func UpdateEmailStatus(application_id uint, s uint8) error {
+	err := tx.Model(&MerchantApplication{}).
+		Where("id", application_id).
+		Update("email_status", s).Error
+	return err
+}
 
 // 管理员申请表，创建失败的时候会返回error
 func CreateMerchantApplication(a *MerchantApplication) error {
