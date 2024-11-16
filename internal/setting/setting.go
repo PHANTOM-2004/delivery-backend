@@ -201,7 +201,7 @@ func Setup() {
 	parseLogSetting()
 	parseServerSetting()
 	parseDatabaseSetting()
-  parseRabbitmqSetting()
+	parseRabbitmqSetting()
 	parseRedisSetting()
 	parseTestSetting()
 	parseAppSetting()
