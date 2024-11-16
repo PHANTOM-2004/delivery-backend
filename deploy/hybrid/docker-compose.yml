@@ -32,8 +32,21 @@ services:
       interval: 20s
       timeout: 5s
       retries: 5
-    volumes:
-      - test_redis_data:/data
+    # volumes:
+    #   - test_redis_data:/data
+
+  rabbitmq:
+    image: rabbitmq:alpine
+    container_name: test_rabbitmq
+    healthcheck:
+      # use the flag --erlang-cookie if setting the erlang
+      # cookie was necessary (comment by red-riding-hood)
+      # test: rabbitmq-diagnostics -q ping --erlang-cookie "mycookie"
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
 
   nginx:
     image: nginx:mainline-alpine-slim
@@ -70,6 +83,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
     # 默认工作区为项目目录
     working_dir: /home/Projects
@@ -84,5 +99,5 @@ services:
 volumes:
   # 暂时先不需要mariadb的持久卷，每次通过curl进行创建
   # test_mariadb_data:
-  test_redis_data:
+  # test_redis_data:
   test_go_cache:

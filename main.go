@@ -5,6 +5,8 @@ import (
 	"delivery-backend/internal/setting"
 	"delivery-backend/models"
 	"delivery-backend/routers"
+	"delivery-backend/service/consumer"
+	"delivery-backend/service/email"
 	"delivery-backend/test/CA"
 	"fmt"
 	"net/http"
@@ -17,9 +19,18 @@ func Setup() {
 	setting.Setup()
 	models.SetUp()
 	gredis.Setup()
-
 	// set server mode
 	gin.SetMode(setting.ServerSetting.RunMode)
+
+	// 初始化consumer email
+	email.Setup()
+	// 启动所有consumer
+	consumer.Setup()
+}
+
+// shutdown服务
+func Shutdown() {
+	defer consumer.ShutDown()
 }
 
 func LaunchServer() {
@@ -42,6 +53,7 @@ func LaunchServer() {
 
 func main() {
 	Setup()
+	defer Shutdown()
 
 	if setting.TestSetting.CATest && gin.Mode() == gin.DebugMode {
 		// NOTE: 请使用该模块测试本地开发环境是否可以正确访问

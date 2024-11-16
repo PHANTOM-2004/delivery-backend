@@ -14,6 +14,10 @@ import (
 	"github.com/go-ini/ini"
 )
 
+type Rabbitmq struct {
+	DialURL string
+}
+
 type Server struct {
 	RunMode      string
 	HTTPPort     int
@@ -28,6 +32,17 @@ type Test struct {
 	HTTPPort          int
 	LocalhostKeyPath  string
 	LocalhostCertPath string
+}
+
+// 目前支持一台服务器的情况
+type Email struct {
+	EmailOn        bool
+	SMTPHost       string
+	SMTPPort       int
+	SenderEmail    string
+	SenderPassword string
+	CCEmail        string
+	TemplatePath   string
 }
 
 type Log struct {
@@ -139,10 +154,12 @@ var cfg *ini.File
 var (
 	DatabaseSetting = &Database{}
 	RedisSetting    = &Redis{}
+	RabitmqSetting  = &Rabbitmq{}
 	ServerSetting   = &Server{}
 	TestSetting     = &Test{}
 	AppSetting      = &App{}
 	LogSetting      = &Log{}
+	EmailSetting    = &Email{}
 )
 
 const FallbackPreset = "localdebug"
@@ -184,9 +201,11 @@ func Setup() {
 	parseLogSetting()
 	parseServerSetting()
 	parseDatabaseSetting()
+  parseRabbitmqSetting()
 	parseRedisSetting()
 	parseTestSetting()
 	parseAppSetting()
+	parseEmailSetting()
 }
 
 func logCurrentConf(s any, section string) {
@@ -257,4 +276,29 @@ func parseRedisSetting() {
 	}
 
 	logCurrentConf(RedisSetting, "Redis")
+}
+
+func parseRabbitmqSetting() {
+	err := cfg.Section("rabbitmq").StrictMapTo(RabitmqSetting)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	logCurrentConf(RabitmqSetting, "rabbitmq")
+}
+
+func parseEmailSetting() {
+	err := cfg.Section("email").StrictMapTo(EmailSetting)
+	if err != nil {
+		log.Fatal(err)
+	}
+	logCurrentConf(EmailSetting, "Email")
+	if EmailSetting.SenderEmail == "" {
+		log.Fatal("邮件发送人地址不可为空")
+	}
+
+	_, err = os.Open(EmailSetting.TemplatePath)
+	if err != nil {
+		log.Fatal("parse email setting", err)
+	}
 }
