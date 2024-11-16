@@ -32,6 +32,7 @@ type Test struct {
 
 // 目前支持一台服务器的情况
 type Email struct {
+	EmailOn        bool
 	SMTPHost       string
 	SMTPPort       int
 	SenderEmail    string
@@ -276,14 +277,13 @@ func parseEmailSetting() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	logCurrentConf(EmailSetting, "Email")
 	if EmailSetting.SenderEmail == "" {
 		log.Fatal("邮件发送人地址不可为空")
 	}
 
 	_, err = os.Open(EmailSetting.TemplatePath)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("parse email setting", err)
 	}
-
-	logCurrentConf(EmailSetting, "Email")
 }

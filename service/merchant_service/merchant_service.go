@@ -1,15 +1,20 @@
 package merchant_service
 
 import (
+	"context"
 	"delivery-backend/internal/app"
 	"delivery-backend/internal/ecode"
 	"delivery-backend/internal/setting"
 	"delivery-backend/models"
 	"delivery-backend/pkg/utils"
+	"delivery-backend/service/email"
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	amqp "github.com/rabbitmq/amqp091-go"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -136,6 +141,76 @@ func PasswordRequestValidate(password string, c *gin.Context) bool {
 	return true
 }
 
+// queue_name: merchant_approval_email
+type EmailProducer struct {
+	queueName string
+	// exchangeName string
+	conn *amqp.Connection
+}
+
+func NewEmailProducer() *EmailProducer {
+	res := EmailProducer{
+		queueName: "merchant_approval_email",
+		// exchangeName: "merchant_email",
+	}
+	return &res
+}
+
+func (e *EmailProducer) Connect() error {
+	var err error
+	e.conn, err = amqp.Dial("amqp://guest:guest@localhost:5672/")
+	return err
+}
+
+func (e *EmailProducer) Close() error {
+	err := e.conn.Close()
+	return err
+}
+
+func (e *EmailProducer) PublishMsg(data *email.MsgData) error {
+	ch, err := e.conn.Channel()
+	if err != nil {
+		return err
+	}
+	defer ch.Close()
+
+	q, err := ch.QueueDeclare(
+		e.queueName, // name
+		true,        // durable
+		false,       // delete when unused
+		false,       // exclusive
+		false,       // no-wait
+		nil,         // arguments
+	)
+	if err != nil {
+		return err
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	body, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	err = ch.PublishWithContext(ctx,
+		"",
+		q.Name,
+		false,
+		false,
+		amqp.Publishing{
+			DeliveryMode: amqp.Persistent,
+			ContentType:  "application/json",
+			Body:         body,
+		},
+	)
+	if err == nil {
+		log.Tracef("publish email msg [%v]", string(body))
+	}
+	return err
+}
+
 // 管理员端为Merchant创建
 func CreateMerchantFromApplication(application_id uint) error {
 	a, err := models.
@@ -163,8 +238,33 @@ func CreateMerchantFromApplication(application_id uint) error {
 	if err != nil {
 		return err
 	}
+	log.Debugf("created merchant: ACCOUNT[%s],PWD[%s]", account, password)
 
-	log.Debugf("created merchant: ACCOUNT[%s],PWD[%s]",
-		account, password)
-	return nil
+	// 接下来发送email, 作为生产者推送给email 服务
+	p := NewEmailProducer()
+	err = p.Connect()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		err := p.Close()
+		if err != nil {
+			log.Warn(err)
+		}
+	}()
+
+	data := email.MsgData{
+		PageData: email.PageData{
+			Account:     m.Account,
+			Password:    password,
+			Name:        m.MerchantName,
+			PhoneNumber: m.PhoneNumber,
+		},
+		Email: a.Email,
+	}
+	err = p.PublishMsg(&data)
+	if err == nil {
+		log.Tracef("email to merchant[%v] sent", m.MerchantName)
+	}
+	return err
 }
