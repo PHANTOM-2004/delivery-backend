@@ -32,12 +32,12 @@ func GetCategories(c *gin.Context) {
 
 type categoryRequest struct {
 	Name string `form:"name" validate:"max=30"`
-	// 分类类型，0代表菜品，1代表套餐;默认是菜品
-	Type uint8 `form:"type" validate:"gte=0,lte=1"`
+	// 分类类型，1代表菜品，2代表套餐;默认是菜品
+	Type uint8 `form:"type" validate:"gte=1,lte=2"`
 	// 排序值，用于决定顺序；
 	Sort uint16 `form:"sort" validate:"gte=0"`
-	// 0代表禁用，1代表启用，默认禁用
-	Status uint8 `form:"status" validate:"gte=0,lte=1"`
+	// 1代表禁用，2代表启用，默认禁用
+	Status uint8 `form:"status" validate:"gte=1,lte=2"`
 }
 
 func (r *categoryRequest) GetCategoryModel() *models.Category {
