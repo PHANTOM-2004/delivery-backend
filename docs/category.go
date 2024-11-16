@@ -84,6 +84,8 @@ type MerchantUpdateCategoryRequest struct {
 	Type uint8 `json:"type"`
 	//in:formData
 	Sort uint16 `json:"sort"`
+	//in:formData
+	Status uint8 `json:"status"`
 }
 
 // =============================================================

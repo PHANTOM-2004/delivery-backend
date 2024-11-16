@@ -15,7 +15,7 @@ type MerchantApplication struct {
 	Email       string `gorm:"size:50;not null" json:"email"`
 	PhoneNumber string `gorm:"size:30;not null" json:"phone_number"`
 	Name        string `gorm:"size:20;not null" json:"name"`
-	EmailStatus uint8  `gorm:default:0;not null json:"email_status"`
+	EmailStatus uint8  `gorm:"default:0;not null" json:"email_status"`
 }
 
 const (
