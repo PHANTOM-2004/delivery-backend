@@ -30,6 +30,16 @@ type Test struct {
 	LocalhostCertPath string
 }
 
+// 目前支持一台服务器的情况
+type Email struct {
+	SMTPHost       string
+	SMTPPort       int
+	SenderEmail    string
+	SenderPassword string
+	CCEmail        string
+	TemplatePath   string
+}
+
 type Log struct {
 	Level string
 }
@@ -143,6 +153,7 @@ var (
 	TestSetting     = &Test{}
 	AppSetting      = &App{}
 	LogSetting      = &Log{}
+	EmailSetting    = &Email{}
 )
 
 const FallbackPreset = "localdebug"
@@ -187,6 +198,7 @@ func Setup() {
 	parseRedisSetting()
 	parseTestSetting()
 	parseAppSetting()
+	parseEmailSetting()
 }
 
 func logCurrentConf(s any, section string) {
@@ -257,4 +269,21 @@ func parseRedisSetting() {
 	}
 
 	logCurrentConf(RedisSetting, "Redis")
+}
+
+func parseEmailSetting() {
+	err := cfg.Section("email").StrictMapTo(EmailSetting)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if EmailSetting.SenderEmail == "" {
+		log.Fatal("邮件发送人地址不可为空")
+	}
+
+	_, err = os.Open(EmailSetting.TemplatePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	logCurrentConf(EmailSetting, "Email")
 }
