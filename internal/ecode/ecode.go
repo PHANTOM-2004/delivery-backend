@@ -14,12 +14,13 @@ const (
 	INVALID_PARAMS Ecode = 1001
 
 	// admin related error
-	ERROR_ADMIN_NOT_FOUND     Ecode = 10000
-	ERROR_ADMIN_INCORRECT_PWD Ecode = 10001
-	ERROR_ADMIN_ACCOUNT_EXIST Ecode = 10002
-	ERROR_ADMIN_LOGOUT        Ecode = 10003
-	ERROR_ADMIN_NOT_LOGIN     Ecode = 10004
-	ERROR_ADMIN_ROLE          Ecode = 10005
+	ERROR_ADMIN_NOT_FOUND         Ecode = 10000
+	ERROR_ADMIN_INCORRECT_PWD     Ecode = 10001
+	ERROR_ADMIN_ACCOUNT_EXIST     Ecode = 10002
+	ERROR_ADMIN_LOGOUT            Ecode = 10003
+	ERROR_ADMIN_NOT_LOGIN         Ecode = 10004
+	ERROR_ADMIN_ROLE              Ecode = 10005
+	ERROR_ADMIN_INVALID_OPERATION Ecode = 10006
 
 	// merchant related
 	ERROR_MERCHANT_NON_FOUND      Ecode = 11000
@@ -74,6 +75,8 @@ func StatusText(e Ecode) (res string) {
 		res = "管理员未登录"
 	case ERROR_ADMIN_ROLE:
 		res = "管理员身份错误"
+	case ERROR_ADMIN_INVALID_OPERATION:
+		res = "管理员非法操作"
 
 	case ERROR_MERCHANT_NON_FOUND:
 		res = "商家账号不存在"

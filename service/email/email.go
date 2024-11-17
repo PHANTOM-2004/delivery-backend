@@ -7,6 +7,7 @@ import (
 	"delivery-backend/pkg/utils"
 	"delivery-backend/service/consumer"
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"os"
 	"time"
@@ -149,6 +150,7 @@ func (a *EmailSender) ConsumeMsg() error {
 // 2. 创建商家账户
 // 3. 发送邮件
 // 4. 修改申请表发送邮件的状态
+// * ACK/NACK
 func (a *EmailSender) approveHandler(d *amqp.Delivery) (err error) {
 	///////解析data
 	data := MsgData{}
@@ -171,9 +173,14 @@ func (a *EmailSender) approveHandler(d *amqp.Delivery) (err error) {
 		MerchantName:          data.Name,
 		MerchantApplicationID: data.ApplicationID,
 	}
-	err = models.CreateMerchant(&m)
+	created, err := models.CreateMerchant(&m)
 	if err != nil {
 		return err
+	}
+	if !created {
+		// 说明之前已经handle过这个request了, 就不必继续处理, 重复发送了create请求
+		// 直接标记处理完毕即可
+		return fmt.Errorf("merchant with application_id[%v] exists", m.MerchantApplicationID)
 	}
 	log.Tracef("created merchant: ACCOUNT[%s],PWD[%s]", account, password)
 
