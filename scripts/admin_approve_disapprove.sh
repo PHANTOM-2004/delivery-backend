@@ -25,6 +25,14 @@ curl -b cookies.txt http://localhost:8000/api/v1/admin/merchant-application/1
 curl -b cookies.txt \
  http://localhost:8000/api/v1/admin/merchant-application/1/approve --request PUT
 
+# 通过商家账号
+curl -b cookies.txt \
+ http://localhost:8000/api/v1/admin/merchant-application/1/approve --request PUT
+
+# 通过商家账号
+curl -b cookies.txt \
+ http://localhost:8000/api/v1/admin/merchant-application/1/approve --request PUT
+
   # 获得申请表
 curl -b cookies.txt http://localhost:8000/api/v1/admin/merchant-application/1
 
