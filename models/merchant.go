@@ -13,8 +13,8 @@ type Merchant struct {
 	Model
 	MerchantName string `gorm:"size:50;not null" json:"merchant_name"`
 	PhoneNumber  string `gorm:"size:30;not null" json:"phone_number"`
-	Account      string `gorm:"size:50;uniqueIndex;not null" json:"account"`
-	Password     string `gorm:"size:100;not null" json:"password"`
+	Account      string `gorm:"size:50;index;not null" json:"account"`
+	Password     string `gorm:"size:100;not null" json:"-"`
 	//  1启用，0禁用;默认启用
 	Status uint8 `gorm:"default:1;not null" json:"status"`
 	// 每个商家账号对应的申请表，这个申请表是唯一的
@@ -62,9 +62,26 @@ func GetMerchant(account string) (*Merchant, error) {
 	return &m, err
 }
 
-func CreateMerchant(m *Merchant) error {
-	err := tx.Create(m).Error
-	return err
+// bool: 返回是否created
+func CreateMerchant(m *Merchant) (bool, error) {
+	attrs := Merchant{
+		MerchantName:          m.MerchantName,
+		Password:              m.Password,
+		PhoneNumber:           m.PhoneNumber,
+		MerchantApplicationID: m.MerchantApplicationID,
+	}
+	merchant := Merchant{}
+
+	res := tx.Where(Merchant{
+		Account: m.Account,
+	}).Attrs(attrs).FirstOrCreate(&merchant)
+
+	if errors.Is(res.Error, gorm.ErrDuplicatedKey) {
+		// 该申请表已经创建过, 那么就不创建了
+		return false, nil
+	}
+
+	return res.RowsAffected > 0, res.Error
 }
 
 func ExistMerchant(account string) (bool, error) {
@@ -82,6 +99,15 @@ func GetMerchantByID(id uint) (*Merchant, error) {
 	}
 
 	return &m, err
+}
+
+// 从1开始
+func GetMerchants(page_cnt int) ([]Merchant, error) {
+	page_size := 10
+	offset := max(page_cnt-1, 0) * page_size
+	merchants := []Merchant{}
+	err := tx.Limit(page_size).Offset(offset).Find(&merchants).Error
+	return merchants, err
 }
 
 func EnableMerchant(id uint) error {

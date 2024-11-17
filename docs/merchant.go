@@ -119,3 +119,54 @@ type MerchantInfoResponse struct {
 // 商家获得个人信息
 // responses:
 // 200:merchant_information
+
+// swagger:response admin_get_merchants
+type MerchantsResponse struct {
+	// in:body
+	Body struct {
+		// Required:true
+		// Example: 200
+		ECode int `json:"ecode"`
+		// Example: ok
+		// error message
+		// Required:true
+		Msg string `json:"msg"`
+		// Required:true
+		// data to get
+		// Required:true
+		// In:body
+		Data struct {
+			Merchant []models.Merchant `json:"merchants"`
+		} `json:"data"`
+	}
+}
+
+//swagger:parameters admin_get_merchants
+type PageCnt struct {
+	//in:path
+	Cnt int `json:"page"`
+}
+
+// =============================================================
+// swagger:route GET /api/v1/admin/merchants/{page} v1-admin admin_get_merchants
+// 管理员获得所有merchants
+// responses:
+// 200:admin_get_merchants
+
+//swagger:parameters admin_enable_merchant admin_disable_merchant
+type MerchantIDRequest struct {
+	//in:path
+	MerchantID int `json:"merchant_id"`
+}
+
+// =============================================================
+// swagger:route POST /api/v1/admin/merchant/{merchant_id}/enable v1-admin admin_enable_merchant
+// 管理员启用 merchant
+// responses:
+// 200:COMMON
+
+// =============================================================
+// swagger:route POST /api/v1/admin/merchant/{merchant_id}/disable v1-admin admin_disable_merchant
+// 管理员禁用 merchant
+// responses:
+// 200:COMMON

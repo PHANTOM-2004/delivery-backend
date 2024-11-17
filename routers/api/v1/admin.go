@@ -7,13 +7,11 @@ import (
 	"delivery-backend/models"
 	"delivery-backend/pkg/utils"
 	"delivery-backend/service/merchant_service"
-	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 )
 
 // 传入page_id, 作为url传送
@@ -29,7 +27,7 @@ func GetMerchantApplication(c *gin.Context) {
 
 	res, err := models.GetMerchantApplications(page_cnt)
 	if err != nil {
-		app.Response(c, http.StatusInternalServerError, ecode.ERROR, nil)
+		app.Response(c, http.StatusBadRequest, ecode.ERROR, nil)
 		return
 	}
 
@@ -40,6 +38,7 @@ func GetMerchantApplication(c *gin.Context) {
 	app.Response(c, http.StatusOK, ecode.SUCCESS, data)
 }
 
+// approve之前必然是拒绝或者没有看的状态, 也就是没有对应的账号, 所以approve的时候必然创建.
 func ApproveMerchantApplication(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("application_id"))
 	if err != nil {
@@ -48,48 +47,14 @@ func ApproveMerchantApplication(c *gin.Context) {
 		return
 	}
 
-	// status从 未审核变为通过审核，或者从不通过审核变为通过审核
-	// 如果原本已经通过审核，则该请求不造成任何后果
-	//
-	//
-	// 需要判定先前状态, 这种申请必然不频繁，所以直接从数据库查询即可
-	// 至于先前状态，实际上只需要找商家账号是否存在即可
-	//
-	// 1. 查找相关联的账号
-	m, err := models.GetRelatedMerchant(uint(id))
+	// 3.更新申请表的状态
+	succ, err := models.ApproveApplication(id)
 	if err != nil {
 		app.ResponseInternalError(c, err)
 		return
 	}
-
-	// 2. 存在商家账号
-	if m.ID != 0 {
-		// 说明商家有账号，所以需要检查是否解冻这个账号
-		log.Debugf("related account[%s] found", m.Account)
-		err = merchant_service.EnableMerchant(m.ID)
-		if err != nil {
-			app.ResponseInternalError(c, err)
-			return
-		}
-		log.Debugf("merchant account[%s] enabled", m.Account)
-	}
-
-	// 3.更新申请表的状态
-	err = models.ApproveApplication(id)
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		log.Warnf("application form id[%d] not found", id)
-		app.Response(c, http.StatusOK,
-			ecode.ERROR_MERCHANT_APPLICATION_NOT_FOUND, nil)
-		return
-	} else if err != nil {
-		app.ResponseInternalError(c, err)
-		return
-	}
-
-	// 商家已经存在，那么不需要考虑创建账号
-	if m.ID != 0 {
-		app.ResponseSuccess(c)
-		log.Debugf("application form id[%d] approved", id)
+	if !succ {
+		app.Response(c, http.StatusOK, ecode.ERROR_ADMIN_INVALID_OPERATION, nil)
 		return
 	}
 
@@ -104,6 +69,7 @@ func ApproveMerchantApplication(c *gin.Context) {
 	app.ResponseSuccess(c)
 }
 
+// 对于disapprove, 不再进行封禁操作, 也就是说disapprove后可以approve, approve后不能disapprove
 func DisapproveMerchantApplication(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("application_id"))
 	if err != nil {
@@ -111,34 +77,15 @@ func DisapproveMerchantApplication(c *gin.Context) {
 		app.ResponseInvalidParams(c)
 		return
 	}
-	m, err := models.GetRelatedMerchant(uint(id))
+	succ, err := models.DisapproveApplication(id)
 	if err != nil {
 		app.ResponseInternalError(c, err)
 		return
 	}
-
-	if m.ID == 0 {
-		// 没有关联的商家账号，那么那么无需冻结和解冻操作
-		log.Debug("No related merchant account")
-		app.ResponseSuccess(c)
+	if !succ {
+		app.Response(c, http.StatusBadRequest, ecode.ERROR_ADMIN_INVALID_OPERATION, nil)
 		return
 	}
-
-	// 有关联的商家账号，需要冻结
-	// NOTE:正常来说，关联的商家此时必然是非冻结状态，否则就是多次disapprove
-	err = merchant_service.DisableMerchant(m.ID)
-	if err != nil {
-		app.ResponseInternalError(c, err)
-		return
-	}
-	log.Debugf("Disable merchant account: %s", m.Account)
-
-	err = models.DisapproveApplication(id)
-	if err != nil {
-		app.ResponseInternalError(c, err)
-		return
-	}
-
 	app.ResponseSuccess(c)
 }
 
@@ -188,21 +135,66 @@ func CreateMerchant(c *gin.Context) {
 		MerchantApplicationID: uint(application_id),
 	}
 
-	exist, err := models.ExistMerchant(account)
+	created, err := models.CreateMerchant(&data)
 	if err != nil {
 		app.ResponseInternalError(c, err)
 		return
 	}
-
-	if exist {
+	if !created {
 		app.Response(c, http.StatusOK, ecode.ERROR_MERCHANT_ACCOUNT_EXIST, nil)
 		return
 	}
+	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
+}
 
-	err = models.CreateMerchant(&data)
+func GetMerchants(c *gin.Context) {
+	page, err := strconv.Atoi(c.Param("page"))
+	if err != nil {
+		log.Warn(err)
+		app.ResponseInvalidParams(c)
+		return
+	}
+	merchants, err := models.GetMerchants(page)
 	if err != nil {
 		app.ResponseInternalError(c, err)
 		return
 	}
-	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
+	res := map[string]any{
+		"merchants": merchants,
+	}
+	app.Response(c, http.StatusOK, ecode.SUCCESS, res)
+}
+
+func EnableMerchant(c *gin.Context) {
+	merchant_id, err := strconv.ParseUint(c.Param("merchant_id"), 10, 0)
+	if err != nil {
+		log.Warn(err)
+		app.ResponseInvalidParams(c)
+		return
+	}
+
+	err = merchant_service.EnableMerchant(uint(merchant_id))
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+
+	app.ResponseSuccess(c)
+}
+
+func DisableMerchant(c *gin.Context) {
+	merchant_id, err := strconv.ParseUint(c.Param("merchant_id"), 10, 0)
+	if err != nil {
+		log.Warn(err)
+		app.ResponseInvalidParams(c)
+		return
+	}
+
+	err = merchant_service.DisableMerchant(uint(merchant_id))
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+
+	app.ResponseSuccess(c)
 }

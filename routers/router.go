@@ -230,8 +230,14 @@ func InitRouter() *gin.Engine {
 				v1.CreateMerchant)
 			admin_session_v1.POST("/merchant/delete",
 				v1.DeleteMerchant)
+			admin_session_v1.POST("/merchant/:merchant_id/disable",
+				v1.DisableMerchant)
+			admin_session_v1.POST("/merchant/:merchant_id/enable",
+				v1.EnableMerchant)
 			admin_session_v1.GET("/merchant-application/:page",
 				v1.GetMerchantApplication)
+			admin_session_v1.GET("/merchants/:page",
+				v1.GetMerchants)
 			admin_session_v1.PUT("/merchant-application/:application_id/approve",
 				v1.ApproveMerchantApplication)
 			admin_session_v1.PUT("/merchant-application/:application_id/disapprove",

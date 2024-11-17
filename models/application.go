@@ -59,28 +59,27 @@ func GetMerchantApplication(id uint) (*MerchantApplication, error) {
 	return &res, err
 }
 
-// 从未通过到通过，后续需要创建商家账号
-func ApproveApplication(id int) error {
-	err := tx.Model(&MerchantApplication{}).
-		Where("id = ?", id).
-		Update("status", ApplicationApproved).Error
-	return err
+// 只允许通过已经没通过的以及未审核的, 也就是说除了已经通过的其他的都可以通过
+func ApproveApplication(id int) (bool, error) {
+	res := tx.Model(&MerchantApplication{}).
+		Where("id = ? AND status <> ?", id, ApplicationApproved).
+		Update("status", ApplicationApproved)
+	return res.RowsAffected == 1, res.Error
 }
 
-// 从已通过到未通过，那么后续需要冻结对应的账号；
-// 从未审核到未通过，后续不需要操作
-func DisapproveApplication(id int) error {
-	err := tx.Model(&MerchantApplication{}).
-		Where("id = ?", id).
-		Update("status", ApplicationDisapproved).Error
-	return err
+// 只能不通过没有审核的
+func DisapproveApplication(id int) (bool, error) {
+	res := tx.Model(&MerchantApplication{}).
+		Where("id = ? AND status = ?", id, ApplicationToBeViewed).
+		Update("status", ApplicationDisapproved)
+	return res.RowsAffected == 1, res.Error
 }
 
 // 获得所有的商家申请,注意需要分页查询
 // 注意：page从1开始
 func GetMerchantApplications(page_cnt int) ([]MerchantApplication, error) {
 	page_size := setting.AppSetting.LicensePageSize
-	offset := (page_cnt - 1) * page_size
+	offset := max(page_cnt-1, 0) * page_size
 	applications := []MerchantApplication{}
 	err := tx.Limit(page_size).Offset(offset).Find(&applications).Error
 	return applications, err
