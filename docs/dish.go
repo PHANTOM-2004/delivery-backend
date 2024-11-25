@@ -2,12 +2,15 @@ package docs
 
 import (
 	"bytes"
+	"delivery-backend/models"
 
 	"github.com/go-openapi/runtime"
 )
 
 // swagger:parameters merchant_create_dish
 type MerchantCreateDishRequest struct {
+	// in: path
+	RestaurantID uint `json:"restaurant_id"`
 	//in:path
 	//required:true
 	ID uint `json:"dish_id"`
@@ -65,10 +68,43 @@ type MerchantUpdateDishRequest struct {
 // 200: COMMON
 
 // =============================================================
-// swagger:route POST /api/v1/merchant/category/{category_id}/dish v1-merchant merchant_create_dish
-// 创建某一个分类下的菜品
+// swagger:route POST /api/v1/merchant/restaurant/{restaurant_id}/dish v1-merchant merchant_create_dish
+// 创建某一个店铺下的菜品
 // responses:
 // 200: COMMON
+
+//swagger:parameters merchant_get_dishes
+type MerchantGetDishesRequest struct {
+	// in: path
+	RestaurantID uint `json:"restaurant_id"`
+}
+
+//swagger:response merchant_get_dishes_response
+type MerchantGetDishResponse struct {
+	// in:body
+	Body struct {
+		// Required:true
+		// Example: 200
+		ECode int `json:"ecode"`
+		// Example: ok
+		// error message
+		// Required:true
+		Msg string `json:"msg"`
+		// Required:true
+		// data to get
+		// Required:true
+		Data struct {
+			// in:body
+			Flavors []models.Dish `json:"dishes"`
+		} `json:"data"`
+	}
+}
+
+// =============================================================
+// swagger:route GET /api/v1/merchant/restaurant/{restaurant_id}/dish/{page} v1-merchant merchant_get_dishes
+// 获得某一个店铺下的菜品
+// responses:
+// 200: merchant_get_dishes_response
 
 //swagger:parameters merchant_delete_dish
 type DeleteDish struct {
