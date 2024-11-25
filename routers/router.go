@@ -151,17 +151,17 @@ func InitRouter() *gin.Engine {
 			// form中发送需要加入的
 			merchant_session.POST(
 				"/dish/:dish_id/flavors/add",
-				merchant_service.DishAuth(),
+				// merchant_service.DishAuth(),
 				v1.AddDishFlavor,
 			)
 			merchant_session.POST(
 				"/dish/:dish_id/flavors/delete",
-				merchant_service.DishAuth(),
+				// merchant_service.DishAuth(),
 				v1.DeleteDishFlavor,
 			)
 			merchant_session.GET(
 				"/dish/:dish_id/flavors",
-				merchant_service.DishAuth(),
+				// merchant_service.DishAuth(),
 				v1.GetDishFlavor,
 			)
 
@@ -169,18 +169,25 @@ func InitRouter() *gin.Engine {
 			// NOTE:这里需要验证更新的dish是否属于商家
 			merchant_session.DELETE(
 				"/dish/:dish_id",
-				merchant_service.DishAuth(),
+				// merchant_service.DishAuth(),
 				v1.DeleteDish,
 			)
 			merchant_session.PUT(
 				"/dish/:dish_id",
-				merchant_service.DishAuth(),
+				// merchant_service.DishAuth(),
 				v1.UpdateDish,
 			)
 			merchant_session.POST(
-				"/category/:category_id/dish",
-				// 以及需要鉴定设置的category是否是商家自己的店铺的
-				merchant_service.CategoryAuth(),
+				"/category/:category_id/dish/add",
+				v1.AddCategoryDish,
+			)
+			merchant_session.POST(
+				"/category/:category_id/dish/delete",
+				v1.DeleteCategoryDish,
+			)
+			// NOTE:菜品直接归属在restaurant名下
+			merchant_restaurant.POST(
+				"/dish",
 				v1.CreateDish,
 			)
 

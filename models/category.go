@@ -18,7 +18,7 @@ type Category struct {
 	// 考虑到每一家店铺大概率有一个独立的分类，因此每一个category对应一家店铺
 	Restaurant   Restaurant `json:"-"`
 	RestaurantID uint       `gorm:"index;not null" json:"restaurant_id"`
-	Dishes       []Dish     `json:"dishes"`
+	Dishes       []*Dish    `gorm:"many2many:category_dish" json:"dishes"`
 }
 
 func (c *Category) AfterDelete(tx *gorm.DB) error {
@@ -64,5 +64,25 @@ func CreateCategory(data *Category) error {
 // 注意更新不存在的category的情况
 func UpdateCategory(category_id uint, data *Category) error {
 	err := tx.Model(&Category{}).Where("id = ?", category_id).Updates(data).Error
+	return err
+}
+
+func AddCategoryDish(category_id uint, dishes_id []uint) error {
+	dishes := make([]Dish, len(dishes_id))
+	for i := range dishes {
+		id := dishes_id[i]
+		dishes[i] = Dish{Model: Model{ID: id}}
+	}
+	err := tx.Model(&Category{Model: Model{ID: category_id}}).Association("Dishes").Append(dishes)
+	return err
+}
+
+func DeleteCategoryDish(category_id uint, dishes_id []uint) error {
+	dishes := make([]Dish, len(dishes_id))
+	for i := range dishes {
+		id := dishes_id[i]
+		dishes[i] = Dish{Model: Model{ID: id}}
+	}
+	err := tx.Model(&Category{Model: Model{ID: category_id}}).Association("Dishes").Delete(dishes)
 	return err
 }

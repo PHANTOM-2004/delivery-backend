@@ -7,14 +7,13 @@ import (
 
 type Dish struct {
 	Model
-	Name        string   `gorm:"size:30;not null" json:"name"`
-	Price       uint     `gorm:"default:0;not null" json:"price"`
-	Image       string   `gorm:"size:256;not null" json:"image"`
-	Description string   `gorm:"size:50" json:"description"`
-	Sort        uint16   `gorm:"default:0;not null" json:"sort"`
-	CategoryID  uint     `gorm:"not null" json:"category_id"`
-	Category    Category `json:"-"`
-	Flavors     []Flavor `gorm:"many2many:dish_flavor" json:"flavors"`
+	Name         string    `gorm:"size:30;not null" json:"name"`
+	Price        uint      `gorm:"default:0;not null" json:"price"`
+	Image        string    `gorm:"size:256;not null" json:"image"`
+	Description  string    `gorm:"size:50" json:"description"`
+	Sort         uint16    `gorm:"default:0;not null" json:"sort"`
+	RestaurantID uint      `gorm:"not null" json:"restaurant_id"`
+	Flavors      []*Flavor `gorm:"many2many:dish_flavor" json:"flavors"`
 }
 
 type Flavor struct {

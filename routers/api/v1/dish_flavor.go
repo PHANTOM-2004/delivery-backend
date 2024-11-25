@@ -65,6 +65,7 @@ func validateDish(c *gin.Context) (*dishRequest, bool) {
 	return &dish, true
 }
 
+// category_id表示把菜品放到哪里
 // 注意与models.Dish信息同步
 type dishRequest struct {
 	Name        string `form:"name" validate:"max=30"`
@@ -86,10 +87,8 @@ func (r *dishRequest) GetDishModel() *models.Dish {
 // 商家create一个dish, dish属于某个商铺
 // 传递参数
 // 1. restaurant
-// 2. category
 // 3. form
 func CreateDish(c *gin.Context) {
-	category_id, _ := strconv.Atoi(c.Param("category_id"))
 	var err error
 
 	//////////////////// 校验form
@@ -105,7 +104,7 @@ func CreateDish(c *gin.Context) {
 
 	dish := dish_r.GetDishModel()
 	dish.Image = image_name
-	dish.CategoryID = uint(category_id)
+	dish.RestaurantID = c.GetUint("restaurant_id")
 	err = models.CreateDish(dish)
 	if err != nil {
 		log.Debug(dish)
