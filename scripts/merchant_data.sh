@@ -71,7 +71,7 @@ curl -b cookies.txt \
   -F "name=雪豹" \
   -F "type=1" \
   -F "sort=9" \
-  -F "status=2"\
+  -F "status=2" \
   http://localhost:8000/api/v1/merchant/restaurant/1/category \
   --request POST
 
@@ -80,7 +80,7 @@ curl -b cookies.txt \
   -F "name=桌饺" \
   -F "type=2" \
   -F "sort=1" \
-  -F "status=1"\
+  -F "status=1" \
   http://localhost:8000/api/v1/merchant/restaurant/1/category \
   --request POST
 
@@ -88,22 +88,35 @@ curl -b cookies.txt \
 curl -b cookies.txt \
   http://localhost:8000/api/v1/merchant/restaurant/1/categories
 
-# 向category 1插入dish 1
+# 向餐厅1插入dish 1
 curl -b cookies.txt \
   -F "name=雪豹炒鸡扒" \
   -F "price=2089" \
   -F "image=@Makefile.png" \
   -F "description=好的" \
-  http://localhost:8000/api/v1/merchant/category/1/dish \
+  http://localhost:8000/api/v1/merchant/restaurant/1/dish \
   --request POST
 
-# 向category 1插入dish 2
+# 向餐厅1插入dish 2
 curl -b cookies.txt \
   -F "name=西瓜炖土豆" \
   -F "price=1999" \
   -F "image=@Makefile.png" \
   -F "description=你知道我要说什么" \
-  http://localhost:8000/api/v1/merchant/category/1/dish \
+  http://localhost:8000/api/v1/merchant/restaurant/1/dish \
+  --request POST
+
+# 把dish 1加入category 1
+curl -b cookies.txt \
+  -d "dishes=1" \
+  http://localhost:8000/api/v1/merchant/category/1/dish/add \
+  --request POST
+
+# 把dish 1,2加入category 2
+curl -b cookies.txt \
+  -d "dishes=1" \
+  -d "dishes=2" \
+  http://localhost:8000/api/v1/merchant/category/2/dish/add \
   --request POST
 
 # 获得餐厅1所有category
