@@ -23,14 +23,7 @@ type Category struct {
 
 func (c *Category) AfterDelete(tx *gorm.DB) error {
 	log.Trace("running category after delete hook")
-
-	// 删除关联的所有dishes
-	err := tx.Where("category_id = ?", c.ID).Delete(&Dish{}).Error
-	if err != nil {
-		return err
-	}
-	defer log.Tracef("dishes related to category[%v] are deleted", c.ID)
-	defer log.Trace(*c)
+	// 目前category和dishes是分立的，因此不必主动删除
 	return nil
 }
 
