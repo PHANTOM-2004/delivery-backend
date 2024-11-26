@@ -12,7 +12,7 @@ type Dish struct {
 	Image        string    `gorm:"size:256;not null" json:"image"`
 	Description  string    `gorm:"size:50" json:"description"`
 	Sort         uint16    `gorm:"default:0;not null" json:"sort"`
-	RestaurantID uint      `gorm:"not null" json:"restaurant_id"`
+	RestaurantID uint      `gorm:"not null" json:"-"`
 	Flavors      []*Flavor `gorm:"many2many:dish_flavor" json:"flavors"`
 }
 
@@ -20,7 +20,7 @@ type Flavor struct {
 	Model
 	Name string `gorm:"size:30;not null" json:"name"`
 	// 关联的商店
-	RestaurantID uint `gorm:"index" json:"restaurant_id"`
+	RestaurantID uint `gorm:"index" json:"-"`
 }
 
 // 从口味得到商家
@@ -108,6 +108,20 @@ func GetFlavors(restaurant_id uint) ([]Flavor, error) {
 	flavors := []Flavor{}
 	err := tx.Find(&flavors, Flavor{RestaurantID: restaurant_id}).Error
 	return flavors, err
+}
+
+func GetDishes(restaurant_id uint) ([]Dish, error) {
+	dishes := []Dish{}
+	err := tx.Preload("Flavors").Find(&dishes).Error
+	return dishes, err
+}
+
+func GetDishesByPage(restaurant_id uint, page_cnt int) ([]Dish, error) {
+	dishes := []Dish{}
+	page_size := 10
+	offset := page_size * (page_cnt - 1)
+	err := tx.Limit(page_size).Offset(offset).Preload("Flavors").Find(&dishes).Error
+	return dishes, err
 }
 
 // 一个菜品可以添加多种口味

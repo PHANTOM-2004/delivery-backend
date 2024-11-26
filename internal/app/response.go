@@ -27,6 +27,14 @@ func ResponseInvalidParams(c *gin.Context) {
 	c.Abort()
 }
 
+func ResponseSuccessWithData(c *gin.Context, data map[string]any) {
+	c.JSON(http.StatusOK, gin.H{
+		"ecode": ecode.SUCCESS,
+		"msg":   ecode.StatusText(ecode.SUCCESS),
+		"data":  data,
+	})
+}
+
 func ResponseSuccess(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"ecode": ecode.SUCCESS,

@@ -178,17 +178,21 @@ func InitRouter() *gin.Engine {
 				v1.UpdateDish,
 			)
 			merchant_session.POST(
-				"/category/:category_id/dish/add",
+				"/category/:category_id/dishes/add",
 				v1.AddCategoryDish,
 			)
 			merchant_session.POST(
-				"/category/:category_id/dish/delete",
+				"/category/:category_id/dishes/delete",
 				v1.DeleteCategoryDish,
 			)
 			// NOTE:菜品直接归属在restaurant名下
 			merchant_restaurant.POST(
 				"/dish",
 				v1.CreateDish,
+			)
+			merchant_restaurant.GET(
+				"/dish",
+				v1.GetDishes,
 			)
 
 			// NOTE: license的图片静态文件路由, 对餐品图片的访问不进行鉴权

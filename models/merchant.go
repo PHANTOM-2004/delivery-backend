@@ -20,7 +20,7 @@ type Merchant struct {
 	// 每个商家账号对应的申请表，这个申请表是唯一的
 	MerchantApplicationID uint `gorm:"uniqueIndex" json:"merchant_application_id"`
 	// 用于preload对应reference model
-	MerchantApplication MerchantApplication `json:"-"` // 关联的对应的MerchantApplication
+	MerchantApplication *MerchantApplication `json:"-"` // 关联的对应的MerchantApplication
 }
 
 const (
@@ -32,7 +32,7 @@ const (
 func GetMerchantByCategory(category_id uint) (*Merchant, error) {
 	c := Category{}
 	err := tx.Preload("Restaurant.Merchant").Find(&c, category_id).Error
-	return &c.Restaurant.Merchant, err
+	return c.Restaurant.Merchant, err
 }
 
 // func GetMerchantByDish(dish_id uint) (*Merchant, error) {

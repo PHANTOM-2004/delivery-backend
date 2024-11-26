@@ -109,16 +109,60 @@ curl -b cookies.txt \
 # 把dish 1加入category 1
 curl -b cookies.txt \
   -d "dishes=1" \
-  http://localhost:8000/api/v1/merchant/category/1/dish/add \
+  http://localhost:8000/api/v1/merchant/category/1/dishes/add \
   --request POST
 
 # 把dish 1,2加入category 2
 curl -b cookies.txt \
   -d "dishes=1" \
   -d "dishes=2" \
-  http://localhost:8000/api/v1/merchant/category/2/dish/add \
+  http://localhost:8000/api/v1/merchant/category/2/dishes/add \
   --request POST
 
 # 获得餐厅1所有category
 curl -b cookies.txt \
   http://localhost:8000/api/v1/merchant/restaurant/1/categories
+
+# 从category 2中删除一个
+# 然后再次获得餐厅1所有category
+curl -b cookies.txt \
+  -d "dishes=1" \
+  http://localhost:8000/api/v1/merchant/category/2/dishes/delete \
+  --request POST
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/restaurant/1/categories
+
+# 获得餐厅1所有dishes
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/restaurant/1/dish
+
+# 插入flavors 1
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/restaurant/1/flavor/蒜香干拌 \
+  --request POST
+
+# 插入flavors 2
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/restaurant/1/flavor/红油干拌 \
+  --request POST
+
+# 插入flavors 3
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/restaurant/1/flavor/别干拌了 \
+  --request POST
+
+# 获得所有flavors
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/restaurant/1/flavors
+
+# 为菜品1加入flavors
+curl -b cookies.txt \
+  -d "flavors=1" \
+  -d "flavors=2" \
+  -d "flavors=3" \
+  http://localhost:8000/api/v1/merchant/dish/1/flavors/add \
+  --request POST
+
+# 获得餐厅1所有dishes
+curl -b cookies.txt \
+  http://localhost:8000/api/v1/merchant/restaurant/1/dish

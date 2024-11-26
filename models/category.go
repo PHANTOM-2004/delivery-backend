@@ -16,9 +16,9 @@ type Category struct {
 	// 1代表禁用，2代表启用，默认禁用
 	Status uint8 `gorm:"default:1;not null" json:"status"`
 	// 考虑到每一家店铺大概率有一个独立的分类，因此每一个category对应一家店铺
-	Restaurant   Restaurant `json:"-"`
-	RestaurantID uint       `gorm:"index;not null" json:"restaurant_id"`
-	Dishes       []*Dish    `gorm:"many2many:category_dish" json:"dishes"`
+	Restaurant   *Restaurant `json:"-"`
+	RestaurantID uint        `gorm:"index;not null" json:"-"`
+	Dishes       []*Dish     `gorm:"many2many:category_dish" json:"dishes"`
 }
 
 func (c *Category) AfterDelete(tx *gorm.DB) error {

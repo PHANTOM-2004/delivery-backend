@@ -17,8 +17,8 @@ type Restaurant struct {
 	// 商铺评分
 	Rating float32 `gorm:"default:0;not null" json:"rating"`
 	// 所属的商家ID
-	MerchantID uint     `gorm:"index" json:"merchant_id"`
-	Merchant   Merchant `json:"-"` // 该部分不参与json化
+	MerchantID uint      `gorm:"index" json:"-"`
+	Merchant   *Merchant `json:"-"` // 该部分不参与json化
 }
 
 type RestaurantTime struct {
