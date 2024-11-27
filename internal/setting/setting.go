@@ -49,6 +49,11 @@ type Log struct {
 	Level string
 }
 
+type Wechat struct {
+	AppID     string
+	AppSecret string
+}
+
 type App struct {
 	Salt                string
 	JWTSecretKey        string
@@ -160,6 +165,7 @@ var (
 	AppSetting      = &App{}
 	LogSetting      = &Log{}
 	EmailSetting    = &Email{}
+	WechatSetting   = &Wechat{}
 )
 
 const FallbackPreset = "localdebug"
@@ -300,5 +306,19 @@ func parseEmailSetting() {
 	_, err = os.Open(EmailSetting.TemplatePath)
 	if err != nil {
 		log.Fatal("parse email setting", err)
+	}
+}
+
+func parseWechatSetting() {
+	err := cfg.Section("wechat").StrictMapTo(WechatSetting)
+	if err != nil {
+		log.Fatal(err)
+	}
+	logCurrentConf(WechatSetting, "Wechat")
+	if WechatSetting.AppID == "" {
+		log.Fatal("wechat appid must be filled")
+	}
+	if WechatSetting.AppSecret == "" {
+		log.Fatal("wechat appsecret must be filled")
 	}
 }
