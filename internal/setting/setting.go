@@ -2,6 +2,7 @@ package setting
 
 import (
 	"delivery-backend/pkg/utils"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -50,8 +51,15 @@ type Log struct {
 }
 
 type Wechat struct {
-	AppID     string
-	AppSecret string
+	AppID           string
+	AppSecret       string
+	code2SessionURL string
+}
+
+func (w *Wechat) GetCode2SessionURL(js_code string) string {
+	res := fmt.Sprintf(w.code2SessionURL,
+		w.AppID, w.AppSecret, js_code)
+	return res
 }
 
 type App struct {
@@ -212,6 +220,7 @@ func Setup() {
 	parseTestSetting()
 	parseAppSetting()
 	parseEmailSetting()
+	parseWechatSetting()
 }
 
 func logCurrentConf(s any, section string) {
@@ -314,11 +323,18 @@ func parseWechatSetting() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	logCurrentConf(WechatSetting, "Wechat")
 	if WechatSetting.AppID == "" {
 		log.Fatal("wechat appid must be filled")
 	}
 	if WechatSetting.AppSecret == "" {
 		log.Fatal("wechat appsecret must be filled")
 	}
+
+	url_fmt := "https://api.weixin.qq.com/sns/jscode2session?" +
+		"appid=%s" +
+		"&secret=%s" +
+		"&js_code=%s&grant_type=authorization_code"
+	WechatSetting.code2SessionURL = url_fmt
+	log.Info(WechatSetting.code2SessionURL)
+	logCurrentConf(WechatSetting, "Wechat")
 }
