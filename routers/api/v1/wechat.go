@@ -47,7 +47,7 @@ func WXLogin(c *gin.Context) {
 		app.ResponseInternalError(c, err)
 		return
 	}
-
 	log.Trace("wxserver code2sesion response: ", wxserverResp)
+	// 接下来返回session
 	app.ResponseSuccess(c)
 }

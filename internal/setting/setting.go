@@ -54,6 +54,7 @@ type Wechat struct {
 	AppID                string
 	AppSecret            string
 	TokenRefreshInterval int
+	SessionAge           int
 	code2SessionURL      string
 	accesstokenURL       string
 }
