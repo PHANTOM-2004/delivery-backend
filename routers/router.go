@@ -3,6 +3,7 @@ package routers
 import (
 	"delivery-backend/internal/setting"
 	"delivery-backend/middleware/auth"
+	"delivery-backend/middleware/wechat"
 	"delivery-backend/routers/api"
 	v1 "delivery-backend/routers/api/v1"
 	"delivery-backend/service/merchant_service"
@@ -43,7 +44,8 @@ func InitRouter() *gin.Engine {
 		// customer group
 		customer := wx.Group("/customer")
 		// NOTE: user session 可以暂时不使用，方便测试
-		// customer.Use(wechat.WXsession())
+		customer.Use(wechat.WXsession())
+		customer.POST("/info", v1.WXUploadUserInfo)
 		customer.POST("/merchant-application", v1.MerchantApply)
 		customer.GET("/restaurant/:restaurant_id/categories/dishes",
 			v1.GetRestaurantCategoryDish)

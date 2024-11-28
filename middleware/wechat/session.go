@@ -51,7 +51,7 @@ func (wxs *WXSession) SetInfo(openid string, id uint, role uint8) error {
 	return err
 }
 
-func (wxs *WXSession) GetInfo(openid string, id uint) (*WXSessionInfoStore, error) {
+func (wxs *WXSession) GetInfo() (*WXSessionInfoStore, error) {
 	s, err := gredis.Get(wxs.session_id)
 	if err != nil {
 		return nil, err
@@ -65,13 +65,13 @@ func (wxs *WXSession) GetInfo(openid string, id uint) (*WXSessionInfoStore, erro
 func WXsession() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// handle 微信发送的session id 请求
-    session_id := c.GetHeader("Authorization")
+		session_id := c.GetHeader("Authorization")
 		if session_id == "" {
 			log.Debug("没有在请求头中提供session_id")
 			app.ResponseInvalidParams(c)
 			return
 		}
-    log.Tracef("get session_id from header [%s]", session_id)
+		log.Tracef("get session_id from header [%s]", session_id)
 		// 检查session是否过期，如果不存在说明已经过期
 		exist, err := gredis.Exists(session_id)
 		if err != nil {
@@ -81,10 +81,12 @@ func WXsession() gin.HandlerFunc {
 		if !exist {
 			// 说明session已经过期
 			app.Response(c, http.StatusOK, ecode.ERROR_WX_SESSION_EXPIRE, nil)
+			c.Abort()
 			return
 		}
 		// 如果session没有过期， 设置session
 		c.Set(defaultWXSessionKey, NewWXSession(session_id))
+		log.Trace("Set Session in Context")
 		c.Next()
 	}
 }
