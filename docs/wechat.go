@@ -1,9 +1,6 @@
 package docs
 
-import (
-	"delivery-backend/models"
-	v1 "delivery-backend/routers/api/v1"
-)
+import "delivery-backend/models"
 
 // swagger:parameters wechat_login
 type WXLoginRequest struct {
@@ -31,8 +28,6 @@ type WXLoginResponse struct {
 		Body struct {
 			// required: true
 			SessionID string `json:"session_id"`
-			// 当该用户不是新用户的时候返回
-			Info v1.UserInfoRequest `json:"info"`
 		} `json:"data"`
 	}
 }
@@ -40,7 +35,7 @@ type WXLoginResponse struct {
 // =============================================================
 // swagger:route POST /api/v1/wx/login v1-wechat wechat_login
 // 微信登录，会返回sessionid
-// 注意传递数据是json格式。注意info字段的返回条件。
+// 注意传递数据是json格式
 // responses:
 // 200: wechat_login
 //
