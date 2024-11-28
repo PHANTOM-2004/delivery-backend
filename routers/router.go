@@ -3,6 +3,7 @@ package routers
 import (
 	"delivery-backend/internal/setting"
 	"delivery-backend/middleware/auth"
+	"delivery-backend/middleware/wechat"
 	"delivery-backend/routers/api"
 	v1 "delivery-backend/routers/api/v1"
 	"delivery-backend/service/merchant_service"
@@ -26,16 +27,35 @@ func InitRouter() *gin.Engine {
 	gin.SetMode(setting.ServerSetting.RunMode)
 	// NOTE:注意更新文档
 
-	// merchant
 	apiv1 := r.Group("/api/v1")
+
+	wx := apiv1.Group("/wx")
+	{
+		// 微信group
+		wx.POST("/login", v1.WXLogin)
+	}
+
+	/////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////
 
 	{
 		// customer group
-		// TODO: 身份校验
-		customer := apiv1.Group("/customer")
+		customer := wx.Group("/customer")
+		// NOTE: user session 可以暂时不使用，方便测试
+		customer.Use(wechat.WXsession())
+		customer.POST("/info", v1.WXUploadUserInfo)
 		customer.POST("/merchant-application", v1.MerchantApply)
+		customer.GET("/restaurant/:restaurant_id/categories/dishes",
+			v1.GetRestaurantCategoryDish)
 	}
 
+	////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////
+	//
 	{
 		// middleware redis session
 		merchant_session_store_v1, err := redis.NewStore(
@@ -202,6 +222,11 @@ func InitRouter() *gin.Engine {
 		}
 
 	}
+
+	//////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////
 
 	{
 		// middleware redis session

@@ -37,7 +37,7 @@ type MerchantRestaurantStatusGetRequest struct {
 }
 
 // =============================================================
-// swagger:route GET /api/v1/merchant/restuarant/{restaurant_id}/status v1-merchant merchant_get_restaurant_status
+// swagger:route GET /api/v1/merchant/restaurant/{restaurant_id}/status v1-merchant merchant_get_restaurant_status
 //
 // 获取商家某个店铺的状态
 // 如果返回0, 代表商家手动关闭店铺；如果返回1, 代表店铺开启。
@@ -57,7 +57,7 @@ type MerchantRestaurantStatusSetRequest struct {
 }
 
 // =============================================================
-// swagger:route PUT /api/v1/merchant/restuarant/{restaurant_id}/status/{status} v1-merchant merchant_set_restaurant_status
+// swagger:route PUT /api/v1/merchant/restaurant/{restaurant_id}/status/{status} v1-merchant merchant_set_restaurant_status
 //
 // 设置商家某个店铺的状态
 // 设置0, 代表商家手动关闭店铺；设置1, 代表店铺开启。

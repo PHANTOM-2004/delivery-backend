@@ -13,6 +13,9 @@ const (
 	ERROR          Ecode = http.StatusInternalServerError
 	INVALID_PARAMS Ecode = 1001
 
+	// wx related error
+	ERROR_WX_SESSION_EXPIRE Ecode = 9000
+
 	// admin related error
 	ERROR_ADMIN_NOT_FOUND         Ecode = 10000
 	ERROR_ADMIN_INCORRECT_PWD     Ecode = 10001
@@ -60,6 +63,9 @@ func StatusText(e Ecode) (res string) {
 		res = "ok"
 	case ERROR:
 		res = "fail"
+
+	case ERROR_WX_SESSION_EXPIRE:
+		res = "微信session过期"
 
 	case INVALID_PARAMS:
 		res = "请求参数错误"
