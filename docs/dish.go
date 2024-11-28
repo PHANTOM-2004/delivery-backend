@@ -101,7 +101,7 @@ type MerchantGetDishResponse struct {
 }
 
 // =============================================================
-// swagger:route GET /api/v1/merchant/restaurant/{restaurant_id}/dish/{page} v1-merchant merchant_get_dishes
+// swagger:route GET /api/v1/merchant/restaurant/{restaurant_id}/dish v1-merchant merchant_get_dishes
 // 获得某一个店铺下的菜品
 // responses:
 // 200: merchant_get_dishes_response

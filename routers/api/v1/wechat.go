@@ -1,26 +1,15 @@
 package v1
 
 import (
-	"crypto/tls"
 	"delivery-backend/internal/app"
 	"delivery-backend/internal/setting"
+	wechat_service "delivery-backend/service/wechat"
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
-
-var WXClient = &http.Client{
-	Timeout: 10 * time.Second, // 设置超时时间
-	Transport: &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
-			// 跳过证书验证（仅限测试，生产环境中请使用有效证书）
-		},
-	},
-}
 
 type WXLoginRequest struct {
 	Code string `json:"code"`
@@ -41,13 +30,13 @@ func WXLogin(c *gin.Context) {
 	// TODO: handle error
 
 	// send request
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		app.ResponseInternalError(c, err)
 		return
 	}
 
-	resp, err := WXClient.Do(req)
+	resp, err := wechat_service.WXClient.Do(req)
 	if err != nil {
 		app.ResponseInternalError(c, err)
 		return

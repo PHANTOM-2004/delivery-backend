@@ -16,7 +16,7 @@ func WXsession() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// TODO:
 		// handle 微信发送的session id 请求
-		session_id := c.PostForm("session_id")
+		session_id := c.Query("session_id")
 		if session_id == "" {
 			log.Debug("没有提供session_id")
 			app.ResponseInvalidParams(c)

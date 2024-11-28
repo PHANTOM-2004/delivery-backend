@@ -7,6 +7,7 @@ import (
 	"delivery-backend/routers"
 	"delivery-backend/service/consumer"
 	"delivery-backend/service/email"
+	wechat_service "delivery-backend/service/wechat"
 	"delivery-backend/test/CA"
 	"fmt"
 	"net/http"
@@ -26,6 +27,9 @@ func Setup() {
 	email.Setup()
 	// 启动所有consumer
 	consumer.Setup()
+
+	// 初始化wechat access token服务
+	wechat_service.Setup()
 }
 
 // shutdown服务

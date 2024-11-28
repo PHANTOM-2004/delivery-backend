@@ -51,14 +51,21 @@ type Log struct {
 }
 
 type Wechat struct {
-	AppID           string
-	AppSecret       string
-	code2SessionURL string
+	AppID                string
+	AppSecret            string
+	TokenRefreshInterval int
+	code2SessionURL      string
+	accesstokenURL       string
 }
 
 func (w *Wechat) GetCode2SessionURL(js_code string) string {
 	res := fmt.Sprintf(w.code2SessionURL,
 		w.AppID, w.AppSecret, js_code)
+	return res
+}
+
+func (w *Wechat) GetAccessTokenURL() string {
+	res := fmt.Sprintf(w.accesstokenURL, w.AppID, w.AppSecret)
 	return res
 }
 
@@ -335,6 +342,12 @@ func parseWechatSetting() {
 		"&secret=%s" +
 		"&js_code=%s&grant_type=authorization_code"
 	WechatSetting.code2SessionURL = url_fmt
+
+	WechatSetting.accesstokenURL = "https://api.weixin.qq.com/cgi-bin/token?" +
+		"appid=%s" +
+		"&secret=%s" +
+		"&grant_type=client_credential"
+
 	log.Info(WechatSetting.code2SessionURL)
 	logCurrentConf(WechatSetting, "Wechat")
 }
