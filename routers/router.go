@@ -49,6 +49,9 @@ func InitRouter() *gin.Engine {
 		customer.POST("/merchant-application", v1.MerchantApply)
 		customer.GET("/restaurant/:restaurant_id/categories/dishes",
 			v1.GetRestaurantCategoryDish)
+		customer.GET("/restaurants", v1.WXGetRestaurants)
+		customer.GET("/restaurant/:restaurant_id/dishes/top",
+			v1.WXGetTopDishes)
 	}
 
 	////////////////////////////////////////////////////

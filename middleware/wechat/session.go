@@ -35,7 +35,7 @@ func NewWXSession(session_id string) *WXSession {
 func DefaultSession(c *gin.Context) *WXSession {
 	res, exist := c.Get(defaultWXSessionKey)
 	if !exist {
-		log.Fatal("no wx session, fatal error")
+		log.Panic("no wx session, it is the fault of coder")
 	}
 	return res.(*WXSession)
 }

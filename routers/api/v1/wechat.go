@@ -8,6 +8,7 @@ import (
 	wechat_service "delivery-backend/service/wechat"
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -122,4 +123,33 @@ func WXUploadUserInfo(c *gin.Context) {
 		return
 	}
 	app.ResponseSuccess(c)
+}
+
+func WXGetRestaurants(c *gin.Context) {
+	res, err := models.GetAllRestaurants()
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+	app.ResponseSuccessWithData(c, map[string]any{
+		"restaurants": res,
+	})
+}
+
+func WXGetTopDishes(c *gin.Context) {
+	restaurant_id, err := strconv.Atoi(c.Param("restaurant_id"))
+	if err != nil {
+		app.ResponseInvalidParams(c)
+		log.Debug(err)
+		return
+	}
+
+	res, err := models.GetTopDishes(uint(restaurant_id))
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+	app.ResponseSuccessWithData(c, map[string]any{
+		"dishes": res,
+	})
 }

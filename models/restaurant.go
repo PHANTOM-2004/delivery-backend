@@ -67,6 +67,12 @@ func GetRestaurantByMerchant(merchant_id uint) ([]Restaurant, error) {
 	return r, err
 }
 
+func GetAllRestaurants() ([]Restaurant, error) {
+	res := []Restaurant{}
+	err := tx.Find(&res).Error
+	return res, err
+}
+
 func GetRestaurantByID(restaurant_id uint) (*Restaurant, error) {
 	r := Restaurant{}
 	err := tx.Find(&r,

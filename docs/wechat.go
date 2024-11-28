@@ -74,3 +74,63 @@ type CustomerGetCDFResponse struct {
 // 返回商家某个商店的所有分类,以及分类下的所有菜品，以及菜品下的所有口味
 // responses:
 // 200: customer_get_cdf
+
+// swagger:response customer_get_restaurants
+type CustomerRestaurantResponse struct {
+	// in:body
+	Body struct {
+		// Required:true
+		// Example: 200
+		ECode int `json:"ecode"`
+		// Example: ok
+		// error message
+		// Required:true
+		Msg string `json:"msg"`
+		// Required:true
+		// data to get
+		// Required:true
+		Data struct {
+			// in:body
+			Restaurant []models.Restaurant `json:"restaurants"`
+		} `json:"data"`
+	}
+}
+
+// =============================================================
+// swagger:route GET /api/v1/wx/customer/restaurants v1-wechat customer_get_restaurants
+// 返回所有餐馆
+// responses:
+// 200: customer_get_restaurants
+
+// swagger:response customer_get_restaurant_top_dishes
+type CustomerRestaurantTopDishResponse struct {
+	// in:body
+	Body struct {
+		// Required:true
+		// Example: 200
+		ECode int `json:"ecode"`
+		// Example: ok
+		// error message
+		// Required:true
+		Msg string `json:"msg"`
+		// Required:true
+		// data to get
+		// Required:true
+		Data struct {
+			// in:body
+			Restaurant []models.Dish `json:"dishes"`
+		} `json:"data"`
+	}
+}
+
+// swagger:parameters customer_get_restaurant_top_dishes
+type CustomerRestaurantTopDishRequest struct {
+	//in:path
+	RestaurantID uint `json:"restaurant_id"`
+}
+
+// =============================================================
+// swagger:route GET /api/v1/wx/customer/restaurant/{restaurant_id}/dishes/top v1-wechat customer_get_restaurant_top_dishes
+// 返回商家某个商店的所有分类,以及分类下的所有菜品，以及菜品下的所有口味
+// responses:
+// 200: customer_get_restaurant_top_dishes

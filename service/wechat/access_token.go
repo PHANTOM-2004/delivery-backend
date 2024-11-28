@@ -95,6 +95,11 @@ func (w *WXtoken) Refresh() {
 	}
 	log.Trace("wxserver getAccessToken response: ", wxserverResp)
 
-	w.access_token = wxserverResp["access_token"].(string)
+	ok := false
+	w.access_token, ok = wxserverResp["access_token"].(string)
+	if !ok {
+		log.Error("Failed to get access_token")
+		return
+	}
 	log.Info("token refreshed, access_token: ", w.access_token)
 }
