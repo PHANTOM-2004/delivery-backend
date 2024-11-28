@@ -31,7 +31,7 @@ type MerchantRestaurantRequest struct {
 }
 
 // =============================================================
-// swagger:route GET /api/v1/merchant/restuarant/{restaurant_id}/categories v1-merchant merchant_get_categories
+// swagger:route GET /api/v1/merchant/restaurant/{restaurant_id}/categories v1-merchant merchant_get_categories
 // 返回商家某个商店的所有分类
 // PS:分类中包含菜品项，所以实际上获得菜品的接口也是这个
 // responses:
@@ -110,7 +110,7 @@ type MerchantCreateCategoryRequest struct {
 }
 
 // =============================================================
-// swagger:route POST /api/v1/merchant/restuarant/{restaurant_id}/category v1-merchant merchant_create_category
+// swagger:route POST /api/v1/merchant/restaurant/{restaurant_id}/category v1-merchant merchant_create_category
 // 创建一个餐馆下的菜品分类
 // responses:
 // 200: COMMON
