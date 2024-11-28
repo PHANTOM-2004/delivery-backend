@@ -28,10 +28,10 @@ func InitRouter() *gin.Engine {
 
 	apiv1 := r.Group("/api/v1")
 
+	wx := apiv1.Group("/wx")
 	{
 		// 微信group
-		wxlogin := apiv1.Group("/wx")
-		wxlogin.POST("/login", v1.WXLogin)
+		wx.POST("/login", v1.WXLogin)
 	}
 
 	/////////////////////////////////////////////////////
@@ -41,9 +41,12 @@ func InitRouter() *gin.Engine {
 
 	{
 		// customer group
-		// TODO: 身份校验
-		customer := apiv1.Group("/customer")
+		customer := wx.Group("/customer")
+		// NOTE: user session 可以暂时不使用，方便测试
+		// customer.Use(wechat.WXsession())
 		customer.POST("/merchant-application", v1.MerchantApply)
+		customer.GET("/restaurant/:restaurant_id/categories/dishes",
+			v1.GetRestaurantCategoryDish)
 	}
 
 	////////////////////////////////////////////////////

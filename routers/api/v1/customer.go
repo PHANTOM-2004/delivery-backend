@@ -7,6 +7,7 @@ import (
 	"delivery-backend/models"
 	"delivery-backend/service/customer_service"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -75,4 +76,21 @@ func MerchantApply(c *gin.Context) {
 	log.Debugf("license[%s] saved to %s", file.Filename, dst)
 
 	app.Response(c, http.StatusOK, ecode.SUCCESS, nil)
+}
+
+func GetRestaurantCategoryDish(c *gin.Context) {
+	var err error
+	restaurant_id, err := strconv.Atoi(c.Param("restaurant_id"))
+	if err != nil {
+		log.Debug(err)
+		app.ResponseInvalidParams(c)
+		return
+	}
+
+	res, err := models.GetCategoryDishFlavor(uint(restaurant_id))
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+	app.ResponseSuccessWithData(c, map[string]any{"categories": res})
 }

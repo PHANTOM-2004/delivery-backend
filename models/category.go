@@ -42,8 +42,16 @@ func GetCategoryByRestaurant(restaurant_id uint) ([]Category, error) {
 	return c, err
 }
 
+// 同时会返回对应的dishes, 以及flavors
+func GetCategoryDishFlavor(restaurant_id uint) ([]Category, error) {
+	c := []Category{}
+	err := tx.Preload("Dishes.Flavors").
+		Find(&c, Category{RestaurantID: restaurant_id}).Error
+	return c, err
+}
+
 // 同时返回对应的dishes
-func GetCategory(category_id uint) (*Category, error) {
+func GetCategoryDish(category_id uint) (*Category, error) {
 	res := Category{}
 	err := tx.Preload("Dishes").Find(&res, category_id).Error
 	return &res, err

@@ -17,7 +17,7 @@ curl \
   -F "phone_number=+8618537775175" \
   -F "license=@Makefile.png" \
   -F "name=szc" \
-  http://localhost:8000/api/v1/customer/merchant-application -H "Content-Type: multipart/form-data" \
+  http://localhost:8000/api/v1/wx/customer/merchant-application -H "Content-Type: multipart/form-data" \
   --request POST -w "\n"
 echo "finish: admin auth"
 
@@ -166,3 +166,6 @@ curl -b cookies.txt \
 # 获得餐厅1所有dishes
 curl -b cookies.txt \
   http://localhost:8000/api/v1/merchant/restaurant/1/dish
+
+# wechat获得餐厅的dishes
+curl http://localhost:8000/api/v1/wx/customer/restaurant/1/categories/dishes 

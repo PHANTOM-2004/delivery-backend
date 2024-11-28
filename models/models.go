@@ -67,6 +67,7 @@ func SetUp() {
 		&Category{},
 		&Flavor{},
 		&Dish{},
+		&WechatUser{},
 	)
 
 	log.Info("tables created")

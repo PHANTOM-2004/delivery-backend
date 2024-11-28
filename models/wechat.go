@@ -2,12 +2,12 @@ package models
 
 type WechatUser struct {
 	Model
-	OpenID      string `gorm:"index;size:50" json:"-"`
+	OpenID      string `gorm:"not null;index;size:50" json:"-"`
 	Role        uint8  `gorm:"not null;default:1"`
 	PhoneNumber string `gorm:"size:20"`
 }
 
-//默认创建顾客
+// 默认创建顾客
 const (
 	RoleCustomer = 1
 	RoleRider    = 2
@@ -20,4 +20,3 @@ func GetOrCreateWechatUser(openid string) (*WechatUser, error) {
 	err := tx.FirstOrCreate(&res, WechatUser{OpenID: openid}).Error
 	return &res, err
 }
-
