@@ -64,14 +64,14 @@ func (wxs *WXSession) GetInfo(openid string, id uint) (*WXSessionInfoStore, erro
 // 从中提取出session_id
 func WXsession() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// TODO:
 		// handle 微信发送的session id 请求
-		session_id := c.Query("session_id")
+    session_id := c.GetHeader("Authorization")
 		if session_id == "" {
-			log.Debug("没有提供session_id")
+			log.Debug("没有在请求头中提供session_id")
 			app.ResponseInvalidParams(c)
 			return
 		}
+    log.Tracef("get session_id from header [%s]", session_id)
 		// 检查session是否过期，如果不存在说明已经过期
 		exist, err := gredis.Exists(session_id)
 		if err != nil {
