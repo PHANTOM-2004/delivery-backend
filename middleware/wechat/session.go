@@ -25,7 +25,7 @@ type WXSession struct {
 	session_id string
 }
 
-func newWXSession(session_id string) *WXSession {
+func NewWXSession(session_id string) *WXSession {
 	res := WXSession{
 		session_id: session_id,
 	}
@@ -84,7 +84,7 @@ func WXsession() gin.HandlerFunc {
 			return
 		}
 		// 如果session没有过期， 设置session
-		c.Set(defaultWXSessionKey, newWXSession(session_id))
+		c.Set(defaultWXSessionKey, NewWXSession(session_id))
 		c.Next()
 	}
 }
