@@ -61,6 +61,7 @@ func InitRouter() *gin.Engine {
 		customer.PUT("/addressbook/:address_book_id", v1.UpdateAddressBook)
 		customer.PUT("/addressbook/:address_book_id/default", v1.SetDefaultAddressBook)
 		customer.DELETE("/addressbook/:address_book_id", v1.DeleteAddressBook)
+		customer.GET("/orders", v1.GetCustomerOrders)
 		customer.POST("/order/restaurant/:restaurant_id", v1.CreateOrder)
 	}
 

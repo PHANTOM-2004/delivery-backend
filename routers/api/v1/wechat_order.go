@@ -19,6 +19,24 @@ type CreateOrderRequest struct {
 	PhoneNumber  string `json:"phone_number" validate:"e164"`
 }
 
+func GetCustomerOrders(c *gin.Context) {
+	session := wechat.DefaultSession(c)
+	info, err := session.GetInfo()
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+	res, err := models.GetOrderByUserID(info.ID)
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+	app.ResponseSuccessWithData(c,
+		map[string]any{
+			"orders": res,
+		})
+}
+
 func CreateOrder(c *gin.Context) {
 	restaurant_id, err := strconv.Atoi(c.Param("restaurant_id"))
 	if err != nil {

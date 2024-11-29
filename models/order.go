@@ -53,6 +53,12 @@ type OrderDetail struct {
 	OrderID    uint   `gorm:"index;not null" json:"-"`
 }
 
+func GetOrderByUserID(user_id uint) ([]Order, error) {
+	orders := []Order{}
+	err := tx.Find(&orders, Order{WechatUserID: user_id}).Error
+	return orders, err
+}
+
 // dishes id以及对应的口味
 // 记得保证stores参数不为空，也就是购物车为空的时候无法下单
 func CreateOrder(restaurant_id uint, order *Order, stores []wechat.WXSessionCartStore) error {
