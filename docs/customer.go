@@ -66,7 +66,7 @@ type MerchantApplicationResponse struct {
 // 200: merchant_application
 
 //=============================================================
-// swagger:route POST /api/v1/customer/merchant-application v1-customer send_merchant_application
+// swagger:route POST /api/v1/wx/customer/merchant-application v1-wechat send_merchant_application
 // 顾客发起商务合作申请，上传对应信息以及执照
 // responses:
 // 200: COMMON

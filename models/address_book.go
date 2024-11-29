@@ -23,6 +23,11 @@ func CreateAddressBook(a *AddressBook) error {
 	return err
 }
 
+func DeleteAddressBook(addr_id uint) error {
+	err := tx.Delete(&AddressBook{}, addr_id).Error
+	return err
+}
+
 func GetAddressBooks(user_id uint) ([]AddressBook, error) {
 	res := []AddressBook{}
 	err := tx.Find(&res, AddressBook{WechatUserID: user_id}).Error
