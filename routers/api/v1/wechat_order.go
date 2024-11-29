@@ -19,6 +19,23 @@ type CreateOrderRequest struct {
 	PhoneNumber  string `json:"phone_number" validate:"e164"`
 }
 
+func CancelOrder(c *gin.Context) {
+	order_id, err := strconv.Atoi(c.Param("order_id"))
+	if err != nil {
+		log.Debug(err)
+		app.ResponseInvalidParams(c)
+		return
+	}
+
+	success, err := models.CancelOrder(uint(order_id))
+	if err != nil || !success {
+		log.Error("error cancel order")
+		app.Response(c, http.StatusOK, ecode.ERROR_WX_ORDER_CANCEL, nil)
+		return
+	}
+	app.ResponseSuccess(c)
+}
+
 func GetCustomerOrders(c *gin.Context) {
 	session := wechat.DefaultSession(c)
 	info, err := session.GetInfo()
@@ -77,6 +94,7 @@ func CreateOrder(c *gin.Context) {
 		app.ResponseInternalError(c, err)
 		return
 	}
+	log.Tracef("user:[%v] is creating order", info.ID)
 
 	/////////////////////////////////////
 	// NOTE:
@@ -99,6 +117,7 @@ func CreateOrder(c *gin.Context) {
 			ecode.ERROR_WX_ORDER_CREATE, nil)
 		return
 	}
+	log.Tracef("pickup_no:[%s], order_no:[%s]", pickup_number, order_no)
 
 	/////////////////////////////////////
 	// 成功生成pickup no, order no
@@ -113,11 +132,13 @@ func CreateOrder(c *gin.Context) {
 	err = models.CreateOrder(uint(restaurant_id), &order, cart)
 	if err != nil {
 		// 下单失败
+		log.Debugf("user:[%v] fail to create order", info.ID)
 		app.Response(c,
 			http.StatusOK,
 			ecode.ERROR_WX_ORDER_CREATE, nil)
 		return
 	}
+	log.Debug("new order created")
 	// 首先create order, 其次create order details
 	app.ResponseSuccess(c)
 }

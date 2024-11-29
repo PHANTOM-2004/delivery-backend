@@ -51,6 +51,18 @@ type GetUserOrderResponse struct {
 
 // =============================================================
 // swagger:route GET /api/v1/wx/customer/orders v1-wechat customer_create_order
-// 创建订单
+// 获得用户订单
 // responses:
 // 200: customer_get_orders
+
+//swagger:parameters customer_cancel_order
+type CancelOrderRequest struct {
+	//in:path
+	OrderID uint `json:"order_id"`
+}
+
+// =============================================================
+// swagger:route POST /api/v1/wx/customer/order/{order_id}/cancel v1-wechat customer_cancel_order
+// 取消订单
+// responses:
+// 200: COMMON

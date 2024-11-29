@@ -9,6 +9,8 @@ import (
 	"gorm.io/gorm"
 )
 
+// TODO:定期清理超时的订单
+
 type Order struct {
 	Model
 	PickupNo     string         `gorm:"not null;size:8" json:"pickup_number"`
@@ -53,6 +55,37 @@ type OrderDetail struct {
 	OrderID    uint   `gorm:"index;not null" json:"-"`
 }
 
+func CancelOrder(order_id uint) (bool, error) {
+	success := false
+	err := tx.Transaction(
+		func(ftx *gorm.DB) error {
+			order := Order{}
+			err := tx.Find(&order, order_id).Error
+			if err != nil {
+				return err
+			}
+			if order.ID == 0 {
+				// 没有找到
+				log.Warnf("cancel order not found[%d]", order_id)
+				return nil
+			}
+			if order.Status > OrderNotPayed {
+				// 当前状态不可能被取消
+				log.Warnf("cannot cancel order with status[%v]", order.Status)
+				return nil
+			}
+			// 满足条件，更新状态
+			err = tx.Model(&Order{}).Where("id = ?", order_id).Update("status", OrderCanceled).Error
+			if err != nil {
+				return err
+			}
+			log.Tracef("order canceled[%d]", order_id)
+			return nil
+		},
+	)
+	return success, err
+}
+
 func GetOrderByUserID(user_id uint) ([]Order, error) {
 	orders := []Order{}
 	err := tx.Find(&orders, Order{WechatUserID: user_id}).Error
@@ -92,7 +125,7 @@ func CreateOrder(restaurant_id uint, order *Order, stores []wechat.WXSessionCart
 			if err != nil {
 				return err
 			}
-			log.Trace("prepare dishes:\n", dishes)
+			log.Trace("prepared dishes:\n", dishes)
 
 			// 2. 准备好所有口味信息，为了后续保留口味从中查找。
 			// 由于口味数量比较小，所以使用线性查找即可
@@ -114,7 +147,7 @@ func CreateOrder(restaurant_id uint, order *Order, stores []wechat.WXSessionCart
 				flavors_map[flavors[i].ID] = flavors[i].Name
 			}
 			flavors = nil // 不再使用
-			log.Trace("prepare flavors:\n", flavors)
+			log.Trace("prepared flavors:\n", flavors)
 
 			// 3. 此时store中dish id是升序，对应到的dishes中的id也是升序，可以对应上
 			order_details := make([]OrderDetail, len(stores))
@@ -134,7 +167,7 @@ func CreateOrder(restaurant_id uint, order *Order, stores []wechat.WXSessionCart
 				}
 			}
 
-			log.Trace("prepare order details", order_details)
+			log.Trace("prepared order details", order_details)
 
 			// 4. 创建订单明细
 			err = tx.Create(order_details).Error
