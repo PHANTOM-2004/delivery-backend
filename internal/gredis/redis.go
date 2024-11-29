@@ -40,6 +40,27 @@ func Set(key string, data any, expiration time.Duration) error {
 	return err
 }
 
+func HSet(key string, pairs []string) error {
+	if len(pairs)%2 != 0 {
+		log.Panic("invalid usage")
+	}
+	ctx := context.Background()
+	err := rdb.HSet(ctx, key, pairs).Err()
+	return err
+}
+
+func HGet(key string, field string) (string, error) {
+	ctx := context.Background()
+	res, err := rdb.HGet(ctx, key, field).Result()
+	return res, err
+}
+
+func Expire(key string, expires time.Duration) error {
+	ctx := context.Background()
+	err := rdb.Expire(ctx, key, expires).Err()
+	return err
+}
+
 func Exists(key string) (bool, error) {
 	ctx := context.Background()
 	res, err := rdb.Exists(ctx, key).Result()

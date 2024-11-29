@@ -52,6 +52,10 @@ func InitRouter() *gin.Engine {
 		customer.GET("/restaurants", v1.WXGetRestaurants)
 		customer.GET("/restaurant/:restaurant_id/dishes/top",
 			v1.WXGetTopDishes)
+		customer.POST("/cart/restaurant/:restaurant_id",
+			v1.WXUpdateCart)
+		customer.GET("/cart/restaurant/:restaurant_id",
+			v1.WXGetCart)
 	}
 
 	////////////////////////////////////////////////////

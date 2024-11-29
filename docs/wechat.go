@@ -1,6 +1,9 @@
 package docs
 
-import "delivery-backend/models"
+import (
+	"delivery-backend/middleware/wechat"
+	"delivery-backend/models"
+)
 
 // swagger:parameters wechat_login
 type WXLoginRequest struct {
@@ -134,3 +137,51 @@ type CustomerRestaurantTopDishRequest struct {
 // 返回商家某个商店的所有分类,以及分类下的所有菜品，以及菜品下的所有口味
 // responses:
 // 200: customer_get_restaurant_top_dishes
+
+// swagger:response  customer_get_cart
+type CustomerGetCartResponse struct {
+	// in:body
+	Body struct {
+		// Required:true
+		// Example: 200
+		ECode int `json:"ecode"`
+		// Example: ok
+		// error message
+		// Required:true
+		Msg string `json:"msg"`
+		// Required:true
+		// data to get
+		// Required:true
+		Data struct {
+			// in:body
+			Cart []wechat.WXSessionCartStore `json:"cart"`
+		} `json:"data"`
+	}
+}
+
+// swagger:parameters customer_get_cart
+type CustomerCartRequest struct {
+	//in:path
+	RestaurantID uint `json:"restaurant_id"`
+}
+
+// =============================================================
+// swagger:route GET /api/v1/wx/customer/cart/restaurant/{restaurant_id} v1-wechat customer_get_cart
+// 获得顾客在某一个店铺的购物车
+// responses:
+// 200: customer_get_cart
+
+// swagger:parameters  customer_update_cart
+type CustomerUpdateCartRequest struct {
+	// in: body
+	Cart []wechat.WXSessionCartStore `json:"cart"`
+	//in:path
+	RestaurantID uint `json:"restaurant_id"`
+}
+
+// =============================================================
+// swagger:route POST /api/v1/wx/customer/cart/restaurant/{restaurant_id} v1-wechat customer_update_cart
+// 更新顾客的购物车
+// PS:不要忘记key, json的key是cart
+// responses:
+// 200: COMMON
