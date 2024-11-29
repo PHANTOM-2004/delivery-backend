@@ -56,6 +56,11 @@ func InitRouter() *gin.Engine {
 			v1.WXUpdateCart)
 		customer.GET("/cart/restaurant/:restaurant_id",
 			v1.WXGetCart)
+		customer.GET("/addressbook", v1.GetAddressBook)
+		customer.POST("/addressbook", v1.CreateAddressBook)
+		customer.PUT("/addressbook/:address_book_id", v1.UpdateAddressBook)
+		customer.PUT("/addressbook/:address_book_id/default", v1.SetDefaultAddressBook)
+		customer.DELETE("/addressbook/:address_book_id", v1.DeleteAddressBook)
 	}
 
 	////////////////////////////////////////////////////
