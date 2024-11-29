@@ -67,7 +67,7 @@ func MerchantLoginValidate(account string, password string, c *gin.Context) (uin
 		Password: password,
 	}
 
-	err := app.ValidateStruct(data)
+	err := app.ValidateStruct(&data)
 	if err != nil {
 		// 通常来说前端不应当传递非法参数，对于非法参数的传递
 		// 通常是其他人所进行的
@@ -120,7 +120,7 @@ func SignUpRequestValidate(c *gin.Context) bool {
 		PhoneNumber:  c.PostForm("phone_number"),
 	}
 
-	err := app.ValidateStruct(data)
+	err := app.ValidateStruct(&data)
 	if err != nil {
 		app.ResponseInvalidParams(c)
 		log.Warn(err)
@@ -132,7 +132,7 @@ func SignUpRequestValidate(c *gin.Context) bool {
 func PasswordRequestValidate(password string, c *gin.Context) bool {
 	data := Password{password}
 
-	err := app.ValidateStruct(data)
+	err := app.ValidateStruct(&data)
 	if err != nil {
 		app.ResponseInvalidParams(c)
 		log.Warn(err)
