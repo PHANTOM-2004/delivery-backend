@@ -63,7 +63,7 @@ func CreateCategory(c *gin.Context) {
 		return
 	}
 
-	err = app.ValidateStruct(data)
+	err = app.ValidateStruct(&data)
 	if err != nil {
 		log.Warn(err)
 		app.ResponseInvalidParams(c)
@@ -97,7 +97,7 @@ func UpdateCategory(c *gin.Context) {
 		app.ResponseInvalidParams(c)
 		return
 	}
-	err = app.ValidateStruct(data)
+	err = app.ValidateStruct(&data)
 	if err != nil {
 		log.Warn(err)
 		app.ResponseInvalidParams(c)
