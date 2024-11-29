@@ -79,6 +79,7 @@ func CancelOrder(order_id uint) (bool, error) {
 			if err != nil {
 				return err
 			}
+			success = true
 			log.Tracef("order canceled[%d]", order_id)
 			return nil
 		},

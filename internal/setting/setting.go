@@ -51,18 +51,34 @@ type Log struct {
 }
 
 type Wechat struct {
-	AppID                string
-	AppSecret            string
-	TokenRefreshInterval int
-	SessionAge           int
-	code2SessionURL      string
-	accesstokenURL       string
+	AppID                 string
+	AppSecret             string
+	TokenRefreshInterval  int
+	SessionAge            int
+	CommentImageExt       []string
+	CommentImageStorePath string
+	code2SessionURL       string
+	accesstokenURL        string
 }
 
 func (w *Wechat) GetCode2SessionURL(js_code string) string {
 	res := fmt.Sprintf(w.code2SessionURL,
 		w.AppID, w.AppSecret, js_code)
 	return res
+}
+
+func (w *Wechat) CheckCommentImageExt(name string) (string, bool) {
+	return checkExt(w.CommentImageExt, name)
+}
+
+func (w *Wechat) GetImageName() string {
+	res := "comment-" + uuid.NewString()
+	return res
+}
+
+func (w *Wechat) GetImagePath(name string) string {
+	path := w.CommentImageStorePath + "/" + name
+	return path
 }
 
 func (w *Wechat) GetAccessTokenURL() string {
@@ -102,7 +118,7 @@ func (a *App) GenLicenseName() string {
 	return path
 }
 
-func (a *App) checkExt(allows []string, name string) (string, bool) {
+func checkExt(allows []string, name string) (string, bool) {
 	ext := filepath.Ext(name)
 	for i := range allows {
 		if ext == allows[i] {
@@ -113,11 +129,11 @@ func (a *App) checkExt(allows []string, name string) (string, bool) {
 }
 
 func (a *App) CheckLicenseExt(name string) (string, bool) {
-	return a.checkExt(a.LicenseAllowExts, name)
+	return checkExt(a.LicenseAllowExts, name)
 }
 
 func (a *App) CheckDishImageExt(name string) (string, bool) {
-	return a.checkExt(a.DishImageAllowExts, name)
+	return checkExt(a.DishImageAllowExts, name)
 }
 
 func (a *App) GetDishImageStorePath(name string) string {

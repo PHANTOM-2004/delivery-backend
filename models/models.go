@@ -71,6 +71,8 @@ func SetUp() {
 		&AddressBook{},
 		&Order{},
 		&OrderDetail{},
+		&Comment{},
+		&CommentDetail{},
 	)
 
 	log.Info("tables created")
