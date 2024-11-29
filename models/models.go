@@ -69,6 +69,8 @@ func SetUp() {
 		&Dish{},
 		&WechatUser{},
 		&AddressBook{},
+		&Order{},
+		&OrderDetail{},
 	)
 
 	log.Info("tables created")
