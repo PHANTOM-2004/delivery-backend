@@ -96,3 +96,9 @@ func Delete(key string) error {
 	}
 	return err
 }
+
+func Incre(key string) (int64, error) {
+	ctx := context.Background()
+	num, err := rdb.Incr(ctx, key).Result()
+	return num, err
+}
