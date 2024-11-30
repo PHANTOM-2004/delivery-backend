@@ -50,10 +50,12 @@ func DefaultSession(c *gin.Context) *WXSession {
 }
 
 type WXSessionCartStore struct {
-	DishID    uint `json:"dish_id"`
-	FlavorsID uint `json:"flavors_id"`
-	Cnt       int  `json:"count"`
+	DishID   uint `json:"dish_id"`
+	FlavorID uint `json:"flavor_id"`
+	Cnt      int  `json:"count"`
 }
+
+
 
 func (wxs *WXSession) getCartKey(restaurant_id uint) string {
 	return "cart_" + strconv.Itoa(int(restaurant_id))
