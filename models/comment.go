@@ -12,7 +12,7 @@ type Comment struct {
 	OrderID        uint             `gorm:"not null" json:"-"`
 	WechatUserID   uint             `gorm:"not null" json:"-"`
 	WechatUser     WechatUser       `json:"wechat_user"`
-	RestaurantID   uint             `gorm:"not null" json:"-"`
+	RestaurantID   uint             `gorm:"not null;index" json:"-"`
 	CommentDetails []*CommentDetail `json:"comment_details"`
 	Reply          []*Reply         `json:"replies"`
 }
@@ -33,6 +33,12 @@ type Reply struct {
 	To           uint
 	FromMerchant bool
 	ToMerchant   bool
+}
+
+func GetCommentsByRestaurnat(restaurant_id uint) ([]Comment, error) {
+	comments := []Comment{}
+	err := tx.Preload("CommentDetails").Find(&comments, Comment{RestaurantID: restaurant_id}).Error
+	return comments, err
 }
 
 // func CreateComment

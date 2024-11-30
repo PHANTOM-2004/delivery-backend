@@ -13,6 +13,25 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// 获得一个商店的comment
+func WXGetRestaurantComments(c *gin.Context) {
+	restaurant_id, err := strconv.Atoi(c.Param("restaurant_id"))
+	if err != nil {
+		log.Debug(err)
+		app.ResponseInvalidParams(c)
+		return
+	}
+
+	res, err := models.GetCommentsByRestaurnat(uint(restaurant_id))
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+	app.ResponseSuccessWithData(c, map[string]any{
+		"comments": res,
+	})
+}
+
 func WXUploadCommentImage(c *gin.Context) {
 	file, err := c.FormFile("image")
 	if err != nil {
