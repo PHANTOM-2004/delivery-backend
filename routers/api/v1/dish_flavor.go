@@ -55,7 +55,7 @@ func validateDish(c *gin.Context) (*dishRequest, bool) {
 		app.ResponseInvalidParams(c)
 		return nil, false
 	}
-	err = app.ValidateStruct(dish)
+	err = app.ValidateStruct(&dish)
 	if err != nil {
 		log.Debug(err)
 		app.ResponseInvalidParams(c)

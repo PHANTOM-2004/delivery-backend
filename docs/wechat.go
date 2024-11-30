@@ -1,8 +1,8 @@
 package docs
 
 import (
+	"delivery-backend/middleware/wechat"
 	"delivery-backend/models"
-	v1 "delivery-backend/routers/api/v1"
 )
 
 // swagger:parameters wechat_login
@@ -31,8 +31,6 @@ type WXLoginResponse struct {
 		Body struct {
 			// required: true
 			SessionID string `json:"session_id"`
-			// 当该用户不是新用户的时候返回
-			Info v1.UserInfoRequest `json:"info"`
 		} `json:"data"`
 	}
 }
@@ -40,7 +38,7 @@ type WXLoginResponse struct {
 // =============================================================
 // swagger:route POST /api/v1/wx/login v1-wechat wechat_login
 // 微信登录，会返回sessionid
-// 注意传递数据是json格式。注意info字段的返回条件。
+// 注意传递数据是json格式
 // responses:
 // 200: wechat_login
 //
@@ -79,3 +77,111 @@ type CustomerGetCDFResponse struct {
 // 返回商家某个商店的所有分类,以及分类下的所有菜品，以及菜品下的所有口味
 // responses:
 // 200: customer_get_cdf
+
+// swagger:response customer_get_restaurants
+type CustomerRestaurantResponse struct {
+	// in:body
+	Body struct {
+		// Required:true
+		// Example: 200
+		ECode int `json:"ecode"`
+		// Example: ok
+		// error message
+		// Required:true
+		Msg string `json:"msg"`
+		// Required:true
+		// data to get
+		// Required:true
+		Data struct {
+			// in:body
+			Restaurant []models.Restaurant `json:"restaurants"`
+		} `json:"data"`
+	}
+}
+
+// =============================================================
+// swagger:route GET /api/v1/wx/customer/restaurants v1-wechat customer_get_restaurants
+// 返回所有餐馆
+// responses:
+// 200: customer_get_restaurants
+
+// swagger:response customer_get_restaurant_top_dishes
+type CustomerRestaurantTopDishResponse struct {
+	// in:body
+	Body struct {
+		// Required:true
+		// Example: 200
+		ECode int `json:"ecode"`
+		// Example: ok
+		// error message
+		// Required:true
+		Msg string `json:"msg"`
+		// Required:true
+		// data to get
+		// Required:true
+		Data struct {
+			// in:body
+			Restaurant []models.Dish `json:"dishes"`
+		} `json:"data"`
+	}
+}
+
+// swagger:parameters customer_get_restaurant_top_dishes
+type CustomerRestaurantTopDishRequest struct {
+	//in:path
+	RestaurantID uint `json:"restaurant_id"`
+}
+
+// =============================================================
+// swagger:route GET /api/v1/wx/customer/restaurant/{restaurant_id}/dishes/top v1-wechat customer_get_restaurant_top_dishes
+// 返回商家某个商店的所有分类,以及分类下的所有菜品，以及菜品下的所有口味
+// responses:
+// 200: customer_get_restaurant_top_dishes
+
+// swagger:response  customer_get_cart
+type CustomerGetCartResponse struct {
+	// in:body
+	Body struct {
+		// Required:true
+		// Example: 200
+		ECode int `json:"ecode"`
+		// Example: ok
+		// error message
+		// Required:true
+		Msg string `json:"msg"`
+		// Required:true
+		// data to get
+		// Required:true
+		Data struct {
+			// in:body
+			Cart []wechat.WXSessionCartStore `json:"cart"`
+		} `json:"data"`
+	}
+}
+
+// swagger:parameters customer_get_cart
+type CustomerCartRequest struct {
+	//in:path
+	RestaurantID uint `json:"restaurant_id"`
+}
+
+// =============================================================
+// swagger:route GET /api/v1/wx/customer/cart/restaurant/{restaurant_id} v1-wechat customer_get_cart
+// 获得顾客在某一个店铺的购物车
+// responses:
+// 200: customer_get_cart
+
+// swagger:parameters  customer_update_cart
+type CustomerUpdateCartRequest struct {
+	// in: body
+	Cart []wechat.WXSessionCartStore `json:"cart"`
+	//in:path
+	RestaurantID uint `json:"restaurant_id"`
+}
+
+// =============================================================
+// swagger:route POST /api/v1/wx/customer/cart/restaurant/{restaurant_id} v1-wechat customer_update_cart
+// 更新顾客的购物车
+// PS:不要忘记key, json的key是cart
+// responses:
+// 200: COMMON

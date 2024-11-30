@@ -37,7 +37,7 @@ func MerchantApply(c *gin.Context) {
 		Name:        c.PostForm("name"),
 	}
 
-	err = app.ValidateStruct(a)
+	err = app.ValidateStruct(&a)
 	if err != nil {
 		log.Debug(err)
 		app.ResponseInvalidParams(c)

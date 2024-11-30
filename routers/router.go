@@ -49,6 +49,18 @@ func InitRouter() *gin.Engine {
 		customer.POST("/merchant-application", v1.MerchantApply)
 		customer.GET("/restaurant/:restaurant_id/categories/dishes",
 			v1.GetRestaurantCategoryDish)
+		customer.GET("/restaurants", v1.WXGetRestaurants)
+		customer.GET("/restaurant/:restaurant_id/dishes/top",
+			v1.WXGetTopDishes)
+		customer.POST("/cart/restaurant/:restaurant_id",
+			v1.WXUpdateCart)
+		customer.GET("/cart/restaurant/:restaurant_id",
+			v1.WXGetCart)
+		customer.GET("/addressbook", v1.GetAddressBook)
+		customer.POST("/addressbook", v1.CreateAddressBook)
+		customer.PUT("/addressbook/:address_book_id", v1.UpdateAddressBook)
+		customer.PUT("/addressbook/:address_book_id/default", v1.SetDefaultAddressBook)
+		customer.DELETE("/addressbook/:address_book_id", v1.DeleteAddressBook)
 	}
 
 	////////////////////////////////////////////////////

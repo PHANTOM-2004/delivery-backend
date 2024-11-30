@@ -116,11 +116,11 @@ func GetDishes(restaurant_id uint) ([]Dish, error) {
 	return dishes, err
 }
 
-func GetDishesByPage(restaurant_id uint, page_cnt int) ([]Dish, error) {
+// 只取几个dishes作为demo
+func GetTopDishes(restaurant_id uint) ([]Dish, error) {
 	dishes := []Dish{}
-	page_size := 10
-	offset := page_size * (page_cnt - 1)
-	err := tx.Limit(page_size).Offset(offset).Preload("Flavors").Find(&dishes).Error
+	page_size := 4
+	err := tx.Limit(page_size).Find(&dishes).Error
 	return dishes, err
 }
 

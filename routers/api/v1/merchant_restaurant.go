@@ -103,7 +103,7 @@ func UpdateRestaurant(c *gin.Context) {
 		return
 	}
 
-	err = app.ValidateStruct(data)
+	err = app.ValidateStruct(&data)
 	if err != nil {
 		log.Debug(err)
 		app.ResponseInvalidParams(c)
@@ -138,7 +138,7 @@ func CreateRestaurant(c *gin.Context) {
 		return
 	}
 	// 注意添加外键
-	err = app.ValidateStruct(data)
+	err = app.ValidateStruct(&data)
 	if err != nil {
 		log.Debug(err)
 		app.ResponseInvalidParams(c)
