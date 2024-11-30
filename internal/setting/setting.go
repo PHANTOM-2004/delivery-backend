@@ -203,8 +203,9 @@ var (
 const FallbackPreset = "localdebug"
 
 var Preset = map[string]string{
-	"localdebug": "conf/app.ini",
-	"dockertest": "conf/app_test_docker.ini",
+	"localdebug":   "conf/app.ini",
+	"dockertest":   "conf/app_test_docker.ini",
+	"dockerdeploy": "conf/app_deploy_docker.ini",
 }
 
 func parseConfigModeSetting() {
@@ -230,6 +231,7 @@ func parseConfigModeSetting() {
 		log.Println(err)
 		log.Fatalf("Failed to parse [%s]", path)
 	}
+	log.Info("using preset: ", path)
 }
 
 func Setup() {

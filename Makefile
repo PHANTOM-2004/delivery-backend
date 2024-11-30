@@ -5,6 +5,8 @@ go_files = $(shell go list ./... | grep -v /vendor/)
 # 检查环境变量，设置默认目标
 ifeq ($(GO_SERVICE_ENV),DOCKER_TEST)
     DEFAULT_GOAL := rundt
+else ifeq ($(GO_SERVICE_ENV),DOCKER_DEPLOY)
+    DEFAULT_GOAL := runserver
 else
     DEFAULT_GOAL := run
 endif
@@ -39,3 +41,6 @@ run:
 
 rundt:
 	@go run -v . --DockerTest
+
+runserver:
+	@go run -v . --DockerDeploy
