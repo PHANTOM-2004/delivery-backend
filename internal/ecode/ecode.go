@@ -17,6 +17,8 @@ const (
 	ERROR_WX_SESSION_EXPIRE Ecode = 9000
 	ERROR_WX_CART_EMPTY     Ecode = 9010
 	ERROR_WX_ORDER_CREATE   Ecode = 9011
+	ERROR_WX_ORDER_CANCEL   Ecode = 9012
+	ERROR_WX_IMAGE_UPLOAD   Ecode = 9013
 
 	// admin related error
 	ERROR_ADMIN_NOT_FOUND         Ecode = 10000
@@ -72,6 +74,10 @@ func StatusText(e Ecode) (res string) {
 		res = "购物车为空，无法下单"
 	case ERROR_WX_ORDER_CREATE:
 		res = "下单失败"
+	case ERROR_WX_ORDER_CANCEL:
+		res = "取消订单失败"
+	case ERROR_WX_IMAGE_UPLOAD:
+		res = "微信图片上传失败"
 
 	case INVALID_PARAMS:
 		res = "请求参数错误"

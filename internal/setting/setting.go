@@ -3,6 +3,7 @@ package setting
 import (
 	"delivery-backend/pkg/utils"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -51,18 +52,34 @@ type Log struct {
 }
 
 type Wechat struct {
-	AppID                string
-	AppSecret            string
-	TokenRefreshInterval int
-	SessionAge           int
-	code2SessionURL      string
-	accesstokenURL       string
+	AppID                 string
+	AppSecret             string
+	TokenRefreshInterval  int
+	SessionAge            int
+	CommentImageExt       []string
+	CommentImageStorePath string
+	code2SessionURL       string
+	accesstokenURL        string
 }
 
 func (w *Wechat) GetCode2SessionURL(js_code string) string {
 	res := fmt.Sprintf(w.code2SessionURL,
 		w.AppID, w.AppSecret, js_code)
 	return res
+}
+
+func (w *Wechat) CheckCommentImageExt(name string) (string, bool) {
+	return checkExt(w.CommentImageExt, name)
+}
+
+func (w *Wechat) GetImageName() string {
+	res := "comment-" + uuid.NewString()
+	return res
+}
+
+func (w *Wechat) GetImagePath(name string) string {
+	path := w.CommentImageStorePath + "/" + name
+	return path
 }
 
 func (w *Wechat) GetAccessTokenURL() string {
@@ -102,7 +119,7 @@ func (a *App) GenLicenseName() string {
 	return path
 }
 
-func (a *App) checkExt(allows []string, name string) (string, bool) {
+func checkExt(allows []string, name string) (string, bool) {
 	ext := filepath.Ext(name)
 	for i := range allows {
 		if ext == allows[i] {
@@ -113,11 +130,11 @@ func (a *App) checkExt(allows []string, name string) (string, bool) {
 }
 
 func (a *App) CheckLicenseExt(name string) (string, bool) {
-	return a.checkExt(a.LicenseAllowExts, name)
+	return checkExt(a.LicenseAllowExts, name)
 }
 
 func (a *App) CheckDishImageExt(name string) (string, bool) {
-	return a.checkExt(a.DishImageAllowExts, name)
+	return checkExt(a.DishImageAllowExts, name)
 }
 
 func (a *App) GetDishImageStorePath(name string) string {
@@ -187,8 +204,9 @@ var (
 const FallbackPreset = "localdebug"
 
 var Preset = map[string]string{
-	"localdebug": "conf/app.ini",
-	"dockertest": "conf/app_test_docker.ini",
+	"localdebug":   "conf/app.ini",
+	"dockertest":   "conf/app_test_docker.ini",
+	"dockerdeploy": "conf/app_deploy_docker.ini",
 }
 
 func parseConfigModeSetting() {
@@ -214,6 +232,7 @@ func parseConfigModeSetting() {
 		log.Println(err)
 		log.Fatalf("Failed to parse [%s]", path)
 	}
+	log.Info("using preset: ", path)
 }
 
 func Setup() {
@@ -261,6 +280,28 @@ func parseLogSetting() {
 	log.SetLevel(level)
 
 	logCurrentConf(LogSetting, "Log")
+
+	// NOTE:对于log设置，我们要求写入屏幕以及文件
+	//
+	logfilename := time.Now().Format("log-2006-01-02-15-04-05") + ".log"
+	logFile, err := os.OpenFile(logfilename,
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	if err != nil {
+		log.Error("fail to creating log file")
+		log.Fatal(err)
+	}
+
+	// 设置控制台日志
+	writer := io.MultiWriter(os.Stdout, logFile)
+	// 首先设置timestamp格式
+	log.SetOutput(writer)
+	log.SetFormatter(&log.TextFormatter{
+		ForceColors:      false,
+		DisableColors:    true,
+		FullTimestamp:    true,
+		QuoteEmptyFields: true,
+		TimestampFormat:  "2006-01-02 15:04:05",
+	})
 }
 
 func parseTestSetting() {

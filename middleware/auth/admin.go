@@ -15,13 +15,13 @@ func AdminAuth() gin.HandlerFunc {
 		h := handler.NewAdminInfoHanlder(c)
 		account := h.GetAccount()
 		id := h.GetID()
-		log.Trace(account, id)
 
 		if id == 0 || account == "" {
 			app.Response(c, http.StatusUnauthorized, ecode.ERROR_ADMIN_NOT_LOGIN, nil)
 			c.Abort()
 			return
 		}
+		log.Trace("account:", account, " id:", id)
 		c.Next()
 	}
 }

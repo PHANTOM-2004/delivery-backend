@@ -55,8 +55,6 @@ type WXSessionCartStore struct {
 	Cnt      int  `json:"count"`
 }
 
-
-
 func (wxs *WXSession) getCartKey(restaurant_id uint) string {
 	return "cart_" + strconv.Itoa(int(restaurant_id))
 }
