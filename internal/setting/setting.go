@@ -3,6 +3,7 @@ package setting
 import (
 	"delivery-backend/pkg/utils"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -279,6 +280,26 @@ func parseLogSetting() {
 	log.SetLevel(level)
 
 	logCurrentConf(LogSetting, "Log")
+
+	// NOTE:对于log设置，我们要求写入屏幕以及文件
+
+	logfilename := time.Now().Format("log-2006-01-02-15-04-05") + ".log"
+	logFile, err := os.OpenFile(logfilename,
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	if err != nil {
+		log.Error("fail to creating log file")
+		log.Fatal(err)
+	}
+
+	// 设置控制台日志
+	writer := io.MultiWriter(os.Stdout, logFile)
+	log.SetOutput(writer)
+	log.SetFormatter(&log.TextFormatter{
+		ForceColors:      false,
+		DisableColors:    true,
+		FullTimestamp:    true,
+		QuoteEmptyFields: true,
+	})
 }
 
 func parseTestSetting() {
