@@ -3,6 +3,7 @@ package routers
 import (
 	"delivery-backend/internal/setting"
 	"delivery-backend/middleware/auth"
+	gin_log "delivery-backend/middleware/log"
 	"delivery-backend/middleware/wechat"
 	"delivery-backend/routers/api"
 	v1 "delivery-backend/routers/api/v1"
@@ -20,11 +21,19 @@ func InitRouter() *gin.Engine {
 	defer log.Info("app router initialized")
 
 	r := gin.New()
-	r.Use(gin.Logger())
+	r.Use(gin_log.Logger())
 	r.Use(gin.Recovery())
 	r.MaxMultipartMemory = int64(setting.AppSetting.MaxImageSize << 20) // MiB
 
 	gin.SetMode(setting.ServerSetting.RunMode)
+	// 设置gin的setGinLogger
+	gin.DebugPrintRouteFunc = func(httpMethod, absolutePath, handlerName string, nuHandlers int) {
+		log.Printf("[GIN-route] %6s %v %v (%v handlers)", httpMethod, absolutePath, handlerName, nuHandlers)
+	}
+	gin.DebugPrintFunc = func(format string, values ...any) {
+		log.Debug("[GIN-debug] "+format, values)
+	}
+
 	// NOTE:注意更新文档
 
 	apiv1 := r.Group("/api/v1")
