@@ -28,7 +28,7 @@ func InitRouter() *gin.Engine {
 	gin.SetMode(setting.ServerSetting.RunMode)
 	// 设置gin的setGinLogger
 	gin.DebugPrintRouteFunc = func(httpMethod, absolutePath, handlerName string, nuHandlers int) {
-		log.Printf("[GIN-route] %6s %v %v (%v handlers)", httpMethod, absolutePath, handlerName, nuHandlers)
+		log.Printf("[GIN-route] %6s %v -- [%v] (%v handlers)", httpMethod, absolutePath, handlerName, nuHandlers)
 	}
 	gin.DebugPrintFunc = func(format string, values ...any) {
 		log.Debug("[GIN-debug] "+format, values)
@@ -310,6 +310,9 @@ func InitRouter() *gin.Engine {
 				v1.ApproveMerchantApplication)
 			admin_session_v1.PUT("/merchant-application/:application_id/disapprove",
 				v1.DisapproveMerchantApplication)
+
+			// 给admin留一个后门
+			admin_session_v1.POST("/hack/merchant-application", v1.MerchantApply)
 
 			// NOTE: license的图片静态文件路由
 			license_path := setting.AppSetting.LicenseStorePath
