@@ -107,7 +107,7 @@ func CreateAddressBook(c *gin.Context) {
 	}
 	m := req.GetModel()
 	m.WechatUserID = info.ID
-	err = models.CreateAddressBook(req.GetModel())
+	err = models.CreateAddressBook(m)
 	if err != nil {
 		app.ResponseInternalError(c, err)
 		return
