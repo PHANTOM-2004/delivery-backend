@@ -105,6 +105,7 @@ func CreateDish(c *gin.Context) {
 	dish := dish_r.GetDishModel()
 	dish.Image = image_name
 	dish.RestaurantID = c.GetUint("restaurant_id")
+	log.Trace("creating dish", dish)
 	err = models.CreateDish(dish)
 	if err != nil {
 		log.Debug(dish)

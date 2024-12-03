@@ -112,7 +112,9 @@ func GetFlavors(restaurant_id uint) ([]Flavor, error) {
 
 func GetDishes(restaurant_id uint) ([]Dish, error) {
 	dishes := []Dish{}
-	err := tx.Preload("Flavors").Find(&dishes).Error
+	err := tx.Preload("Flavors").
+		Where("restaurant_id = ?", restaurant_id).
+		Find(&dishes).Error
 	return dishes, err
 }
 
@@ -120,7 +122,8 @@ func GetDishes(restaurant_id uint) ([]Dish, error) {
 func GetTopDishes(restaurant_id uint) ([]Dish, error) {
 	dishes := []Dish{}
 	page_size := 4
-	err := tx.Limit(page_size).Find(&dishes).Error
+	err := tx.
+		Limit(page_size).Find(&dishes, Dish{RestaurantID: restaurant_id}).Error
 	return dishes, err
 }
 
