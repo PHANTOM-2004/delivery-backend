@@ -1,6 +1,9 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
+)
 
 type AddressBook struct {
 	Model
@@ -42,25 +45,33 @@ func SetDefaultAddressBook(user_id uint, addr_id uint) error {
 			if err != nil {
 				return err
 			}
+			log.Trace("got address book list", res)
 			unset_id := 0
 
 			for i := range res {
-				if !res[i].Default {
-					continue
+				if res[i].Default {
+					unset_id = int(res[i].ID)
+					break
 				}
-				unset_id = i
 			}
 			if unset_id == int(addr_id) {
 				// 不需要设置
+				log.Trace("no need to unset", unset_id)
 				return nil
 			}
-			// 取消默认
-			err = ftx.Model(&AddressBook{}).
-				Where("id = ?", unset_id).
-				UpdateColumn("default", false).Error
-			if err != nil {
-				return err
+			// 如果不存在unset那么就不需要unset
+			log.Trace("address book: unset id")
+			if unset_id != 0 {
+				// 取消默认
+				err = ftx.Model(&AddressBook{}).
+					Where("id = ?", unset_id).
+					UpdateColumn("default", false).Error
+				if err != nil {
+					return err
+				}
+				log.Trace("unset default addressbook", unset_id)
 			}
+
 			// 设置默认
 			err = ftx.Model(&AddressBook{}).
 				Where("id = ?", addr_id).
