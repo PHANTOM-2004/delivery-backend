@@ -1,7 +1,6 @@
 package wechat_service
 
 import (
-	"crypto/tls"
 	"delivery-backend/internal/setting"
 	"encoding/json"
 	"net/http"
@@ -13,13 +12,7 @@ import (
 )
 
 var WXClient = &http.Client{
-	Timeout: 10 * time.Second, // 设置超时时间
-	Transport: &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
-			// 跳过证书验证（仅限测试，生产环境中请使用有效证书）
-		},
-	},
+	Timeout: 5 * time.Second, // 设置超时时间
 }
 
 func Setup() {
