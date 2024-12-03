@@ -81,6 +81,10 @@ func InitRouter() *gin.Engine {
 		comment_image_path := setting.WechatSetting.CommentImageStorePath
 		log.Infof("Serving Static File: [%s]", comment_image_path)
 		customer.Static("/comment/image", comment_image_path)
+
+		dish_image_path := setting.AppSetting.DishImageStorePath
+		log.Infof("Serving Static File: [%s]", dish_image_path)
+		customer.Static("/dish/image", dish_image_path)
 	}
 
 	////////////////////////////////////////////////////
