@@ -113,7 +113,8 @@ func GetFlavors(restaurant_id uint) ([]Flavor, error) {
 func GetDishes(restaurant_id uint) ([]Dish, error) {
 	dishes := []Dish{}
 	err := tx.Preload("Flavors").
-		Find(&dishes, Dish{RestaurantID: restaurant_id}).Error
+		Where("restaurant_id = ?", restaurant_id).
+		Find(&dishes).Error
 	return dishes, err
 }
 
