@@ -48,7 +48,8 @@ type Email struct {
 }
 
 type Log struct {
-	Level string
+	Level    string
+	SavePath string
 }
 
 type Wechat struct {
@@ -283,8 +284,20 @@ func parseLogSetting() {
 
 	// NOTE:对于log设置，我们要求写入屏幕以及文件
 	//
+	var logfile_path string
 	logfilename := time.Now().Format("log-2006-01-02-15-04-05") + ".log"
-	logFile, err := os.OpenFile(logfilename,
+	if LogSetting.SavePath == "" {
+		logfile_path = logfilename
+	} else {
+		// 创建路径
+		if _, err := os.Stat(LogSetting.SavePath); os.IsNotExist(err) {
+			log.Fatal("Log path不存在", LogSetting.SavePath)
+		}
+		logfile_path = LogSetting.SavePath + "/" + logfilename
+		log.Info("LOGGINT TO:", logfile_path)
+	}
+
+	logFile, err := os.OpenFile(logfile_path,
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Error("fail to creating log file")
