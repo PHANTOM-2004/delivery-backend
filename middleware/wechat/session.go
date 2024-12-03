@@ -6,12 +6,14 @@ import (
 	"delivery-backend/internal/gredis"
 	"delivery-backend/internal/setting"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -72,6 +74,10 @@ func (wxs *WXSession) UpdateCart(restaurant_id uint, store []WXSessionCartStore)
 func (wxs *WXSession) GetCart(restaurant_id uint) ([]WXSessionCartStore, error) {
 	field := wxs.getCartKey(restaurant_id)
 	res, err := gredis.HGet(wxs.session_id, field)
+	if errors.Is(err, redis.Nil) {
+		log.Tracef("Cart from restaurant[%v] is empty", restaurant_id)
+		return []WXSessionCartStore{}, nil
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -81,6 +87,9 @@ func (wxs *WXSession) GetCart(restaurant_id uint) ([]WXSessionCartStore, error) 
 	if err != nil {
 		log.Panic(err)
 	}
+	log.Tracef("get cart of restaurant[%v]:", restaurant_id)
+	log.Trace("json:", res)
+	log.Trace("struct:", cart)
 	return cart, err
 }
 
