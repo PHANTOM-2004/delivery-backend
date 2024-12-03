@@ -100,6 +100,13 @@ func CreateAddressBook(c *gin.Context) {
 		app.ResponseInvalidParams(c)
 		return
 	}
+	info, err := wechat.DefaultSession(c).GetInfo()
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+	m := req.GetModel()
+	m.WechatUserID = info.ID
 	err = models.CreateAddressBook(req.GetModel())
 	if err != nil {
 		app.ResponseInternalError(c, err)
