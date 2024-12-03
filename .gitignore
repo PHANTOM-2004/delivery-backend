@@ -10,6 +10,7 @@ swagger.yaml
 *.jpeg
 *.jpg
 *.png
+*.ini
 
 # runtime 
 runtime/
