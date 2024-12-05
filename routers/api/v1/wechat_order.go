@@ -128,8 +128,9 @@ func CreateOrder(c *gin.Context) {
 		PhoneNumber:  req.PhoneNumber,
 		CustomerName: req.CustomerName,
 		WechatUserID: info.ID,
+		RestaurantID: uint(restaurant_id),
 	}
-	err = models.CreateOrder(uint(restaurant_id), &order, cart)
+	err = models.CreateOrder(&order, cart)
 	if err != nil {
 		// 下单失败
 		log.Debugf("user:[%v] fail to create order", info.ID)
@@ -138,7 +139,18 @@ func CreateOrder(c *gin.Context) {
 			ecode.ERROR_WX_ORDER_CREATE, nil)
 		return
 	}
-	log.Debug("new order created")
+	log.Trace("new order created")
+	// 仍需要清空购物车
+	err = session.UpdateCart(uint(restaurant_id), []wechat.WXSessionCartStore{})
+	if err != nil {
+		app.Response(c,
+			http.StatusOK,
+			ecode.ERROR_WX_ORDER_CREATE, nil)
+		log.Error("error cleaning carts")
+		return
+	}
+	log.Trace("clear restaurant carts")
+
 	// 首先create order, 其次create order details
 	app.ResponseSuccess(c)
 }

@@ -95,7 +95,7 @@ func GetOrderByUserID(user_id uint) ([]Order, error) {
 
 // dishes id以及对应的口味
 // 记得保证stores参数不为空，也就是购物车为空的时候无法下单
-func CreateOrder(restaurant_id uint, order *Order, stores []wechat.WXSessionCartStore) error {
+func CreateOrder(order *Order, stores []wechat.WXSessionCartStore) error {
 	err := tx.Transaction(
 		func(ftx *gorm.DB) error {
 			// 首先下单
@@ -122,11 +122,14 @@ func CreateOrder(restaurant_id uint, order *Order, stores []wechat.WXSessionCart
 			}
 			dishes := []Dish{}
 			err = ftx.Order("id").Find(&dishes, dishes_id).Error
-			dishes_id = nil // 不再使用
 			if err != nil {
 				return err
 			}
-			log.Trace("prepared dishes:\n", dishes)
+			dishes_map := map[uint]*Dish{}
+			for i := range dishes {
+				dishes_map[dishes[i].ID] = &dishes[i]
+			}
+			log.Trace("prepared dishes:\n", dishes_map)
 
 			// 2. 准备好所有口味信息，为了后续保留口味从中查找。
 			// 由于口味数量比较小，所以使用线性查找即可
@@ -138,17 +141,15 @@ func CreateOrder(restaurant_id uint, order *Order, stores []wechat.WXSessionCart
 			}
 			flavors := []Flavor{}
 			err = ftx.Find(&flavors, flavors_id).Error
-			flavors_id = nil // 不再使用
 			if err != nil {
 				return err
 			}
 			// 建立一个id -> string的哈希表
-			flavors_map := map[uint]string{}
+			flavors_map := map[uint]*Flavor{}
 			for i := range flavors {
-				flavors_map[flavors[i].ID] = flavors[i].Name
+				flavors_map[flavors[i].ID] = &flavors[i]
 			}
-			flavors = nil // 不再使用
-			log.Trace("prepared flavors:\n", flavors)
+			log.Trace("prepared flavors:\n", flavors_map)
 
 			// 3. 此时store中dish id是升序，对应到的dishes中的id也是升序，可以对应上
 			order_details := make([]OrderDetail, len(stores))
@@ -156,22 +157,23 @@ func CreateOrder(restaurant_id uint, order *Order, stores []wechat.WXSessionCart
 				// order id
 				order_details[i].OrderID = order_id
 				// dish info
-				order_details[i].DishID = dishes[i].ID
-				order_details[i].DishName = dishes[i].Name
-				order_details[i].DishPrice = dishes[i].Price
+				store_dish_id := stores[i].DishID
+				order_details[i].DishID = dishes_map[store_dish_id].ID
+				order_details[i].DishName = dishes_map[store_dish_id].Name
+				order_details[i].DishPrice = dishes_map[store_dish_id].Price
 				order_details[i].DishCount = uint16(stores[i].Cnt)
 
 				// flavor info
 				order_details[i].FlavorID = stores[i].FlavorID // flavor id 可能是0
 				if flavor_id := stores[i].FlavorID; flavor_id != 0 {
-					order_details[i].FlavorName = flavors_map[flavor_id]
+					order_details[i].FlavorName = flavors_map[flavor_id].Name
 				}
 			}
 
 			log.Trace("prepared order details", order_details)
 
 			// 4. 创建订单明细
-			err = tx.Create(order_details).Error
+			err = ftx.Create(order_details).Error
 			return err
 		},
 	)
