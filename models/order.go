@@ -229,6 +229,6 @@ func GetOrderByStatus(status uint8) ([]Order, error) {
 }
 
 func SetOrderStatus(order_id uint, status uint8) (bool, error) {
-	res := tx.Where("id = ?", order_id).UpdateColumn("status", status)
+	res := tx.Model(&Order{}).Where("id = ?", order_id).UpdateColumn("status", status)
 	return res.RowsAffected > 0, res.Error
 }
