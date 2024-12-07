@@ -78,6 +78,7 @@ func InitRouter() *gin.Engine {
 		customer.POST("/comment/restaurant/:restaurant_id", v1.WXCreateComment)
 		customer.GET("/comment/restaurant/:restaurant_id", v1.WXGetRestaurantComments)
 		customer.GET("/restaurant/:restaurant_id", v1.WXGetRestaurant)
+		customer.POST("/application", v1.UploadRiderApplication)
 
 		// 文件服务
 		customer_image_path := setting.WechatSetting.ImageStorePath
@@ -316,6 +317,9 @@ func InitRouter() *gin.Engine {
 				v1.ApproveMerchantApplication)
 			admin_session_v1.PUT("/merchant-application/:application_id/disapprove",
 				v1.DisapproveMerchantApplication)
+			admin_session_v1.GET("/rider-application", v1.GetRiderApplications)
+			admin_session_v1.PUT("rider-application/:application_id/approve", v1.ApproveRiderApplication)
+			admin_session_v1.PUT("rider-application/:application_id/disapprove", v1.DisapproveRiderApplication)
 
 			// 给admin留一个后门
 			admin_session_v1.POST("/hack/merchant-application", v1.MerchantApply)

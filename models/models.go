@@ -73,6 +73,8 @@ func SetUp() {
 		&OrderDetail{},
 		&Comment{},
 		&CommentDetail{},
+		&Rider{},
+		&RiderApplication{},
 	)
 
 	log.Info("tables created")
