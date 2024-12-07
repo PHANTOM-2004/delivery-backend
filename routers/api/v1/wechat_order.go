@@ -139,7 +139,7 @@ func CreateOrder(c *gin.Context) {
 			ecode.ERROR_WX_ORDER_CREATE, nil)
 		return
 	}
-	log.Trace("new order created")
+	log.Trace("new order created with id", order.ID)
 	// 仍需要清空购物车
 	err = session.UpdateCart(uint(restaurant_id), []wechat.WXSessionCartStore{})
 	if err != nil {
@@ -152,5 +152,8 @@ func CreateOrder(c *gin.Context) {
 	log.Trace("clear restaurant carts")
 
 	// 首先create order, 其次create order details
-	app.ResponseSuccess(c)
+	// 返回order_id
+	app.ResponseSuccessWithData(c, map[string]any{
+		"order_id": order.ID,
+	})
 }
