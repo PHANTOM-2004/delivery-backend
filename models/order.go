@@ -26,7 +26,7 @@ type Order struct {
 	RestaurantForRider *struct {
 		Address string `json:"address"`
 		Name    string `json:"name"`
-	} `json:"restaurant_info"`
+	} `gorm:"-" json:"restaurant_info"`
 	WechatUserID uint           `gorm:"index;not null" json:"-"`
 	OrderDetails []*OrderDetail `json:"details"`
 	// TODO:加入接单骑手号
