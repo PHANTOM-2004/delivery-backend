@@ -128,8 +128,9 @@ func CreateOrder(c *gin.Context) {
 		PhoneNumber:  req.PhoneNumber,
 		CustomerName: req.CustomerName,
 		WechatUserID: info.ID,
+		RestaurantID: uint(restaurant_id),
 	}
-	err = models.CreateOrder(uint(restaurant_id), &order, cart)
+	err = models.CreateOrder(&order, cart)
 	if err != nil {
 		// 下单失败
 		log.Debugf("user:[%v] fail to create order", info.ID)
@@ -138,7 +139,40 @@ func CreateOrder(c *gin.Context) {
 			ecode.ERROR_WX_ORDER_CREATE, nil)
 		return
 	}
-	log.Debug("new order created")
+	log.Trace("new order created with id", order.ID)
+	// 仍需要清空购物车
+	err = session.UpdateCart(uint(restaurant_id), []wechat.WXSessionCartStore{})
+	if err != nil {
+		app.Response(c,
+			http.StatusOK,
+			ecode.ERROR_WX_ORDER_CREATE, nil)
+		log.Error("error cleaning carts")
+		return
+	}
+	log.Trace("clear restaurant carts")
+
 	// 首先create order, 其次create order details
+	// 返回order_id
+	app.ResponseSuccessWithData(c, map[string]any{
+		"order_id": order.ID,
+	})
+}
+
+// TODO:调用支付接口
+func PayOrder(c *gin.Context) {
+	order_id, err := strconv.Atoi(c.Param("order_id"))
+	if err != nil {
+		app.ResponseInvalidParams(c)
+		return
+	}
+
+	succ, err := models.PayOrder(uint(order_id))
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+	if !succ {
+		app.Response(c, http.StatusOK, ecode.ERROR_WX_ORDER_PAY, nil)
+	}
 	app.ResponseSuccess(c)
 }

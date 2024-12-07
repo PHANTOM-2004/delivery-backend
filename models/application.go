@@ -2,8 +2,6 @@ package models
 
 import (
 	"delivery-backend/internal/setting"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type MerchantApplication struct {
@@ -39,8 +37,6 @@ func UpdateEmailStatus(application_id uint, s uint8) error {
 
 // 管理员申请表，创建失败的时候会返回error
 func CreateMerchantApplication(a *MerchantApplication) error {
-	// NOTE:这里如果加上model就会出错，非常奇怪。
-	log.Tracef("creating merchant application [%v]", *a)
 	err := tx.Create(a).Error
 	return err
 }

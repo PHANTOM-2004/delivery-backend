@@ -53,14 +53,14 @@ type Log struct {
 }
 
 type Wechat struct {
-	AppID                 string
-	AppSecret             string
-	TokenRefreshInterval  int
-	SessionAge            int
-	CommentImageExt       []string
-	CommentImageStorePath string
-	code2SessionURL       string
-	accesstokenURL        string
+	AppID                string
+	AppSecret            string
+	TokenRefreshInterval int
+	SessionAge           int
+	ImageExt             []string
+	ImageStorePath       string
+	code2SessionURL      string
+	accesstokenURL       string
 }
 
 func (w *Wechat) GetCode2SessionURL(js_code string) string {
@@ -69,17 +69,17 @@ func (w *Wechat) GetCode2SessionURL(js_code string) string {
 	return res
 }
 
-func (w *Wechat) CheckCommentImageExt(name string) (string, bool) {
-	return checkExt(w.CommentImageExt, name)
+func (w *Wechat) CheckImageExt(name string) (string, bool) {
+	return checkExt(w.ImageExt, name)
 }
 
-func (w *Wechat) GetImageName() string {
-	res := "comment-" + uuid.NewString()
+func (w *Wechat) GetImageName(prefix string) string {
+	res := prefix + "-" + uuid.NewString()
 	return res
 }
 
 func (w *Wechat) GetImagePath(name string) string {
-	path := w.CommentImageStorePath + "/" + name
+	path := w.ImageStorePath + "/" + name
 	return path
 }
 

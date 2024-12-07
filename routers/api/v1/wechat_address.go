@@ -59,6 +59,24 @@ func UpdateAddressBook(c *gin.Context) {
 }
 
 func SetDefaultAddressBook(c *gin.Context) {
+	// TODO:
+	address_book_id, err := strconv.Atoi(c.Param("address_book_id"))
+	if err != nil {
+		app.ResponseInvalidParams(c)
+		return
+	}
+
+	info, err := wechat.DefaultSession(c).GetInfo()
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+	err = models.SetDefaultAddressBook(info.ID, uint(address_book_id))
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+	app.ResponseSuccess(c)
 }
 
 type CreateAddressBookRequest struct {

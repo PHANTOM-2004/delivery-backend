@@ -2,6 +2,7 @@ package v1
 
 import (
 	"delivery-backend/internal/app"
+	"delivery-backend/internal/ecode"
 	"delivery-backend/internal/setting"
 	"delivery-backend/middleware/wechat"
 	"delivery-backend/models"
@@ -152,5 +153,33 @@ func WXGetTopDishes(c *gin.Context) {
 	}
 	app.ResponseSuccessWithData(c, map[string]any{
 		"dishes": res,
+	})
+}
+
+func WXUploadImage(c *gin.Context) {
+	file, err := c.FormFile("image")
+	if err != nil {
+		app.ResponseInvalidParams(c)
+		return
+	}
+	image_type := c.Param("type")
+	ext, v := setting.WechatSetting.CheckImageExt(file.Filename)
+	if !v {
+		log.Debugf("wrong ext[%s]", ext)
+		app.ResponseInvalidParams(c)
+		return
+	}
+
+	log.Debug("uploading: ", file.Filename)
+	name := setting.WechatSetting.GetImageName(image_type) + ext
+	dst := setting.WechatSetting.GetImagePath(name)
+	err = c.SaveUploadedFile(file, dst)
+	if err != nil {
+		app.Response(c, http.StatusOK, ecode.ERROR_WX_IMAGE_UPLOAD, nil)
+		return
+	}
+	log.Trace("image saved to:", dst)
+	app.ResponseSuccessWithData(c, map[string]any{
+		"image": name,
 	})
 }

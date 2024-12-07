@@ -73,14 +73,19 @@ func InitRouter() *gin.Engine {
 		customer.GET("/orders", v1.GetCustomerOrders)
 		customer.POST("/order/restaurant/:restaurant_id", v1.CreateOrder)
 		customer.POST("/order/:order_id/cancel", v1.CancelOrder)
-		customer.POST("/comment/image", v1.WXUploadCommentImage)
+		customer.POST("/order/:order_id/pay", v1.PayOrder)
+		customer.POST("/image/:type", v1.WXUploadImage)
 		customer.POST("/comment/restaurant/:restaurant_id", v1.WXCreateComment)
 		customer.GET("/comment/restaurant/:restaurant_id", v1.WXGetRestaurantComments)
+		customer.GET("/restaurant/:restaurant_id", v1.WXGetRestaurant)
+		customer.POST("/rider-application", v1.UploadRiderApplication)
+		customer.GET("/order/status/:status", v1.GetDeliveryOrder)
+		customer.PUT("/order/:order_id/status/:status", v1.SetDeliveryOrderStatus)
 
 		// 文件服务
-		comment_image_path := setting.WechatSetting.CommentImageStorePath
-		log.Infof("Serving Static File: [%s]", comment_image_path)
-		customer.Static("/comment/image", comment_image_path)
+		customer_image_path := setting.WechatSetting.ImageStorePath
+		log.Infof("Serving Static File: [%s]", customer_image_path)
+		customer.Static("/image", customer_image_path)
 
 		dish_image_path := setting.AppSetting.DishImageStorePath
 		log.Infof("Serving Static File: [%s]", dish_image_path)
@@ -314,6 +319,12 @@ func InitRouter() *gin.Engine {
 				v1.ApproveMerchantApplication)
 			admin_session_v1.PUT("/merchant-application/:application_id/disapprove",
 				v1.DisapproveMerchantApplication)
+			admin_session_v1.GET("/rider-application", v1.GetRiderApplications)
+			admin_session_v1.PUT("rider-application/:application_id/approve", v1.ApproveRiderApplication)
+			admin_session_v1.PUT("rider-application/:application_id/disapprove", v1.DisapproveRiderApplication)
+
+			// 给admin留一个后门
+			admin_session_v1.POST("/hack/merchant-application", v1.MerchantApply)
 
 			// 给admin留一个后门
 			admin_session_v1.POST("/hack/merchant-application", v1.MerchantApply)

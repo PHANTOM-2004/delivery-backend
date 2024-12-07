@@ -136,11 +136,17 @@ func WXsession() gin.HandlerFunc {
 		// handle 微信发送的session id 请求
 		session_id := c.GetHeader("Authorization")
 		if session_id == "" {
-			log.Debug("没有在请求头中提供session_id")
-			app.ResponseInvalidParams(c)
-			return
+			session_id = c.Query("session_id")
+			if session_id == "" {
+				log.Debug("没有在header和query中提供session_id")
+				app.ResponseInvalidParams(c)
+				return
+			} else {
+				log.Tracef("get session_id from query [%s]", session_id)
+			}
+		} else {
+			log.Tracef("get session_id from header [%s]", session_id)
 		}
-		log.Tracef("get session_id from header [%s]", session_id)
 		// 检查session是否过期，如果不存在说明已经过期
 		exist, err := gredis.Exists(session_id)
 		if err != nil {

@@ -198,3 +198,54 @@ func DisableMerchant(c *gin.Context) {
 
 	app.ResponseSuccess(c)
 }
+
+func ApproveRiderApplication(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("application_id"))
+	if err != nil {
+		log.Warn(err)
+		app.ResponseInvalidParams(c)
+		return
+	}
+	succ, err := models.ApproveRider(uint(id))
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+	if !succ {
+		app.Response(c, http.StatusBadRequest, ecode.ERROR_ADMIN_INVALID_OPERATION, nil)
+		return
+	}
+	app.ResponseSuccess(c)
+}
+
+// 对于disapprove, 不再进行封禁操作, 也就是说disapprove后可以approve, approve后不能disapprove
+func DisapproveRiderApplication(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("application_id"))
+	if err != nil {
+		log.Debug(err)
+		app.ResponseInvalidParams(c)
+		return
+	}
+	succ, err := models.DisapproveRider(uint(id))
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+	if !succ {
+		app.Response(c, http.StatusBadRequest, ecode.ERROR_ADMIN_INVALID_OPERATION, nil)
+		return
+	}
+	app.ResponseSuccess(c)
+}
+
+func GetRiderApplications(c *gin.Context) {
+	res, err := models.GetRiderApplications()
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+
+	}
+	app.ResponseSuccessWithData(c, map[string]any{
+		"applications": res,
+	})
+}
