@@ -32,7 +32,7 @@ func WXGetRestaurantComments(c *gin.Context) {
 type CreateCommentRequest struct {
 	Images  []string `json:"images" validate:"dive,max=100"`
 	Content string   `json:"content" validate:"max=300"`
-	Rating  uint8    `json:"rating" validate:"gte=0,lte=5"`
+	Rating  uint8    `json:"rating" validate:"gte=0,lte=10"`
 	OrderID uint     `json:"order_id" validate:"gte=1"`
 }
 
