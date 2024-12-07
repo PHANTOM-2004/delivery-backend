@@ -50,12 +50,14 @@ func WXCreateComment(c *gin.Context) {
 		app.ResponseInvalidParams(c)
 		return
 	}
+	log.Trace("request:", req)
 	err = app.ValidateStruct(&req)
 	if err != nil {
 		log.Debug(err)
 		app.ResponseInvalidParams(c)
 		return
 	}
+	log.Trace("request:", req)
 
 	info, err := wechat.DefaultSession(c).GetInfo()
 	if err != nil {
