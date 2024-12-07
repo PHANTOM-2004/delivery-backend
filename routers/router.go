@@ -74,15 +74,15 @@ func InitRouter() *gin.Engine {
 		customer.POST("/order/restaurant/:restaurant_id", v1.CreateOrder)
 		customer.POST("/order/:order_id/cancel", v1.CancelOrder)
 		customer.POST("/order/:order_id/pay", v1.PayOrder)
-		customer.POST("/comment/image", v1.WXUploadCommentImage)
+		customer.POST("/image/:type", v1.WXUploadImage)
 		customer.POST("/comment/restaurant/:restaurant_id", v1.WXCreateComment)
 		customer.GET("/comment/restaurant/:restaurant_id", v1.WXGetRestaurantComments)
 		customer.GET("/restaurant/:restaurant_id", v1.WXGetRestaurant)
 
 		// 文件服务
-		comment_image_path := setting.WechatSetting.CommentImageStorePath
-		log.Infof("Serving Static File: [%s]", comment_image_path)
-		customer.Static("/comment/image", comment_image_path)
+		customer_image_path := setting.WechatSetting.ImageStorePath
+		log.Infof("Serving Static File: [%s]", customer_image_path)
+		customer.Static("/image", customer_image_path)
 
 		dish_image_path := setting.AppSetting.DishImageStorePath
 		log.Infof("Serving Static File: [%s]", dish_image_path)

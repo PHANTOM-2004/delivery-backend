@@ -2,11 +2,8 @@ package v1
 
 import (
 	"delivery-backend/internal/app"
-	"delivery-backend/internal/ecode"
-	"delivery-backend/internal/setting"
 	"delivery-backend/middleware/wechat"
 	"delivery-backend/models"
-	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -29,33 +26,6 @@ func WXGetRestaurantComments(c *gin.Context) {
 	}
 	app.ResponseSuccessWithData(c, map[string]any{
 		"comments": res,
-	})
-}
-
-func WXUploadCommentImage(c *gin.Context) {
-	file, err := c.FormFile("image")
-	if err != nil {
-		app.ResponseInvalidParams(c)
-		return
-	}
-	ext, v := setting.WechatSetting.CheckCommentImageExt(file.Filename)
-	if !v {
-		log.Debugf("wrong ext[%s]", ext)
-		app.ResponseInvalidParams(c)
-		return
-	}
-
-	log.Debug("uploading: ", file.Filename)
-	name := setting.WechatSetting.GetImageName() + ext
-	dst := setting.WechatSetting.GetImagePath(name)
-	err = c.SaveUploadedFile(file, dst)
-	if err != nil {
-		app.Response(c, http.StatusOK, ecode.ERROR_WX_IMAGE_UPLOAD, nil)
-		return
-	}
-	log.Trace("image saved to:", dst)
-	app.ResponseSuccessWithData(c, map[string]any{
-		"image": name,
 	})
 }
 
