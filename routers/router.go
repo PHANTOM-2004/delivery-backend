@@ -76,6 +76,7 @@ func InitRouter() *gin.Engine {
 		customer.POST("/comment/image", v1.WXUploadCommentImage)
 		customer.POST("/comment/restaurant/:restaurant_id", v1.WXCreateComment)
 		customer.GET("/comment/restaurant/:restaurant_id", v1.WXGetRestaurantComments)
+		customer.GET("/restaurant/:restaurant_id", v1.WXGetRestaurant)
 
 		// 文件服务
 		comment_image_path := setting.WechatSetting.CommentImageStorePath
