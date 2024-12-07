@@ -14,22 +14,24 @@ import (
 
 type Order struct {
 	Model
-	PickupNo           string      `gorm:"not null;size:8" json:"pickup_number"`
-	OrderNo            string      `gorm:"not null;size:32" json:"order_number"`
-	Address            string      `gorm:"size:100;not null" json:"address"`
-	CustomerName       string      `gorm:"size:20;not null" json:"customer_name"`
-	PhoneNumber        string      `gorm:"size:20;not null" json:"phone_number"`
-	Status             uint8       `gorm:"not null;default:0" json:"status"`
-	PaymentTime        uint64      `gorm:"not null;default:0" json:"payment_time"`
-	RestaurantID       uint        `gorm:"not null" json:"-"`
-	Restaurant         *Restaurant `json:"-"`
-	RestaurantForRider *struct {
-		Address string `json:"address"`
-		Name    string `json:"name"`
-	} `gorm:"-" json:"restaurant_info"`
-	WechatUserID uint           `gorm:"index;not null" json:"-"`
-	OrderDetails []*OrderDetail `json:"details"`
+	PickupNo           string              `gorm:"not null;size:8" json:"pickup_number"`
+	OrderNo            string              `gorm:"not null;size:32" json:"order_number"`
+	Address            string              `gorm:"size:100;not null" json:"address"`
+	CustomerName       string              `gorm:"size:20;not null" json:"customer_name"`
+	PhoneNumber        string              `gorm:"size:20;not null" json:"phone_number"`
+	Status             uint8               `gorm:"not null;default:0" json:"status"`
+	PaymentTime        uint64              `gorm:"not null;default:0" json:"payment_time"`
+	RestaurantID       uint                `gorm:"not null" json:"-"`
+	Restaurant         *Restaurant         `json:"-"`
+	RestaurantForRider *RestaurantForRider `gorm:"-" json:"restaurant_info"`
+	WechatUserID       uint                `gorm:"index;not null" json:"-"`
+	OrderDetails       []*OrderDetail      `json:"details"`
 	// TODO:加入接单骑手号
+}
+
+type RestaurantForRider struct {
+	Address string `json:"address"`
+	Name    string `json:"name"`
 }
 
 const (
@@ -222,7 +224,7 @@ func PayOrder(order_id uint) (bool, error) {
 
 func GetOrderByStatus(status uint8) ([]Order, error) {
 	orders := []Order{}
-	err := tx.Where("status = ?", status).Preload("Restaurant").Find(&orders, status).Error
+	err := tx.Where("status = ?", status).Preload("Restaurant").Find(&orders).Error
 	return orders, err
 }
 

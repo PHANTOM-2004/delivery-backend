@@ -85,8 +85,10 @@ func GetDeliveryOrder(c *gin.Context) {
 	for i := range orders {
 		// 填充骑手的response
 		restaurant := orders[i].Restaurant
-		orders[i].RestaurantForRider.Address = restaurant.Address
-		orders[i].RestaurantForRider.Name = restaurant.RestaurantName
+		orders[i].RestaurantForRider = &models.RestaurantForRider{
+			Name:    restaurant.RestaurantName,
+			Address: restaurant.Address,
+		}
 	}
 
 	app.ResponseSuccessWithData(c, map[string]any{

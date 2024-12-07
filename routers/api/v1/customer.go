@@ -20,6 +20,7 @@ func MerchantApply(c *gin.Context) {
 
 	file, err := c.FormFile("license")
 	if err != nil {
+		log.Debug(err)
 		app.ResponseInvalidParams(c)
 		return
 	}
