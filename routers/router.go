@@ -73,6 +73,7 @@ func InitRouter() *gin.Engine {
 		customer.GET("/orders", v1.GetCustomerOrders)
 		customer.POST("/order/restaurant/:restaurant_id", v1.CreateOrder)
 		customer.POST("/order/:order_id/cancel", v1.CancelOrder)
+		customer.POST("/order/:order_id/pay", v1.PayOrder)
 		customer.POST("/comment/image", v1.WXUploadCommentImage)
 		customer.POST("/comment/restaurant/:restaurant_id", v1.WXCreateComment)
 		customer.GET("/comment/restaurant/:restaurant_id", v1.WXGetRestaurantComments)

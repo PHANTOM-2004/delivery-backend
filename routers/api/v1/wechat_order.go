@@ -157,3 +157,22 @@ func CreateOrder(c *gin.Context) {
 		"order_id": order.ID,
 	})
 }
+
+// TODO:调用支付接口
+func PayOrder(c *gin.Context) {
+	order_id, err := strconv.Atoi(c.Param("order_id"))
+	if err != nil {
+		app.ResponseInvalidParams(c)
+		return
+	}
+
+	succ, err := models.PayOrder(uint(order_id))
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+	if !succ {
+		app.Response(c, http.StatusOK, ecode.ERROR_WX_ORDER_PAY, nil)
+	}
+	app.ResponseSuccess(c)
+}

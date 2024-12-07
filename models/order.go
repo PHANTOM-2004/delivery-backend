@@ -3,6 +3,7 @@ package models
 import (
 	"delivery-backend/middleware/wechat"
 	"sort"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -178,4 +179,36 @@ func CreateOrder(order *Order, stores []wechat.WXSessionCartStore) error {
 		},
 	)
 	return err
+}
+
+func PayOrder(order_id uint) (bool, error) {
+	success := false
+	err := tx.Transaction(func(ftx *gorm.DB) error {
+		var err error
+		order := Order{}
+		err = ftx.Find(&order, order_id).Error
+		if err != nil {
+			return err
+		}
+		if order.Status != OrderNotPayed {
+			// 状态不符合支付
+			return nil
+		}
+		now := time.Now().Unix()
+		duration := now - int64(order.CreatedAt)
+		if duration > 60*15 {
+			// 超过15分钟
+			return nil
+		}
+
+		err = ftx.Model(&Order{}).UpdateColumn("status", OrderPayed).Error
+		if err != nil {
+			return err
+		}
+
+		// 成功支付
+		success = true
+		return err
+	})
+	return success, err
 }

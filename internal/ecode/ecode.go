@@ -19,6 +19,7 @@ const (
 	ERROR_WX_ORDER_CREATE   Ecode = 9011
 	ERROR_WX_ORDER_CANCEL   Ecode = 9012
 	ERROR_WX_IMAGE_UPLOAD   Ecode = 9013
+	ERROR_WX_ORDER_PAY      Ecode = 9014
 
 	// admin related error
 	ERROR_ADMIN_NOT_FOUND         Ecode = 10000
@@ -78,6 +79,8 @@ func StatusText(e Ecode) (res string) {
 		res = "取消订单失败"
 	case ERROR_WX_IMAGE_UPLOAD:
 		res = "微信图片上传失败"
+	case ERROR_WX_ORDER_PAY:
+		res = "微信订单支付失败"
 
 	case INVALID_PARAMS:
 		res = "请求参数错误"
