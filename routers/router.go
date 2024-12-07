@@ -79,6 +79,8 @@ func InitRouter() *gin.Engine {
 		customer.GET("/comment/restaurant/:restaurant_id", v1.WXGetRestaurantComments)
 		customer.GET("/restaurant/:restaurant_id", v1.WXGetRestaurant)
 		customer.POST("/application", v1.UploadRiderApplication)
+		customer.GET("/order/status/:status", v1.GetDeliveryOrder)
+		customer.PUT("/order/:order_id/status/:status", v1.SetDeliveryOrderStatus)
 
 		// 文件服务
 		customer_image_path := setting.WechatSetting.ImageStorePath

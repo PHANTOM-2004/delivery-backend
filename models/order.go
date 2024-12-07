@@ -14,14 +14,19 @@ import (
 
 type Order struct {
 	Model
-	PickupNo     string         `gorm:"not null;size:8" json:"pickup_number"`
-	OrderNo      string         `gorm:"not null;size:32" json:"order_number"`
-	Address      string         `gorm:"size:100;not null" json:"address"`
-	CustomerName string         `gorm:"size:20;not null" json:"customer_name"`
-	PhoneNumber  string         `gorm:"size:20;not null" json:"phone_number"`
-	Status       uint8          `gorm:"not null;default:0" json:"status"`
-	PaymentTime  uint64         `gorm:"not null;default:0" json:"payment_time"`
-	RestaurantID uint           `gorm:"not null" json:"-"`
+	PickupNo           string      `gorm:"not null;size:8" json:"pickup_number"`
+	OrderNo            string      `gorm:"not null;size:32" json:"order_number"`
+	Address            string      `gorm:"size:100;not null" json:"address"`
+	CustomerName       string      `gorm:"size:20;not null" json:"customer_name"`
+	PhoneNumber        string      `gorm:"size:20;not null" json:"phone_number"`
+	Status             uint8       `gorm:"not null;default:0" json:"status"`
+	PaymentTime        uint64      `gorm:"not null;default:0" json:"payment_time"`
+	RestaurantID       uint        `gorm:"not null" json:"-"`
+	Restaurant         *Restaurant `json:"-"`
+	RestaurantForRider *struct {
+		Address string `json:"address"`
+		Name    string `json:"name"`
+	} `json:"restaurant_info"`
 	WechatUserID uint           `gorm:"index;not null" json:"-"`
 	OrderDetails []*OrderDetail `json:"details"`
 	// TODO:加入接单骑手号
@@ -30,14 +35,16 @@ type Order struct {
 const (
 	// 订单没有支付
 	OrderNotPayed = 0
-	// 订单已经支付, 等待抢单
+	// 订单已经支付<->等待抢单
 	OrderPayed = 1
-	// 订单等待配送
+	// 订单等待配送<->待取餐
 	OrderToDeliver = 2
-	// 订单已经完成
-	OrderFinished = 3
+	// 拿到餐品<->等待送达
+	OrderFetched = 3
+	// 订单已经完成<->已送达
+	OrderFinished = 4
 	// 订单被取消
-	OrderCanceled = 4
+	OrderCanceled = 5
 )
 
 // NOTE:
@@ -211,4 +218,15 @@ func PayOrder(order_id uint) (bool, error) {
 		return err
 	})
 	return success, err
+}
+
+func GetOrderByStatus(status uint8) ([]Order, error) {
+	orders := []Order{}
+	err := tx.Where("status = ?", status).Preload("Restaurant").Find(&orders, status).Error
+	return orders, err
+}
+
+func SetOrderStatus(order_id uint, status uint8) (bool, error) {
+	res := tx.Where("id = ?", order_id).UpdateColumn("status", status)
+	return res.RowsAffected > 0, res.Error
 }
