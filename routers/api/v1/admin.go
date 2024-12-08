@@ -294,9 +294,6 @@ func SetOrderStatus(c *gin.Context) {
 		app.ResponseInvalidParams(c)
 		return
 	}
-	if !AuthRider(c) {
-		return
-	}
 	success, err := models.SetOrderStatus(uint(order_id), uint8(status))
 	if err != nil {
 		app.ResponseInternalError(c, err)
