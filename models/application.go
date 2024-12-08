@@ -74,7 +74,7 @@ func DisapproveApplication(id int) (bool, error) {
 // 获得所有的商家申请,注意需要分页查询
 // 注意：page从1开始
 func GetMerchantApplications(page_cnt int) ([]MerchantApplication, error) {
-	page_size := setting.AppSetting.LicensePageSize
+	page_size := setting.AppSetting.ApplicationPageSize
 	offset := max(page_cnt-1, 0) * page_size
 	applications := []MerchantApplication{}
 	err := tx.Limit(page_size).Offset(offset).Find(&applications).Error
