@@ -324,6 +324,7 @@ func InitRouter() *gin.Engine {
 			admin_session_v1.PUT("/rider-application/:application_id/disapprove", v1.DisapproveRiderApplication)
 			admin_session_v1.GET("/order/restaurant/:restaurant_id",
 				v1.GetRestaurantOrders)
+			admin_session_v1.PUT("/order/:order_id/status/:status", v1.SetOrderStatus)
 
 			// 给admin留一个后门
 			admin_session_v1.POST("/hack/merchant-application", v1.MerchantApply)

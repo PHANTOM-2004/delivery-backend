@@ -265,3 +265,31 @@ func GetRestaurantOrders(c *gin.Context) {
 		"orders": orders,
 	})
 }
+
+func SetOrderStatus(c *gin.Context) {
+	status, err := strconv.Atoi(c.Param("status"))
+	if err != nil {
+		app.ResponseInvalidParams(c)
+		return
+	}
+	order_id, err := strconv.Atoi(c.Param("order_id"))
+	if err != nil {
+		app.ResponseInvalidParams(c)
+		return
+	}
+	if status < models.OrderNotPayed || status > models.OrderCanceled {
+		app.ResponseInvalidParams(c)
+		return
+	}
+	if !AuthRider(c) {
+		return
+	}
+	success, err := models.SetOrderStatus(uint(order_id), uint8(status))
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+	app.ResponseSuccessWithData(c, map[string]any{
+		"success": success,
+	})
+}
