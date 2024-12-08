@@ -21,7 +21,7 @@ type Order struct {
 	PhoneNumber        string              `gorm:"size:20;not null" json:"phone_number"`
 	Status             uint8               `gorm:"not null;default:0" json:"status"`
 	PaymentTime        uint64              `gorm:"not null;default:0" json:"payment_time"`
-	RestaurantID       uint                `gorm:"not null" json:"-"`
+	RestaurantID       uint                `gorm:"not null" json:"restaurant_id"`
 	Restaurant         *Restaurant         `json:"-"`
 	RestaurantForRider *RestaurantForRider `gorm:"-" json:"restaurant_info"`
 	WechatUserID       uint                `gorm:"index;not null" json:"-"`
