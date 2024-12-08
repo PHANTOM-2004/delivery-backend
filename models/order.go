@@ -211,7 +211,10 @@ func PayOrder(order_id uint) (bool, error) {
 			return nil
 		}
 
-		err = ftx.Model(&Order{}).Where("id = ?", order_id).UpdateColumn("status", OrderPayed).Error
+		err = ftx.Model(&Order{}).Where("id = ?", order_id).Updates(Order{
+			Status:      OrderPayed,
+			PaymentTime: uint64(time.Now().Unix()),
+		}).Error
 		if err != nil {
 			return err
 		}
