@@ -99,7 +99,7 @@ func CancelOrder(order_id uint) (bool, error) {
 
 func GetOrderByUserID(user_id uint) ([]Order, error) {
 	orders := []Order{}
-	err := tx.Find(&orders, Order{WechatUserID: user_id}).Error
+	err := tx.Preload("OrderDetails").Find(&orders, Order{WechatUserID: user_id}).Error
 	return orders, err
 }
 
@@ -224,11 +224,20 @@ func PayOrder(order_id uint) (bool, error) {
 
 func GetOrderByStatus(status uint8) ([]Order, error) {
 	orders := []Order{}
-	err := tx.Where("status = ?", status).Preload("Restaurant").Find(&orders).Error
+	err := tx.Where("status = ?", status).
+		Preload("OrderDetails").Preload("Restaurant").
+		Find(&orders).Error
 	return orders, err
 }
 
 func SetOrderStatus(order_id uint, status uint8) (bool, error) {
 	res := tx.Model(&Order{}).Where("id = ?", order_id).UpdateColumn("status", status)
 	return res.RowsAffected > 0, res.Error
+}
+
+func GetOrderByRestaurant(restaurant_id uint) ([]Order, error) {
+	orders := []Order{}
+	err := tx.Preload("OrderDetails").
+		Find(&orders, Order{RestaurantID: restaurant_id}).Error
+	return orders, err
 }

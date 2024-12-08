@@ -249,3 +249,19 @@ func GetRiderApplications(c *gin.Context) {
 		"applications": res,
 	})
 }
+
+func GetRestaurantOrders(c *gin.Context) {
+	restaurant_id, err := strconv.Atoi("restaurant_id")
+	if err != nil {
+		app.ResponseInvalidParams(c)
+		return
+	}
+	orders, err := models.GetOrderByRestaurant(uint(restaurant_id))
+	if err != nil {
+		app.ResponseInternalError(c, err)
+		return
+	}
+	app.ResponseSuccessWithData(c, map[string]any{
+		"orders": orders,
+	})
+}
