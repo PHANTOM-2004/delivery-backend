@@ -73,12 +73,16 @@ func ApproveRider(application_id uint) (bool, error) {
 		if app.Status == RiderApplicationApproved {
 			return nil
 		}
-		err = ftx.Model(&RiderApplication{}).UpdateColumn("status", RiderApplicationApproved).Error
+		err = ftx.Model(&RiderApplication{}).
+			Where("id = ?", application_id).
+			UpdateColumn("status", RiderApplicationApproved).Error
 		if err != nil {
 			return err
 		}
 		// 考虑更改身份
-		err = ftx.Model(&WechatUser{}).UpdateColumn("role", RoleRider).Error
+		err = ftx.Model(&WechatUser{}).
+			Where("id = ?", app.WechatUserID).
+			UpdateColumn("role", RoleRider).Error
 		if err != nil {
 			return err
 		}
@@ -113,7 +117,9 @@ func DisapproveRider(application_id uint) (bool, error) {
 		if app.Status != RiderApplicationToBeViewed {
 			return nil
 		}
-		err = ftx.Model(&RiderApplication{}).UpdateColumn("status", RiderApplicationDisapproved).Error
+		err = ftx.Model(&RiderApplication{}).
+			Where("id = ?", application_id).
+			UpdateColumn("status", RiderApplicationDisapproved).Error
 		if err != nil {
 			return err
 		}

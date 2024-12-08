@@ -327,9 +327,9 @@ func InitRouter() *gin.Engine {
 			admin_session_v1.POST("/hack/merchant-application", v1.MerchantApply)
 
 			// NOTE: license的图片静态文件路由
-			license_path := setting.AppSetting.LicenseStorePath
+			license_path := setting.AppSetting.ApplicationStorePath
 			log.Infof("Serving Static File: [%s]", license_path)
-			admin_session_v1.Static("/merchant-application/license", license_path)
+			admin_session_v1.Static("/application/image", license_path)
 		}
 	}
 

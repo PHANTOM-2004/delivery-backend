@@ -89,25 +89,25 @@ func (w *Wechat) GetAccessTokenURL() string {
 }
 
 type App struct {
-	Salt                string
-	JWTSecretKey        string
-	AdminAliveMinute    int
-	MerchantAliveMinute int
-	AdminToken          string
-	AdminAKAge          int
-	AdminRKAge          int
-	MerchantAKAge       int
-	MerchantRKAge       int
-	MaxImageSize        int
-	LicenseStorePath    string
-	LicenseAllowExts    []string
-	LicensePageSize     int
-	DishImageAllowExts  []string
-	DishImageStorePath  string
+	Salt                 string
+	JWTSecretKey         string
+	AdminAliveMinute     int
+	MerchantAliveMinute  int
+	AdminToken           string
+	AdminAKAge           int
+	AdminRKAge           int
+	MerchantAKAge        int
+	MerchantRKAge        int
+	MaxImageSize         int
+	ApplicationStorePath string
+	ApplicationAllowExts []string
+	ApplicationPageSize  int
+	DishImageAllowExts   []string
+	DishImageStorePath   string
 }
 
 func (a *App) GetLicenseStorePath(name string) string {
-	path := a.LicenseStorePath + "/" + name
+	path := a.ApplicationStorePath + "/" + name
 	return path
 }
 
@@ -131,7 +131,7 @@ func checkExt(allows []string, name string) (string, bool) {
 }
 
 func (a *App) CheckLicenseExt(name string) (string, bool) {
-	return checkExt(a.LicenseAllowExts, name)
+	return checkExt(a.ApplicationAllowExts, name)
 }
 
 func (a *App) CheckDishImageExt(name string) (string, bool) {
