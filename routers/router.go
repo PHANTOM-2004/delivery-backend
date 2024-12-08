@@ -322,8 +322,8 @@ func InitRouter() *gin.Engine {
 			admin_session_v1.GET("/rider-application", v1.GetRiderApplications)
 			admin_session_v1.PUT("/rider-application/:application_id/approve", v1.ApproveRiderApplication)
 			admin_session_v1.PUT("/rider-application/:application_id/disapprove", v1.DisapproveRiderApplication)
-			admin_session_v1.GET("/order/restaurant/:restaurant_id",
-				v1.GetRestaurantOrders)
+			admin_session_v1.GET("/order/:page_id",
+				v1.GetAllOrders)
 			admin_session_v1.PUT("/order/:order_id/status/:status", v1.SetOrderStatus)
 
 			// 给admin留一个后门

@@ -250,16 +250,29 @@ func GetRiderApplications(c *gin.Context) {
 	})
 }
 
-func GetRestaurantOrders(c *gin.Context) {
-	restaurant_id, err := strconv.Atoi("restaurant_id")
+func GetAllOrders(c *gin.Context) {
+	// page 从1开始
+	page_id, err := strconv.Atoi("page_id")
 	if err != nil {
 		app.ResponseInvalidParams(c)
 		return
 	}
-	orders, err := models.GetOrderByRestaurant(uint(restaurant_id))
+	if page_id < 0 {
+		app.ResponseInvalidParams(c)
+		return
+	}
+
+	orders, err := models.GetOrderByPage(page_id)
 	if err != nil {
 		app.ResponseInternalError(c, err)
 		return
+	}
+	for i := range orders {
+		restaurant := orders[i].Restaurant
+		orders[i].RestaurantInfoEx = &models.RestaurantInfoEx{
+			Name:    restaurant.RestaurantName,
+			Address: restaurant.Address,
+		}
 	}
 	app.ResponseSuccessWithData(c, map[string]any{
 		"orders": orders,
