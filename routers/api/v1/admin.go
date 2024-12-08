@@ -252,7 +252,7 @@ func GetRiderApplications(c *gin.Context) {
 
 func GetAllOrders(c *gin.Context) {
 	// page 从1开始
-	page_id, err := strconv.Atoi("page_id")
+	page_id, err := strconv.Atoi(c.Param("page_id"))
 	if err != nil {
 		app.ResponseInvalidParams(c)
 		return
