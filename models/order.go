@@ -1,6 +1,7 @@
 package models
 
 import (
+	"delivery-backend/internal/setting"
 	"delivery-backend/middleware/wechat"
 	"sort"
 	"time"
@@ -14,22 +15,22 @@ import (
 
 type Order struct {
 	Model
-	PickupNo           string              `gorm:"not null;size:8" json:"pickup_number"`
-	OrderNo            string              `gorm:"not null;size:32" json:"order_number"`
-	Address            string              `gorm:"size:100;not null" json:"address"`
-	CustomerName       string              `gorm:"size:20;not null" json:"customer_name"`
-	PhoneNumber        string              `gorm:"size:20;not null" json:"phone_number"`
-	Status             uint8               `gorm:"not null;default:0" json:"status"`
-	PaymentTime        uint64              `gorm:"not null;default:0" json:"payment_time"`
-	RestaurantID       uint                `gorm:"not null" json:"restaurant_id"`
-	Restaurant         *Restaurant         `json:"-"`
-	RestaurantForRider *RestaurantForRider `gorm:"-" json:"restaurant_info"`
-	WechatUserID       uint                `gorm:"index;not null" json:"-"`
-	OrderDetails       []*OrderDetail      `json:"details"`
+	PickupNo         string            `gorm:"not null;size:8" json:"pickup_number"`
+	OrderNo          string            `gorm:"not null;size:32" json:"order_number"`
+	Address          string            `gorm:"size:100;not null" json:"address"`
+	CustomerName     string            `gorm:"size:20;not null" json:"customer_name"`
+	PhoneNumber      string            `gorm:"size:20;not null" json:"phone_number"`
+	Status           uint8             `gorm:"not null;default:0" json:"status"`
+	PaymentTime      uint64            `gorm:"not null;default:0" json:"payment_time"`
+	RestaurantID     uint              `gorm:"not null" json:"restaurant_id"`
+	Restaurant       *Restaurant       `json:"-"`
+	RestaurantInfoEx *RestaurantInfoEx `gorm:"-" json:"restaurant_info"`
+	WechatUserID     uint              `gorm:"index;not null" json:"-"`
+	OrderDetails     []*OrderDetail    `json:"details"`
 	// TODO:加入接单骑手号
 }
 
-type RestaurantForRider struct {
+type RestaurantInfoEx struct {
 	Address string `json:"address"`
 	Name    string `json:"name"`
 }
@@ -99,7 +100,7 @@ func CancelOrder(order_id uint) (bool, error) {
 
 func GetOrderByUserID(user_id uint) ([]Order, error) {
 	orders := []Order{}
-	err := tx.Find(&orders, Order{WechatUserID: user_id}).Error
+	err := tx.Preload("OrderDetails").Find(&orders, Order{WechatUserID: user_id}).Error
 	return orders, err
 }
 
@@ -210,7 +211,10 @@ func PayOrder(order_id uint) (bool, error) {
 			return nil
 		}
 
-		err = ftx.Model(&Order{}).Where("id = ?", order_id).UpdateColumn("status", OrderPayed).Error
+		err = ftx.Model(&Order{}).Where("id = ?", order_id).Updates(Order{
+			Status:      OrderPayed,
+			PaymentTime: uint64(time.Now().Unix()),
+		}).Error
 		if err != nil {
 			return err
 		}
@@ -224,11 +228,24 @@ func PayOrder(order_id uint) (bool, error) {
 
 func GetOrderByStatus(status uint8) ([]Order, error) {
 	orders := []Order{}
-	err := tx.Where("status = ?", status).Preload("Restaurant").Find(&orders).Error
+	err := tx.Where("status = ?", status).
+		Preload("OrderDetails").Preload("Restaurant").
+		Find(&orders).Error
 	return orders, err
 }
 
 func SetOrderStatus(order_id uint, status uint8) (bool, error) {
 	res := tx.Model(&Order{}).Where("id = ?", order_id).UpdateColumn("status", status)
 	return res.RowsAffected > 0, res.Error
+}
+
+// 1...n
+func GetOrderByPage(page_id int) ([]Order, error) {
+	page_size := setting.AppSetting.ApplicationPageSize
+	offset := max(page_id-1, 0) * page_size
+	orders := []Order{}
+	err := tx.Limit(page_size).Offset(offset).
+		Preload("OrderDetails").Preload("Restaurant").
+		Find(&orders).Error
+	return orders, err
 }
