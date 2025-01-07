@@ -1,0 +1,77 @@
+syntax="proto3";
+
+package user;
+
+option go_package="/user";
+
+//商家服务
+///////////////////////////////////////////////////////
+
+service MerchantService{
+    rpc MerchantRegister(MerchantRegisterReq) returns (MerchantRegisterResp) {}
+    rpc MerchantLogin(MerchantLoginReq) returns (MerchantLoginResp) {}
+    rpc MerchantApply(MerchantApplyReq) returns (MerchantApplyResp) {}
+}
+
+message MerchantLoginReq{
+    string account = 1;
+    string password = 2;
+}
+
+message MerchantLoginResp{
+    uint32 user_id = 1;
+}
+
+//注册时应当关联其申请表
+message MerchantRegisterReq{
+    string password = 1;
+    uint32 application_id = 2;
+    //可选
+    string account = 3;
+}
+
+//注册后返回其id和account
+message MerchantRegisterResp{
+    uint32 user_id = 1;
+    string account = 2;
+}
+
+message MerchantApplyReq{
+    string description = 1;
+    string email = 2;
+    string phone_number = 3;
+    string name = 4;
+}
+
+message MerchantApplyResp{
+    uint32 application_id = 1;
+}
+
+//管理员服务
+////////////////////////////////////////////////////////
+
+service AdminService{
+    rpc AdminRegister(AdminRegisterReq ) returns (AdminRegisterResp) {}
+    rpc AdminLogin(AdminLoginReq) returns (AdminLoginResp) {}
+}
+
+message AdminLoginReq{
+    string account = 1;
+    string password = 2;
+}
+
+message AdminLoginResp{
+    uint32 user_id = 1;
+}
+
+message AdminRegisterReq{
+    string name = 1;
+    string password = 2;
+    //可选
+    string account = 3;
+}
+
+message AdminRegisterResp{
+    uint32 admin_id = 1;
+    string account = 2;
+}
