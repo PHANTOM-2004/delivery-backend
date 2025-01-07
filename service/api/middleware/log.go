@@ -3,8 +3,8 @@ package middleware
 import (
 	"time"
 
+	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 )
 
 func Logger() gin.HandlerFunc {
@@ -23,7 +23,7 @@ func Logger() gin.HandlerFunc {
 		status_code := c.Writer.Status()
 		uri := c.Request.RequestURI
 
-		log.Infof(
+		klog.Infof(
 			"[GIN-handle] %3d | %6s | %10v | %15s | %s",
 			status_code,
 			method,
