@@ -72,7 +72,7 @@ func kitexInit() (opts []server.Option) {
 			MaxBackups: conf.GetConf().Kitex.LogMaxBackups,
 			MaxAge:     conf.GetConf().Kitex.LogMaxAge,
 		}),
-		FlushInterval: time.Minute,
+		FlushInterval: time.Second,
 	}
 	w := io.MultiWriter(os.Stdout, asyncWriter)
 	klog.SetOutput(w)
