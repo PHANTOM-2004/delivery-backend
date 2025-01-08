@@ -38,6 +38,7 @@ func initMerchantRouter(r *gin.RouterGroup) {
 
 	// TODO:
 	merchant.POST("/login", user.MerchantLogin)
+	merchant.POST("/logout", user.MerchantLogout)
 }
 
 func initAdminRouter(r *gin.RouterGroup) {

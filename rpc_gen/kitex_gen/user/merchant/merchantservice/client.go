@@ -13,7 +13,6 @@ import (
 type Client interface {
 	MerchantRegister(ctx context.Context, Req *merchant.MerchantRegisterReq, callOptions ...callopt.Option) (r *merchant.MerchantRegisterResp, err error)
 	MerchantLogin(ctx context.Context, Req *merchant.MerchantLoginReq, callOptions ...callopt.Option) (r *merchant.MerchantLoginResp, err error)
-	MerchantApply(ctx context.Context, Req *merchant.MerchantApplyReq, callOptions ...callopt.Option) (r *merchant.MerchantApplyResp, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -53,9 +52,4 @@ func (p *kMerchantServiceClient) MerchantRegister(ctx context.Context, Req *merc
 func (p *kMerchantServiceClient) MerchantLogin(ctx context.Context, Req *merchant.MerchantLoginReq, callOptions ...callopt.Option) (r *merchant.MerchantLoginResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.MerchantLogin(ctx, Req)
-}
-
-func (p *kMerchantServiceClient) MerchantApply(ctx context.Context, Req *merchant.MerchantApplyReq, callOptions ...callopt.Option) (r *merchant.MerchantApplyResp, err error) {
-	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
-	return p.kClient.MerchantApply(ctx, Req)
 }

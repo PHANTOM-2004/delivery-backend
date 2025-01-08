@@ -24,12 +24,3 @@ func MerchantLogin(ctx context.Context, req *merchant.MerchantLoginReq, callOpti
 	}
 	return resp, nil
 }
-
-func MerchantApply(ctx context.Context, req *merchant.MerchantApplyReq, callOptions ...callopt.Option) (resp *merchant.MerchantApplyResp, err error) {
-	resp, err = defaultClient.MerchantApply(ctx, req, callOptions...)
-	if err != nil {
-		klog.CtxErrorf(ctx, "MerchantApply call failed,err =%+v", err)
-		return nil, err
-	}
-	return resp, nil
-}

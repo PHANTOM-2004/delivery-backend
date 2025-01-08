@@ -152,86 +152,6 @@ func (x *MerchantRegisterResp) fastReadField2(buf []byte, _type int8) (offset in
 	return offset, err
 }
 
-func (x *MerchantApplyReq) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
-	switch number {
-	case 1:
-		offset, err = x.fastReadField1(buf, _type)
-		if err != nil {
-			goto ReadFieldError
-		}
-	case 2:
-		offset, err = x.fastReadField2(buf, _type)
-		if err != nil {
-			goto ReadFieldError
-		}
-	case 3:
-		offset, err = x.fastReadField3(buf, _type)
-		if err != nil {
-			goto ReadFieldError
-		}
-	case 4:
-		offset, err = x.fastReadField4(buf, _type)
-		if err != nil {
-			goto ReadFieldError
-		}
-	default:
-		offset, err = fastpb.Skip(buf, _type, number)
-		if err != nil {
-			goto SkipFieldError
-		}
-	}
-	return offset, nil
-SkipFieldError:
-	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
-ReadFieldError:
-	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_MerchantApplyReq[number], err)
-}
-
-func (x *MerchantApplyReq) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.Description, offset, err = fastpb.ReadString(buf, _type)
-	return offset, err
-}
-
-func (x *MerchantApplyReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
-	x.Email, offset, err = fastpb.ReadString(buf, _type)
-	return offset, err
-}
-
-func (x *MerchantApplyReq) fastReadField3(buf []byte, _type int8) (offset int, err error) {
-	x.PhoneNumber, offset, err = fastpb.ReadString(buf, _type)
-	return offset, err
-}
-
-func (x *MerchantApplyReq) fastReadField4(buf []byte, _type int8) (offset int, err error) {
-	x.Name, offset, err = fastpb.ReadString(buf, _type)
-	return offset, err
-}
-
-func (x *MerchantApplyResp) FastRead(buf []byte, _type int8, number int32) (offset int, err error) {
-	switch number {
-	case 1:
-		offset, err = x.fastReadField1(buf, _type)
-		if err != nil {
-			goto ReadFieldError
-		}
-	default:
-		offset, err = fastpb.Skip(buf, _type, number)
-		if err != nil {
-			goto SkipFieldError
-		}
-	}
-	return offset, nil
-SkipFieldError:
-	return offset, fmt.Errorf("%T cannot parse invalid wire-format data, error: %s", x, err)
-ReadFieldError:
-	return offset, fmt.Errorf("%T read field %d '%s' error: %s", x, number, fieldIDToName_MerchantApplyResp[number], err)
-}
-
-func (x *MerchantApplyResp) fastReadField1(buf []byte, _type int8) (offset int, err error) {
-	x.ApplicationId, offset, err = fastpb.ReadUint32(buf, _type)
-	return offset, err
-}
-
 func (x *MerchantLoginReq) FastWrite(buf []byte) (offset int) {
 	if x == nil {
 		return offset
@@ -329,65 +249,6 @@ func (x *MerchantRegisterResp) fastWriteField2(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteString(buf[offset:], 2, x.GetAccount())
-	return offset
-}
-
-func (x *MerchantApplyReq) FastWrite(buf []byte) (offset int) {
-	if x == nil {
-		return offset
-	}
-	offset += x.fastWriteField1(buf[offset:])
-	offset += x.fastWriteField2(buf[offset:])
-	offset += x.fastWriteField3(buf[offset:])
-	offset += x.fastWriteField4(buf[offset:])
-	return offset
-}
-
-func (x *MerchantApplyReq) fastWriteField1(buf []byte) (offset int) {
-	if x.Description == "" {
-		return offset
-	}
-	offset += fastpb.WriteString(buf[offset:], 1, x.GetDescription())
-	return offset
-}
-
-func (x *MerchantApplyReq) fastWriteField2(buf []byte) (offset int) {
-	if x.Email == "" {
-		return offset
-	}
-	offset += fastpb.WriteString(buf[offset:], 2, x.GetEmail())
-	return offset
-}
-
-func (x *MerchantApplyReq) fastWriteField3(buf []byte) (offset int) {
-	if x.PhoneNumber == "" {
-		return offset
-	}
-	offset += fastpb.WriteString(buf[offset:], 3, x.GetPhoneNumber())
-	return offset
-}
-
-func (x *MerchantApplyReq) fastWriteField4(buf []byte) (offset int) {
-	if x.Name == "" {
-		return offset
-	}
-	offset += fastpb.WriteString(buf[offset:], 4, x.GetName())
-	return offset
-}
-
-func (x *MerchantApplyResp) FastWrite(buf []byte) (offset int) {
-	if x == nil {
-		return offset
-	}
-	offset += x.fastWriteField1(buf[offset:])
-	return offset
-}
-
-func (x *MerchantApplyResp) fastWriteField1(buf []byte) (offset int) {
-	if x.ApplicationId == 0 {
-		return offset
-	}
-	offset += fastpb.WriteUint32(buf[offset:], 1, x.GetApplicationId())
 	return offset
 }
 
@@ -491,65 +352,6 @@ func (x *MerchantRegisterResp) sizeField2() (n int) {
 	return n
 }
 
-func (x *MerchantApplyReq) Size() (n int) {
-	if x == nil {
-		return n
-	}
-	n += x.sizeField1()
-	n += x.sizeField2()
-	n += x.sizeField3()
-	n += x.sizeField4()
-	return n
-}
-
-func (x *MerchantApplyReq) sizeField1() (n int) {
-	if x.Description == "" {
-		return n
-	}
-	n += fastpb.SizeString(1, x.GetDescription())
-	return n
-}
-
-func (x *MerchantApplyReq) sizeField2() (n int) {
-	if x.Email == "" {
-		return n
-	}
-	n += fastpb.SizeString(2, x.GetEmail())
-	return n
-}
-
-func (x *MerchantApplyReq) sizeField3() (n int) {
-	if x.PhoneNumber == "" {
-		return n
-	}
-	n += fastpb.SizeString(3, x.GetPhoneNumber())
-	return n
-}
-
-func (x *MerchantApplyReq) sizeField4() (n int) {
-	if x.Name == "" {
-		return n
-	}
-	n += fastpb.SizeString(4, x.GetName())
-	return n
-}
-
-func (x *MerchantApplyResp) Size() (n int) {
-	if x == nil {
-		return n
-	}
-	n += x.sizeField1()
-	return n
-}
-
-func (x *MerchantApplyResp) sizeField1() (n int) {
-	if x.ApplicationId == 0 {
-		return n
-	}
-	n += fastpb.SizeUint32(1, x.GetApplicationId())
-	return n
-}
-
 var fieldIDToName_MerchantLoginReq = map[int32]string{
 	1: "Account",
 	2: "Password",
@@ -568,15 +370,4 @@ var fieldIDToName_MerchantRegisterReq = map[int32]string{
 var fieldIDToName_MerchantRegisterResp = map[int32]string{
 	1: "UserId",
 	2: "Account",
-}
-
-var fieldIDToName_MerchantApplyReq = map[int32]string{
-	1: "Description",
-	2: "Email",
-	3: "PhoneNumber",
-	4: "Name",
-}
-
-var fieldIDToName_MerchantApplyResp = map[int32]string{
-	1: "ApplicationId",
 }

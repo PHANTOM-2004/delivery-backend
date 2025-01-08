@@ -22,10 +22,3 @@ func (s *MerchantServiceImpl) MerchantLogin(ctx context.Context, req *merchant.M
 
 	return resp, err
 }
-
-// MerchantApply implements the MerchantServiceImpl interface.
-func (s *MerchantServiceImpl) MerchantApply(ctx context.Context, req *merchant.MerchantApplyReq) (resp *merchant.MerchantApplyResp, err error) {
-	resp, err = service.NewMerchantApplyService(ctx).Run(req)
-
-	return resp, err
-}

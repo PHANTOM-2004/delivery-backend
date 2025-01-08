@@ -29,13 +29,6 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		false,
 		kitex.WithStreamingMode(kitex.StreamingUnary),
 	),
-	"MerchantApply": kitex.NewMethodInfo(
-		merchantApplyHandler,
-		newMerchantApplyArgs,
-		newMerchantApplyResult,
-		false,
-		kitex.WithStreamingMode(kitex.StreamingUnary),
-	),
 }
 
 var (
@@ -408,159 +401,6 @@ func (p *MerchantLoginResult) GetResult() interface{} {
 	return p.Success
 }
 
-func merchantApplyHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
-	switch s := arg.(type) {
-	case *streaming.Args:
-		st := s.Stream
-		req := new(merchant.MerchantApplyReq)
-		if err := st.RecvMsg(req); err != nil {
-			return err
-		}
-		resp, err := handler.(merchant.MerchantService).MerchantApply(ctx, req)
-		if err != nil {
-			return err
-		}
-		return st.SendMsg(resp)
-	case *MerchantApplyArgs:
-		success, err := handler.(merchant.MerchantService).MerchantApply(ctx, s.Req)
-		if err != nil {
-			return err
-		}
-		realResult := result.(*MerchantApplyResult)
-		realResult.Success = success
-		return nil
-	default:
-		return errInvalidMessageType
-	}
-}
-func newMerchantApplyArgs() interface{} {
-	return &MerchantApplyArgs{}
-}
-
-func newMerchantApplyResult() interface{} {
-	return &MerchantApplyResult{}
-}
-
-type MerchantApplyArgs struct {
-	Req *merchant.MerchantApplyReq
-}
-
-func (p *MerchantApplyArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
-	if !p.IsSetReq() {
-		p.Req = new(merchant.MerchantApplyReq)
-	}
-	return p.Req.FastRead(buf, _type, number)
-}
-
-func (p *MerchantApplyArgs) FastWrite(buf []byte) (n int) {
-	if !p.IsSetReq() {
-		return 0
-	}
-	return p.Req.FastWrite(buf)
-}
-
-func (p *MerchantApplyArgs) Size() (n int) {
-	if !p.IsSetReq() {
-		return 0
-	}
-	return p.Req.Size()
-}
-
-func (p *MerchantApplyArgs) Marshal(out []byte) ([]byte, error) {
-	if !p.IsSetReq() {
-		return out, nil
-	}
-	return proto.Marshal(p.Req)
-}
-
-func (p *MerchantApplyArgs) Unmarshal(in []byte) error {
-	msg := new(merchant.MerchantApplyReq)
-	if err := proto.Unmarshal(in, msg); err != nil {
-		return err
-	}
-	p.Req = msg
-	return nil
-}
-
-var MerchantApplyArgs_Req_DEFAULT *merchant.MerchantApplyReq
-
-func (p *MerchantApplyArgs) GetReq() *merchant.MerchantApplyReq {
-	if !p.IsSetReq() {
-		return MerchantApplyArgs_Req_DEFAULT
-	}
-	return p.Req
-}
-
-func (p *MerchantApplyArgs) IsSetReq() bool {
-	return p.Req != nil
-}
-
-func (p *MerchantApplyArgs) GetFirstArgument() interface{} {
-	return p.Req
-}
-
-type MerchantApplyResult struct {
-	Success *merchant.MerchantApplyResp
-}
-
-var MerchantApplyResult_Success_DEFAULT *merchant.MerchantApplyResp
-
-func (p *MerchantApplyResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
-	if !p.IsSetSuccess() {
-		p.Success = new(merchant.MerchantApplyResp)
-	}
-	return p.Success.FastRead(buf, _type, number)
-}
-
-func (p *MerchantApplyResult) FastWrite(buf []byte) (n int) {
-	if !p.IsSetSuccess() {
-		return 0
-	}
-	return p.Success.FastWrite(buf)
-}
-
-func (p *MerchantApplyResult) Size() (n int) {
-	if !p.IsSetSuccess() {
-		return 0
-	}
-	return p.Success.Size()
-}
-
-func (p *MerchantApplyResult) Marshal(out []byte) ([]byte, error) {
-	if !p.IsSetSuccess() {
-		return out, nil
-	}
-	return proto.Marshal(p.Success)
-}
-
-func (p *MerchantApplyResult) Unmarshal(in []byte) error {
-	msg := new(merchant.MerchantApplyResp)
-	if err := proto.Unmarshal(in, msg); err != nil {
-		return err
-	}
-	p.Success = msg
-	return nil
-}
-
-func (p *MerchantApplyResult) GetSuccess() *merchant.MerchantApplyResp {
-	if !p.IsSetSuccess() {
-		return MerchantApplyResult_Success_DEFAULT
-	}
-	return p.Success
-}
-
-func (p *MerchantApplyResult) SetSuccess(x interface{}) {
-	p.Success = x.(*merchant.MerchantApplyResp)
-}
-
-func (p *MerchantApplyResult) IsSetSuccess() bool {
-	return p.Success != nil
-}
-
-func (p *MerchantApplyResult) GetResult() interface{} {
-	return p.Success
-}
-
 type kClient struct {
 	c client.Client
 }
@@ -586,16 +426,6 @@ func (p *kClient) MerchantLogin(ctx context.Context, Req *merchant.MerchantLogin
 	_args.Req = Req
 	var _result MerchantLoginResult
 	if err = p.c.Call(ctx, "MerchantLogin", &_args, &_result); err != nil {
-		return
-	}
-	return _result.GetSuccess(), nil
-}
-
-func (p *kClient) MerchantApply(ctx context.Context, Req *merchant.MerchantApplyReq) (r *merchant.MerchantApplyResp, err error) {
-	var _args MerchantApplyArgs
-	_args.Req = Req
-	var _result MerchantApplyResult
-	if err = p.c.Call(ctx, "MerchantApply", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

@@ -3,44 +3,15 @@ package user
 import (
 	"context"
 	"delivery-backend/common/app"
+	"delivery-backend/common/ecode"
 	"delivery-backend/rpc_gen/kitex_gen/user/admin"
-	"delivery-backend/rpc_gen/kitex_gen/user/admin/adminservice"
-	"delivery-backend/service/api/conf"
+	"net/http"
 	"time"
 
-	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/klog"
-	"github.com/cloudwego/kitex/pkg/rpcinfo"
-	"github.com/cloudwego/kitex/pkg/transmeta"
-	"github.com/cloudwego/kitex/transport"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	etcd "github.com/kitex-contrib/registry-etcd"
 )
-
-var rpcClient adminservice.Client
-
-// 初始化etcd client
-func init() {
-	r, err := etcd.NewEtcdResolver(
-		conf.GetConf().Registry.RegistryAddress,
-	)
-	if err != nil {
-		klog.Fatal(err)
-	}
-	rpcClient, err = adminservice.NewClient("admin", client.WithResolver(r),
-		// NOTE: 注意选择正确协议, 如果不选择正确协议或者协议不写, 我们就接受不到error
-		client.WithMetaHandler(transmeta.ClientHTTP2Handler),
-		client.WithTransportProtocol(transport.GRPC),
-		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{
-			ServiceName: "user.admin",
-		}),
-	)
-	if err != nil {
-		klog.Fatal(err)
-	}
-	klog.Info("RPC Client Init Done")
-}
 
 type adminLoginReq struct {
 	Account  string `form:"account" validate:"min=10,max=30"`
@@ -79,10 +50,10 @@ func AdminLogin(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	rpcResp, err := rpcClient.AdminLogin(
+	rpcResp, err := rpcClientAdmin.AdminLogin(
 		ctx,
 		&admin.AdminLoginReq{
 			Account:  req.Account,
@@ -91,6 +62,14 @@ func AdminLogin(c *gin.Context) {
 	)
 	if err != nil {
 		resp.RespRPCErr(err)
+		return
+	}
+	if rpcResp.UserId == 0 {
+		resp.Resp(
+			http.StatusUnauthorized,
+			ecode.ERROR_ADMIN_NOT_FOUND,
+			nil,
+		)
 		return
 	}
 
@@ -133,7 +112,7 @@ func AdminRegister(c *gin.Context) {
 	defer cancel()
 
 	// 分发给rpc处理
-	rpcResp, err := rpcClient.AdminRegister(
+	rpcResp, err := rpcClientAdmin.AdminRegister(
 		ctx,
 		&admin.AdminRegisterReq{
 			Name:     req.Name,

@@ -10,7 +10,7 @@ option go_package="/user/merchant";
 service MerchantService{
     rpc MerchantRegister(MerchantRegisterReq) returns (MerchantRegisterResp) {}
     rpc MerchantLogin(MerchantLoginReq) returns (MerchantLoginResp) {}
-    rpc MerchantApply(MerchantApplyReq) returns (MerchantApplyResp) {}
+    //rpc MerchantApply(MerchantApplyReq) returns (MerchantApplyResp) {}
 }
 
 message MerchantLoginReq{
@@ -36,6 +36,7 @@ message MerchantRegisterResp{
     string account = 2;
 }
 
+/*
 message MerchantApplyReq{
     string description = 1;
     string email = 2;
@@ -46,3 +47,4 @@ message MerchantApplyReq{
 message MerchantApplyResp{
     uint32 application_id = 1;
 }
+*/

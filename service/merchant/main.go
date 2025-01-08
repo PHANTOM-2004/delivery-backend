@@ -1,25 +1,38 @@
 package main
 
 import (
+	"delivery-backend/rpc_gen/kitex_gen/user/merchant/merchantservice"
+	"delivery-backend/service/merchant/biz/dal"
+	"delivery-backend/service/merchant/conf"
+	"io"
+	"log"
 	"net"
+	"os"
 	"time"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
+	"github.com/joho/godotenv"
 	kitexlogrus "github.com/kitex-contrib/obs-opentelemetry/logging/logrus"
-	"delivery-backend/service/merchant/conf"
-	"delivery-backend/rpc_gen/kitex_gen/user/merchant/merchantservice"
+	etcd "github.com/kitex-contrib/registry-etcd"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 func main() {
+	// load env
+	err := godotenv.Load()
+	if err != nil {
+		log.Panic(err)
+	}
+	dal.Init()
+
 	opts := kitexInit()
 
 	svr := merchantservice.NewServer(new(MerchantServiceImpl), opts...)
 
-	err := svr.Run()
+	err = svr.Run()
 	if err != nil {
 		klog.Error(err.Error())
 	}
@@ -38,6 +51,15 @@ func kitexInit() (opts []server.Option) {
 		ServiceName: conf.GetConf().Kitex.Service,
 	}))
 
+	// 服务注册
+	r, err := etcd.NewEtcdRegistry(
+		conf.GetConf().Registry.RegistryAddress,
+	) // r should not be reused.
+	if err != nil {
+		log.Fatal(err)
+	}
+	opts = append(opts, server.WithRegistry(r))
+
 	// klog
 	logger := kitexlogrus.NewLogger()
 	klog.SetLogger(logger)
@@ -51,7 +73,8 @@ func kitexInit() (opts []server.Option) {
 		}),
 		FlushInterval: time.Minute,
 	}
-	klog.SetOutput(asyncWriter)
+	w := io.MultiWriter(os.Stdout, asyncWriter)
+	klog.SetOutput(w)
 	server.RegisterShutdownHook(func() {
 		asyncWriter.Sync()
 	})

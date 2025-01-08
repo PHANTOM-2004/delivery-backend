@@ -14,7 +14,6 @@ type RPCClient interface {
 	Service() string
 	MerchantRegister(ctx context.Context, Req *merchant.MerchantRegisterReq, callOptions ...callopt.Option) (r *merchant.MerchantRegisterResp, err error)
 	MerchantLogin(ctx context.Context, Req *merchant.MerchantLoginReq, callOptions ...callopt.Option) (r *merchant.MerchantLoginResp, err error)
-	MerchantApply(ctx context.Context, Req *merchant.MerchantApplyReq, callOptions ...callopt.Option) (r *merchant.MerchantApplyResp, err error)
 }
 
 func NewRPCClient(dstService string, opts ...client.Option) (RPCClient, error) {
@@ -49,8 +48,4 @@ func (c *clientImpl) MerchantRegister(ctx context.Context, Req *merchant.Merchan
 
 func (c *clientImpl) MerchantLogin(ctx context.Context, Req *merchant.MerchantLoginReq, callOptions ...callopt.Option) (r *merchant.MerchantLoginResp, err error) {
 	return c.kitexClient.MerchantLogin(ctx, Req, callOptions...)
-}
-
-func (c *clientImpl) MerchantApply(ctx context.Context, Req *merchant.MerchantApplyReq, callOptions ...callopt.Option) (r *merchant.MerchantApplyResp, err error) {
-	return c.kitexClient.MerchantApply(ctx, Req, callOptions...)
 }
