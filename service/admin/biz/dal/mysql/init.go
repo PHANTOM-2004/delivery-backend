@@ -32,6 +32,7 @@ func Init() {
 		&gorm.Config{
 			PrepareStmt:            true,
 			SkipDefaultTransaction: true,
+			TranslateError:         true,
 		},
 	)
 	if err != nil {

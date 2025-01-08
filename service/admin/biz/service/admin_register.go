@@ -7,8 +7,10 @@ import (
 	admin "delivery-backend/rpc_gen/kitex_gen/user/admin"
 	"delivery-backend/service/admin/biz/dal/model"
 	"delivery-backend/service/admin/biz/dal/mysql"
+	"errors"
 
 	"github.com/cloudwego/kitex/pkg/kerrors"
+	"gorm.io/gorm"
 )
 
 type AdminRegisterService struct {
@@ -32,9 +34,8 @@ func (s *AdminRegisterService) Run(req *admin.AdminRegisterReq) (resp *admin.Adm
 		Password:  req.Password,
 	}
 
-	res := mysql.DB.Where(model.Admin{Account: req.Account}).
-		FirstOrCreate(&a)
-	if res.RowsAffected == 0 {
+	err = mysql.DB.Create(&a).Error
+	if errors.Is(err, gorm.ErrDuplicatedKey) {
 		// 封装error
 		code := ecode.ERROR_ADMIN_ACCOUNT_EXIST
 		err = kerrors.NewGRPCBizStatusError(
@@ -42,7 +43,7 @@ func (s *AdminRegisterService) Run(req *admin.AdminRegisterReq) (resp *admin.Adm
 			ecode.StatusText(code),
 		)
 		return
-	} else if res.Error != nil {
+	} else if err != nil {
 		return
 	}
 
