@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
-	"testing"
 	merchant "delivery-backend/rpc_gen/kitex_gen/user/merchant"
+	"testing"
 )
 
 func TestMerchantRegister_Run(t *testing.T) {
@@ -17,5 +17,4 @@ func TestMerchantRegister_Run(t *testing.T) {
 	t.Logf("resp: %v", resp)
 
 	// todo: edit your unit test
-
 }

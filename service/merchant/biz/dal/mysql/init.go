@@ -1,7 +1,6 @@
 package mysql
 
 import (
-	"delivery-backend/common"
 	"delivery-backend/service/merchant/biz/dal/model"
 	"delivery-backend/service/merchant/conf"
 	"fmt"
@@ -40,8 +39,7 @@ func Init() {
 	}
 
 	// init tables
-	err = DB.AutoMigrate(
-		&common.MerchantApplication{},
+	err := DB.AutoMigrate(
 		&model.Merchant{},
 	)
 	if err != nil {

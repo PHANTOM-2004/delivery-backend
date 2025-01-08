@@ -89,6 +89,11 @@ func (x *MerchantRegisterReq) FastRead(buf []byte, _type int8, number int32) (of
 		if err != nil {
 			goto ReadFieldError
 		}
+	case 4:
+		offset, err = x.fastReadField4(buf, _type)
+		if err != nil {
+			goto ReadFieldError
+		}
 	default:
 		offset, err = fastpb.Skip(buf, _type, number)
 		if err != nil {
@@ -108,12 +113,17 @@ func (x *MerchantRegisterReq) fastReadField1(buf []byte, _type int8) (offset int
 }
 
 func (x *MerchantRegisterReq) fastReadField2(buf []byte, _type int8) (offset int, err error) {
-	x.ApplicationId, offset, err = fastpb.ReadUint32(buf, _type)
+	x.Name, offset, err = fastpb.ReadString(buf, _type)
 	return offset, err
 }
 
 func (x *MerchantRegisterReq) fastReadField3(buf []byte, _type int8) (offset int, err error) {
 	x.Account, offset, err = fastpb.ReadString(buf, _type)
+	return offset, err
+}
+
+func (x *MerchantRegisterReq) fastReadField4(buf []byte, _type int8) (offset int, err error) {
+	x.PhoneNumber, offset, err = fastpb.ReadString(buf, _type)
 	return offset, err
 }
 
@@ -200,6 +210,7 @@ func (x *MerchantRegisterReq) FastWrite(buf []byte) (offset int) {
 	offset += x.fastWriteField1(buf[offset:])
 	offset += x.fastWriteField2(buf[offset:])
 	offset += x.fastWriteField3(buf[offset:])
+	offset += x.fastWriteField4(buf[offset:])
 	return offset
 }
 
@@ -212,10 +223,10 @@ func (x *MerchantRegisterReq) fastWriteField1(buf []byte) (offset int) {
 }
 
 func (x *MerchantRegisterReq) fastWriteField2(buf []byte) (offset int) {
-	if x.ApplicationId == 0 {
+	if x.Name == "" {
 		return offset
 	}
-	offset += fastpb.WriteUint32(buf[offset:], 2, x.GetApplicationId())
+	offset += fastpb.WriteString(buf[offset:], 2, x.GetName())
 	return offset
 }
 
@@ -224,6 +235,14 @@ func (x *MerchantRegisterReq) fastWriteField3(buf []byte) (offset int) {
 		return offset
 	}
 	offset += fastpb.WriteString(buf[offset:], 3, x.GetAccount())
+	return offset
+}
+
+func (x *MerchantRegisterReq) fastWriteField4(buf []byte) (offset int) {
+	if x.PhoneNumber == "" {
+		return offset
+	}
+	offset += fastpb.WriteString(buf[offset:], 4, x.GetPhoneNumber())
 	return offset
 }
 
@@ -300,6 +319,7 @@ func (x *MerchantRegisterReq) Size() (n int) {
 	n += x.sizeField1()
 	n += x.sizeField2()
 	n += x.sizeField3()
+	n += x.sizeField4()
 	return n
 }
 
@@ -312,10 +332,10 @@ func (x *MerchantRegisterReq) sizeField1() (n int) {
 }
 
 func (x *MerchantRegisterReq) sizeField2() (n int) {
-	if x.ApplicationId == 0 {
+	if x.Name == "" {
 		return n
 	}
-	n += fastpb.SizeUint32(2, x.GetApplicationId())
+	n += fastpb.SizeString(2, x.GetName())
 	return n
 }
 
@@ -324,6 +344,14 @@ func (x *MerchantRegisterReq) sizeField3() (n int) {
 		return n
 	}
 	n += fastpb.SizeString(3, x.GetAccount())
+	return n
+}
+
+func (x *MerchantRegisterReq) sizeField4() (n int) {
+	if x.PhoneNumber == "" {
+		return n
+	}
+	n += fastpb.SizeString(4, x.GetPhoneNumber())
 	return n
 }
 
@@ -363,8 +391,9 @@ var fieldIDToName_MerchantLoginResp = map[int32]string{
 
 var fieldIDToName_MerchantRegisterReq = map[int32]string{
 	1: "Password",
-	2: "ApplicationId",
+	2: "Name",
 	3: "Account",
+	4: "PhoneNumber",
 }
 
 var fieldIDToName_MerchantRegisterResp = map[int32]string{

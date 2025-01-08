@@ -4,7 +4,9 @@ import (
 	"context"
 	"delivery-backend/common/app"
 	"delivery-backend/common/ecode"
+	"delivery-backend/common/util"
 	"delivery-backend/rpc_gen/kitex_gen/user/admin"
+	"delivery-backend/rpc_gen/kitex_gen/user/merchant"
 	"net/http"
 	"time"
 
@@ -100,11 +102,13 @@ func AdminRegister(c *gin.Context) {
 	// https://gin-gonic.com/docs/examples/only-bind-query-string/
 	err := c.ShouldBindQuery(&req)
 	if err != nil {
+		klog.Debug(err, req)
 		resp.RespBadReq()
 		return
 	}
 	err = app.ValidateStruct(&req)
 	if err != nil || len(req.Account) < 10 {
+		klog.Debug(err, req)
 		resp.RespBadReq()
 		return
 	}
@@ -129,5 +133,71 @@ func AdminRegister(c *gin.Context) {
 	// 交给答复
 	resp.RespSuccData(map[string]any{
 		"account": rpcResp.Account,
+	})
+}
+
+type createMerchReq struct {
+	Name        string `form:"merchant_name" validate:"min=2,max=20"`
+	Account     string `form:"account" validate:"max=30"`  // min=6
+	Password    string `form:"password" validate:"max=30"` // min=8
+	PhoneNumber string `form:"phone_number" validate:"required,e164"`
+	Email       string `form:"email" validate:"required,email"`
+}
+
+func CreateMerch(c *gin.Context) {
+	var err error
+	var req createMerchReq
+	resp := app.RespWarp{Context: c}
+	err = c.Bind(&req)
+	if err != nil {
+		klog.Debug(err, req)
+		resp.RespBadReq()
+		return
+	}
+	err = app.ValidateStruct(&req)
+	if err != nil || len(req.Account) < 6 {
+		klog.Debug(err, req)
+		resp.RespBadReq()
+		return
+	}
+	if req.Password == "" {
+		req.Password = util.RandString(12)
+	}
+	if req.Account == "" {
+		req.Account = util.RandString(12)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	createdDone := make(chan struct{})
+	var createdErr error
+	go func() {
+		_, createdErr = rpcClientMerch.MerchantRegister(
+			ctx,
+			&merchant.MerchantRegisterReq{
+				Name:        req.Name,
+				Password:    req.Password,
+				Account:     req.Account,
+				PhoneNumber: req.PhoneNumber,
+			},
+		)
+		createdDone <- struct{}{}
+	}()
+	// TODO:邮件服务
+
+	select {
+	case <-createdDone:
+		klog.Debug("created merchant done")
+		if createdErr != nil {
+			resp.RespRPCErr(createdErr)
+			return
+		}
+	}
+
+	// 交给答复
+	resp.RespSuccData(map[string]any{
+		"account":  req.Account,
+		"password": req.Password,
 	})
 }

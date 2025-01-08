@@ -1,7 +1,10 @@
 package main
 
 import (
+	"delivery-backend/common/app"
+	"delivery-backend/service/api/biz/v1/middleware"
 	"delivery-backend/service/api/biz/v1/user"
+	"delivery-backend/service/api/conf"
 	"net/http"
 
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -15,8 +18,8 @@ func initMerchantRouter(r *gin.RouterGroup) {
 		// TODO:
 		10,
 		"tcp",
-		"127.0.0.1:6379",
-		"",
+		conf.GetConf().Redis.Address,
+		conf.GetConf().Redis.Password,
 		[]byte("666"),
 	)
 	if err != nil {
@@ -31,22 +34,33 @@ func initMerchantRouter(r *gin.RouterGroup) {
 		SameSite: http.SameSiteDefaultMode,
 	})
 
-	merchant_session := sessions.Sessions("MerchantSession", session_store)
+	sessionHandler := sessions.Sessions("MerchantSession", session_store)
 
-	merchant := r.Group("/merchant")
-	merchant.Use(merchant_session)
-
+	merchant := r.Group(
+		"/merchant",
+		sessionHandler,
+	)
 	// TODO:
 	merchant.POST("/login", user.MerchantLogin)
-	merchant.POST("/logout", user.MerchantLogout)
+
+	merchant_session := merchant.Group(
+		"/",
+		middleware.MerchAuth(),
+	)
+	merchant_session.GET("/login-status",
+		func(c *gin.Context) {
+			warp := app.RespWarp{Context: c}
+			warp.RespSucc()
+		})
+	merchant_session.POST("/logout", user.MerchantLogout)
 }
 
 func initAdminRouter(r *gin.RouterGroup) {
 	session_store, err := redis.NewStore(
 		10,
 		"tcp",
-		"127.0.0.1:6379",
-		"",
+		conf.GetConf().Redis.Address,
+		conf.GetConf().Redis.Password,
 		[]byte("666"),
 	)
 	if err != nil {
@@ -61,10 +75,23 @@ func initAdminRouter(r *gin.RouterGroup) {
 	})
 	admin_session_handler := sessions.Sessions("AdminSession", session_store)
 
-	admin := r.Group("/admin")
-	admin.POST("/create", user.AdminRegister)
+	admin_account := r.Group("/admin")
+	admin_account.Use(admin_session_handler)
+	admin_account.POST("/create",
+		user.AdminRegister)
+	admin_account.POST("/login",
+		user.AdminLogin)
 
-	admin_session := admin.Group("/", admin_session_handler)
-	admin_session.POST("/login", user.AdminLogin)
+	admin_session := admin_account.Group(
+		"/",
+		middleware.AdminAuth(),
+	)
+
+	admin_session.GET("/login-status",
+		func(c *gin.Context) {
+			warp := app.RespWarp{Context: c}
+			warp.RespSucc()
+		})
 	admin_session.POST("/logout", user.AdminLogout)
+  admin_session.POST("/merchant/create", user.CreateMerch)
 }

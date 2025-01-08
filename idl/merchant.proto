@@ -25,9 +25,9 @@ message MerchantLoginResp{
 //注册时应当关联其申请表
 message MerchantRegisterReq{
     string password = 1;
-    uint32 application_id = 2;
-    //可选
+    string name = 2;
     string account = 3;
+    string phone_number = 4;
 }
 
 //注册后返回其id和account

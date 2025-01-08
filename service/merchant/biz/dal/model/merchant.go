@@ -11,9 +11,9 @@ type Merchant struct {
 	//  1启用，0禁用;默认启用
 	Status uint8 `gorm:"default:1;not null" json:"status"`
 	// 每个商家账号对应的申请表，这个申请表是唯一的
-	MerchantApplicationID uint32 `gorm:"uniqueIndex" json:"merchant_application_id"`
+	// MerchantApplicationID uint32 `gorm:"uniqueIndex" json:"merchant_application_id"`
 	// 用于preload对应reference model
-	MerchantApplication *common.MerchantApplication `json:"-"` // 关联的对应的MerchantApplication
+	// MerchantApplication *common.MerchantApplication `json:"-"` // 关联的对应的MerchantApplication
 }
 
 const (
