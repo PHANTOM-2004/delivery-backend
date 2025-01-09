@@ -1,0 +1,36 @@
+syntax="proto3";
+
+package user.admin;
+
+option go_package="/user/admin";
+
+
+
+//管理员服务
+////////////////////////////////////////////////////////
+
+service AdminService{
+    rpc AdminRegister(AdminRegisterReq ) returns (AdminRegisterResp) {}
+    rpc AdminLogin(AdminLoginReq) returns (AdminLoginResp) {}
+}
+
+message AdminLoginReq{
+    string account = 1;
+    string password = 2;
+}
+
+message AdminLoginResp{
+    uint32 user_id = 1;
+}
+
+message AdminRegisterReq{
+    string name = 1;
+    string password = 2;
+    //可选
+    string account = 3;
+}
+
+message AdminRegisterResp{
+    uint32 admin_id = 1;
+    string account = 2;
+}
