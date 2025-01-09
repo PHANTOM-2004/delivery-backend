@@ -23,7 +23,7 @@ func NewAdminRegisterService(ctx context.Context) *AdminRegisterService {
 // Run create note info
 func (s *AdminRegisterService) Run(req *admin.AdminRegisterReq) (resp *admin.AdminRegisterResp, err error) {
 	// Finish your business logic.
-	req.Password = util.Encrypt(req.Password, "TODO:")
+	req.Password = util.Encrypt(req.Password, salt)
 	// 如果Account为空, 生成随机12位的Account
 	if req.Account == "" {
 		req.Account = util.RandString(12)

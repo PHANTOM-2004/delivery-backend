@@ -13,5 +13,6 @@ for file in ./service/*; do
     echo "find main.go in $file, it is a service"
     cd "$file" && air &
     cd "$root_path" || exit
+    sleep 0.5
   fi
 done
