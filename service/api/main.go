@@ -1,6 +1,7 @@
 package main
 
 import (
+	"delivery-backend/service/api/biz/dal"
 	"delivery-backend/service/api/conf"
 	"delivery-backend/service/api/middleware"
 	"fmt"
@@ -24,6 +25,10 @@ func InitRouter() *gin.Engine {
 	r := gin.New()
 	r.Use(middleware.Logger())
 	r.Use(gin.Recovery())
+	r.Use(middleware.IPRateLimiter())
+	r.GET("/ping", func(c *gin.Context) {
+		c.String(http.StatusOK, "pong!")
+	})
 
 	// TODO:
 	// r.MaxMultipartMemory = int64(setting.AppSetting.MaxImageSize << 20) // MiB
@@ -82,6 +87,7 @@ func InitKlog() {
 }
 
 func main() {
+	dal.Init()
 	InitKlog()
 	LaunchServer()
 }
