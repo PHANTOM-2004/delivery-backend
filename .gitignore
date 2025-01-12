@@ -1,5 +1,6 @@
 # tmp
 tmp/
+*.rdb
 
 # swagger
 swagger.yaml
